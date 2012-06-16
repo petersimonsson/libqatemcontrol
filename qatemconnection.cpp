@@ -727,17 +727,17 @@ quint8 QAtemConnection::tallyState(quint8 id) const
     return 0;
 }
 
-bool QAtemConnection::dskOn(quint8 keyer) const
+bool QAtemConnection::downstreamKeyOn(quint8 keyer) const
 {
     return m_downstreamKeyOn.value(keyer);
 }
 
-bool QAtemConnection::dskTie(quint8 keyer) const
+bool QAtemConnection::downstreamKeyTie(quint8 keyer) const
 {
     return m_downstreamKeyTie.value(keyer);
 }
 
-bool QAtemConnection::keyOn(quint8 keyer) const
+bool QAtemConnection::upstreamKeyOn(quint8 keyer) const
 {
     return m_upstreamKeyOn.value(keyer);
 }

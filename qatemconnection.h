@@ -74,11 +74,15 @@ public:
 
     explicit QAtemConnection(QObject* parent = NULL);
 
+    /// Connect to ATEM switcher at @p address
     void connectToSwitcher(const QHostAddress& address);
 
+    /// @returns the index of the input that is on program
     quint8 programInput() const { return m_programInput; }
+    /// @returns the index of the input that is on preview
     quint8 previewInput() const { return m_previewInput; }
 
+    /// @returns the tally state of the input @p id
     quint8 tallyState(quint8 id) const;
 
     bool transitionPreviewEnabled() const { return m_transitionPreviewEnabled; }
@@ -90,10 +94,13 @@ public:
     bool fadeToBlackEnabled() const { return m_fadeToBlackEnabled; }
     quint8 fadeToBlackFrameCount() const { return m_fadeToBlackFrameCount; }
 
-    bool dskOn(quint8 keyer) const;
-    bool dskTie(quint8 keyer) const;
+    /// @returns true if downstream key @p keyer is on air
+    bool downstreamKeyOn(quint8 keyer) const;
+    /// @returns true if downstream key @p keyer is tied to next transition
+    bool downstreamKeyTie(quint8 keyer) const;
 
-    bool keyOn(quint8 keyer) const;
+    /// @returns true if upstream key @p keyer is on air
+    bool upstreamKeyOn(quint8 keyer) const;
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -111,9 +118,12 @@ public:
 
     MediaInfo mediaInfo(quint8 index) const { return m_mediaInfos.value(index); }
 
+    /// @returns index of the multi view layout, 0 = prg/prv on top, 1 = prg/prv on bottom, 2 = prg/prv on left, 3 = prg/prv on right
     quint8 multiViewLayoutIndex() const { return m_multiViewLayoutIndex; }
+    /// @returns index of the input mapped to @p multiViewOutput
     quint8 multiViewInput(quint8 multiViewOutput) const { return m_multiViewInputs.value(multiViewOutput); }
 
+    /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 720p50, 3 = 720p5994, 4 = 1080i50, 5 = 1080i5994
     quint8 videoFormatIndex() const { return m_videoFormatIndex; }
 
 public slots:
