@@ -1,0 +1,2 @@
+libqatemcontrol
+===============
