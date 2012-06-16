@@ -5,8 +5,13 @@
 
 # Compiled Dynamic libraries
 *.so
+*.dylib
 
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+
+*.pro.user*
+Makefile
+moc_*
