@@ -286,7 +286,8 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             l.u8[0] = (quint8)payload.at(13);
 
             QColor color;
-            color.setHslF(h.u16 / 1000.0, s.u16 / 1000.0, l.u16 / 1000.0);
+            float hf = ((h.u16 / 10) % 360) / 360.0;
+            color.setHslF(hf, s.u16 / 1000.0, l.u16 / 1000.0);
             m_colorGeneratorColors[index] = color;
 
             emit colorGeneratorColorChanged(index, m_colorGeneratorColors[index]);
@@ -716,7 +717,7 @@ void QAtemConnection::setColorGeneratorColor(quint8 generator, const QColor& col
     QByteArray payload;
 
     U16_U8 h, s, l;
-    h.u16 = color.hslHueF() * 1000;
+    h.u16 = (color.hslHueF() * 360.0) * 10;
     s.u16 = color.hslSaturationF() * 1000;
     l.u16 = color.lightnessF() * 1000;
 
