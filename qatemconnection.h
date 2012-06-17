@@ -283,9 +283,9 @@ signals:
 
     void auxSourceChanged(quint8 aux, quint8 source);
 
-    void inputInfoChanged(const InputInfo& info);
+    void inputInfoChanged(const QAtemConnection::InputInfo& info);
 
-    void mediaInfoChanged(const MediaInfo& info);
+    void mediaInfoChanged(const QAtemConnection::MediaInfo& info);
 
     void productInformationChanged(const QString& info);
     void versionChanged(quint16 major, quint16 minor);
