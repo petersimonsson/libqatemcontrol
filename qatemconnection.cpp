@@ -265,6 +265,14 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             emit downstreamKeyTieChanged(index, m_downstreamKeyTie[index]);
             emit downstreamKeyFramesChanged(index, m_downstreamKeyFrames[index]);
         }
+        else if(cmd == "DskB")
+        {
+            quint8 index = (quint8)payload.at(6);
+            m_downstreamKeyFillSource[index] = (quint8)payload.at(7);
+            m_downstreamKeyKeySource[index] = (quint8)payload.at(8);
+
+            emit downstreamKeySourcesChanged(index, m_downstreamKeyFillSource[index], m_downstreamKeyKeySource[index]);
+        }
         else if(cmd == "KeOn")
         {
             quint8 index = (quint8)payload.at(7);

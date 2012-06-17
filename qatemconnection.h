@@ -112,6 +112,10 @@ public:
     quint8 downstreamKeyFrameCount(quint8 keyer) const { return m_downstreamKeyFrameCount.value(keyer); }
     /// @returns duration in number of frames for key transition of dsk @p keyer
     quint8 downstreamKeyFrames(quint8 keyer) const { return m_downstreamKeyFrames.value(keyer); }
+    /// @returns the input selected as fill source for downstream key @p keyer
+    quint8 downstreamKeyFillSource(quint8 keyer) const { return m_downstreamKeyFillSource.value(keyer); }
+    /// @returns the input selected as key source for downstream key @p keyer
+    quint8 downstreamKeyKeySource(quint8 keyer) const { return m_downstreamKeyKeySource.value(keyer); }
 
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOn(quint8 keyer) const;
@@ -221,6 +225,8 @@ private:
     QHash<quint8, bool> m_downstreamKeyTie;
     QHash<quint8, quint8> m_downstreamKeyFrames;
     QHash<quint8, quint8> m_downstreamKeyFrameCount;
+    QHash<quint8, quint8> m_downstreamKeyFillSource;
+    QHash<quint8, quint8> m_downstreamKeyKeySource;
 
     QHash<quint8, bool> m_upstreamKeyOn;
 
@@ -274,6 +280,7 @@ signals:
     void downstreamKeyTieChanged(quint8 keyer, bool state);
     void downstreamKeyFrameCountChanged(quint8 keyer, quint8 count);
     void downstreamKeyFramesChanged(quint8 keyer, quint8 frames);
+    void downstreamKeySourcesChanged(quint8 keyer, quint8 fill, quint8 key);
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
 
