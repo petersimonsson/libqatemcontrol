@@ -49,6 +49,10 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_fadeToBlackEnabled = false;
     m_fadeToBlackFrameCount = 0;
+
+    m_mixFrames = 0;
+    m_dipFrames = 0;
+    m_wipeFrames = 0;
 }
 
 void QAtemConnection::connectToSwitcher(const QHostAddress &address)
@@ -354,6 +358,24 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             val.u8[0] = (quint8)payload.at(9);
 
             emit timeChanged(val.u32);
+        }
+        else if(cmd == "TMxP")
+        {
+            m_mixFrames = (quint8)payload.at(7);
+
+            emit mixFramesChanged(m_mixFrames);
+        }
+        else if(cmd == "TDpP")
+        {
+            m_dipFrames = (quint8)payload.at(7);
+
+            emit dipFramesChanged(m_dipFrames);
+        }
+        else if(cmd == "TWpP")
+        {
+            m_wipeFrames = (quint8)payload.at(7);
+
+            emit wipeFramesChanged(m_wipeFrames);
         }
         else
         {

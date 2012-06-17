@@ -132,6 +132,13 @@ public:
     /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 720p50, 3 = 720p5994, 4 = 1080i50, 5 = 1080i5994
     quint8 videoFormatIndex() const { return m_videoFormatIndex; }
 
+    /// @returns duration in number of frames for mix transition
+    quint8 mixFrames() const { return m_mixFrames; }
+    /// @returns duration in number of frames for dip transition
+    quint8 dipFrames() const { return m_dipFrames; }
+    /// @returns duration in number of frames for wipe transition
+    quint8 wipeFrames() const { return m_wipeFrames; }
+
 public slots:
     void changeProgramInput(char index);
     void changePreviewInput(char index);
@@ -223,6 +230,10 @@ private:
 
     quint8 m_videoFormatIndex;
 
+    quint8 m_mixFrames;
+    quint8 m_dipFrames;
+    quint8 m_wipeFrames;
+
 signals:
     void connected();
     void socketError(const QString& errorString);
@@ -260,6 +271,10 @@ signals:
     void versionChanged(quint16 major, quint16 minor);
 
     void timeChanged(quint32 time);
+
+    void mixFramesChanged(quint8 frames);
+    void dipFramesChanged(quint8 frames);
+    void wipeFramesChanged(quint8 frames);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)
