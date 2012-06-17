@@ -146,6 +146,10 @@ public:
     quint8 dipFrames() const { return m_dipFrames; }
     /// @returns duration in number of frames for wipe transition
     quint8 wipeFrames() const { return m_wipeFrames; }
+    /// @returns duration in number of frames for dve transition
+    quint8 dveFrames() const { return m_dveFrames; }
+    /// @returns duration in number of frames for sting transition
+    quint8 stingFrames() const { return m_stingFrames; }
 
 public slots:
     void changeProgramInput(char index);
@@ -244,6 +248,8 @@ private:
     quint8 m_mixFrames;
     quint8 m_dipFrames;
     quint8 m_wipeFrames;
+    quint8 m_dveFrames;
+    quint8 m_stingFrames;
 
 signals:
     void connected();
@@ -289,6 +295,8 @@ signals:
     void mixFramesChanged(quint8 frames);
     void dipFramesChanged(quint8 frames);
     void wipeFramesChanged(quint8 frames);
+    void dveFramesChanged(quint8 frames);
+    void stingFramesChanged(quint8 frames);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

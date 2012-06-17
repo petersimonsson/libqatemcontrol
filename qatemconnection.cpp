@@ -53,6 +53,8 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_mixFrames = 0;
     m_dipFrames = 0;
     m_wipeFrames = 0;
+    m_dveFrames = 0;
+    m_stingFrames = 0;
 }
 
 void QAtemConnection::connectToSwitcher(const QHostAddress &address)
@@ -386,6 +388,18 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             m_wipeFrames = (quint8)payload.at(7);
 
             emit wipeFramesChanged(m_wipeFrames);
+        }
+        else if(cmd == "TDvP")
+        {
+            m_dveFrames = (quint8)payload.at(7);
+
+            emit dveFramesChanged(m_dveFrames);
+        }
+        else if(cmd == "TStP")
+        {
+            m_stingFrames = (quint8)payload.at(7);
+
+            emit stingFramesChanged(m_stingFrames);
         }
         else
         {
