@@ -239,19 +239,29 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             emit fadeToBlackChanged(m_fadeToBlackEnabled);
             emit fadeToBlackFrameCountChanged(m_fadeToBlackFrameCount);
         }
+        else if(cmd == "FtbP")
+        {
+            m_fadeToBlackFrames = (quint8)payload.at(7);
+
+            emit fadeToBlackFramesChanged(m_fadeToBlackFrames);
+        }
         else if(cmd == "DskS")
         {
             quint8 index = (quint8)payload.at(6);
             m_downstreamKeyOn[index] = (quint8)payload.at(7);
+            m_downstreamKeyFrameCount[index] = (quint8)payload.at(10);
 
             emit downstreamKeyOnChanged(index, m_downstreamKeyOn[index]);
+            emit downstreamKeyFrameCountChanged(index, m_downstreamKeyFrameCount[index]);
         }
         else if(cmd == "DskP")
         {
             quint8 index = (quint8)payload.at(6);
             m_downstreamKeyTie[index] = (quint8)payload.at(7);
+            m_downstreamKeyFrames[index] = (quint8)payload.at(8);
 
             emit downstreamKeyTieChanged(index, m_downstreamKeyTie[index]);
+            emit downstreamKeyFramesChanged(index, m_downstreamKeyFrames[index]);
         }
         else if(cmd == "KeOn")
         {

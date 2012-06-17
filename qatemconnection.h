@@ -97,13 +97,21 @@ public:
     quint8 keyersOnNextTransition() const { return m_keyersOnNextTransition; }
     quint8 transitionStyle() const { return m_transitionStyle; }
 
+    /// @returns true if fade to black is on.
     bool fadeToBlackEnabled() const { return m_fadeToBlackEnabled; }
+    /// @returns number of frames left of fade to black transition.
     quint8 fadeToBlackFrameCount() const { return m_fadeToBlackFrameCount; }
+    /// @returns duration in number of frames for the fade to black transition.
+    quint8 fadeToBlackFrames() const { return m_fadeToBlackFrames; }
 
     /// @returns true if downstream key @p keyer is on air
     bool downstreamKeyOn(quint8 keyer) const;
     /// @returns true if downstream key @p keyer is tied to next transition
     bool downstreamKeyTie(quint8 keyer) const;
+    /// @returns number of frames left of key transition for @p keyer
+    quint8 downstreamKeyFrameCount(quint8 keyer) const { return m_downstreamKeyFrameCount.value(keyer); }
+    /// @returns duration in number of frames for key transition of dsk @p keyer
+    quint8 downstreamKeyFrames(quint8 keyer) const { return m_downstreamKeyFrames.value(keyer); }
 
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOn(quint8 keyer) const;
@@ -203,9 +211,12 @@ private:
 
     bool m_fadeToBlackEnabled;
     quint8 m_fadeToBlackFrameCount;
+    quint8 m_fadeToBlackFrames;
 
     QHash<quint8, bool> m_downstreamKeyOn;
     QHash<quint8, bool> m_downstreamKeyTie;
+    QHash<quint8, quint8> m_downstreamKeyFrames;
+    QHash<quint8, quint8> m_downstreamKeyFrameCount;
 
     QHash<quint8, bool> m_upstreamKeyOn;
 
@@ -251,9 +262,12 @@ signals:
 
     void fadeToBlackChanged(bool enabled);
     void fadeToBlackFrameCountChanged(quint8 count);
+    void fadeToBlackFramesChanged(quint8 frames);
 
     void downstreamKeyOnChanged(quint8 keyer, bool state);
     void downstreamKeyTieChanged(quint8 keyer, bool state);
+    void downstreamKeyFrameCountChanged(quint8 keyer, quint8 count);
+    void downstreamKeyFramesChanged(quint8 keyer, quint8 frames);
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
 
