@@ -28,6 +28,12 @@ typedef union
     quint8 u8[2];
 } U16_U8;
 
+typedef union
+{
+    quint32 u32;
+    quint8 u8[4];
+} U32_U8;
+
 class QAtemConnection : public QObject
 {
     Q_OBJECT
@@ -252,6 +258,8 @@ signals:
 
     void productInformationChanged(const QString& info);
     void versionChanged(quint16 major, quint16 minor);
+
+    void timeChanged(quint32 time);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

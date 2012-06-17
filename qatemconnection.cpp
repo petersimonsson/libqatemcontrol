@@ -345,6 +345,16 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
         {
             m_videoFormatIndex = (quint8)payload.at(6);
         }
+        else if(cmd == "Time")
+        {
+            U32_U8 val;
+            val.u8[3] = (quint8)payload.at(6);
+            val.u8[2] = (quint8)payload.at(7);
+            val.u8[1] = (quint8)payload.at(8);
+            val.u8[0] = (quint8)payload.at(9);
+
+            emit timeChanged(val.u32);
+        }
         else
         {
             QString dbg;
