@@ -693,6 +693,32 @@ void QAtemConnection::doDownstreamKeyAuto(quint8 keyer)
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setDownstreamKeyFillSource(quint8 keyer, quint8 source)
+{
+    QByteArray cmd = "CDsF";
+    QByteArray payload;
+
+    payload.append((char)keyer);
+    payload.append((char)source);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyKeySource(quint8 keyer, quint8 source)
+{
+    QByteArray cmd = "CDsC";
+    QByteArray payload;
+
+    payload.append((char)keyer);
+    payload.append((char)source);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::saveSettings()
 {
     QByteArray cmd = "SRsv";

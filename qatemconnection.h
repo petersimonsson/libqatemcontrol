@@ -174,6 +174,8 @@ public slots:
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
     void doDownstreamKeyAuto(quint8 keyer);
+    void setDownstreamKeyFillSource(quint8 keyer, quint8 source);
+    void setDownstreamKeyKeySource(quint8 keyer, quint8 source);
 
     void saveSettings();
     void clearSettings();
