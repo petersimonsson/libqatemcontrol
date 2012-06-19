@@ -261,9 +261,11 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             quint8 index = (quint8)payload.at(6);
             m_downstreamKeyTie[index] = (quint8)payload.at(7);
             m_downstreamKeyFrames[index] = (quint8)payload.at(8);
+            m_downstreamKeyInvertKey[index] = (quint8)payload.at(14);
 
             emit downstreamKeyTieChanged(index, m_downstreamKeyTie[index]);
             emit downstreamKeyFramesChanged(index, m_downstreamKeyFrames[index]);
+            emit downstreamKeyInvertKeyChanged(index, m_downstreamKeyInvertKey[index]);
         }
         else if(cmd == "DskB")
         {
@@ -713,6 +715,40 @@ void QAtemConnection::setDownstreamKeyKeySource(quint8 keyer, quint8 source)
 
     payload.append((char)keyer);
     payload.append((char)source);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyFrameRate(quint8 keyer, quint8 frames)
+{
+    QByteArray cmd = "CDsR";
+    QByteArray payload;
+
+    payload.append((char)keyer);
+    payload.append((char)frames);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyInvertKey(quint8 keyer, bool invert)
+{
+    QByteArray cmd = "CDsG";
+    QByteArray payload;
+
+    payload.append((char)0x08);
+    payload.append((char)keyer);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)invert);
+    payload.append((char)0x00);
     payload.append((char)0x00);
     payload.append((char)0x00);
 

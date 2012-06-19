@@ -176,6 +176,8 @@ public slots:
     void doDownstreamKeyAuto(quint8 keyer);
     void setDownstreamKeyFillSource(quint8 keyer, quint8 source);
     void setDownstreamKeyKeySource(quint8 keyer, quint8 source);
+    void setDownstreamKeyFrameRate(quint8 keyer, quint8 frames);
+    void setDownstreamKeyInvertKey(quint8 keyer, bool invert);
 
     void saveSettings();
     void clearSettings();
@@ -229,6 +231,7 @@ private:
     QHash<quint8, quint8> m_downstreamKeyFrameCount;
     QHash<quint8, quint8> m_downstreamKeyFillSource;
     QHash<quint8, quint8> m_downstreamKeyKeySource;
+    QHash<quint8, bool> m_downstreamKeyInvertKey;
 
     QHash<quint8, bool> m_upstreamKeyOn;
 
@@ -283,6 +286,7 @@ signals:
     void downstreamKeyFrameCountChanged(quint8 keyer, quint8 count);
     void downstreamKeyFramesChanged(quint8 keyer, quint8 frames);
     void downstreamKeySourcesChanged(quint8 keyer, quint8 fill, quint8 key);
+    void downstreamKeyInvertKeyChanged(quint8 keyer, bool invert);
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
 
