@@ -261,11 +261,13 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             quint8 index = (quint8)payload.at(6);
             m_downstreamKeyTie[index] = (quint8)payload.at(7);
             m_downstreamKeyFrames[index] = (quint8)payload.at(8);
+            m_downstreamKeyPreMultiplied[index] = (quint8)payload.at(9);
             m_downstreamKeyInvertKey[index] = (quint8)payload.at(14);
 
             emit downstreamKeyTieChanged(index, m_downstreamKeyTie[index]);
             emit downstreamKeyFramesChanged(index, m_downstreamKeyFrames[index]);
             emit downstreamKeyInvertKeyChanged(index, m_downstreamKeyInvertKey[index]);
+            emit downstreamKeyPreMultipliedChanged(index, m_downstreamKeyPreMultiplied[index]);
         }
         else if(cmd == "DskB")
         {
@@ -748,6 +750,27 @@ void QAtemConnection::setDownstreamKeyInvertKey(quint8 keyer, bool invert)
     payload.append((char)0x00);
     payload.append((char)0x00);
     payload.append((char)invert);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultiplied)
+{
+    QByteArray cmd = "CDsG";
+    QByteArray payload;
+
+    payload.append((char)0x01);
+    payload.append((char)keyer);
+    payload.append((char)preMultiplied);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
     payload.append((char)0x00);
     payload.append((char)0x00);
     payload.append((char)0x00);
