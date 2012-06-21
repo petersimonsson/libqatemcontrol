@@ -262,12 +262,21 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             m_downstreamKeyTie[index] = (quint8)payload.at(7);
             m_downstreamKeyFrames[index] = (quint8)payload.at(8);
             m_downstreamKeyPreMultiplied[index] = (quint8)payload.at(9);
+            U16_U8 val;
+            val.u8[1] = (quint8)payload.at(10);
+            val.u8[0] = (quint8)payload.at(11);
+            m_downstreamKeyClip[index] = val.u16;
+            val.u8[1] = (quint8)payload.at(12);
+            val.u8[0] = (quint8)payload.at(13);
+            m_downstreamKeyGain[index] = val.u16;
             m_downstreamKeyInvertKey[index] = (quint8)payload.at(14);
 
             emit downstreamKeyTieChanged(index, m_downstreamKeyTie[index]);
             emit downstreamKeyFramesChanged(index, m_downstreamKeyFrames[index]);
             emit downstreamKeyInvertKeyChanged(index, m_downstreamKeyInvertKey[index]);
             emit downstreamKeyPreMultipliedChanged(index, m_downstreamKeyPreMultiplied[index]);
+            emit downstreamKeyClipChanged(index, m_downstreamKeyClip[index]);
+            emit downstreamKeyGainChanged(index, m_downstreamKeyGain[index]);
         }
         else if(cmd == "DskB")
         {
@@ -770,6 +779,52 @@ void QAtemConnection::setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultip
     payload.append((char)0x00);
     payload.append((char)0x00);
     payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyClip(quint8 keyer, quint16 clip)
+{
+    QByteArray cmd = "CDsG";
+    QByteArray payload;
+    U16_U8 val;
+    val.u16 = clip;
+
+    payload.append((char)0x02);
+    payload.append((char)keyer);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyGain(quint8 keyer, quint16 gain)
+{
+    QByteArray cmd = "CDsG";
+    QByteArray payload;
+    U16_U8 val;
+    val.u16 = gain;
+
+    payload.append((char)0x04);
+    payload.append((char)keyer);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
     payload.append((char)0x00);
     payload.append((char)0x00);
     payload.append((char)0x00);

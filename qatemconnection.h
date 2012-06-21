@@ -120,6 +120,10 @@ public:
     bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKeyInvertKey.value(keyer); }
     /// @returns true if the key is pre multiplied for downstream key @p keyer
     bool donwstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKeyPreMultiplied.value(keyer); }
+    /// @returns the clip set for downstream key @p keyer
+    quint16 downstreamKeyClip(quint8 keyer) const { return m_downstreamKeyClip.value(keyer); }
+    /// @returns the gain set for downstream key @p keyer
+    quint16 downstreamKeyGain(quint16 keyer) const { return m_downstreamKeyGain.value(keyer); }
 
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOn(quint8 keyer) const;
@@ -183,6 +187,8 @@ public slots:
     void setDownstreamKeyFrameRate(quint8 keyer, quint8 frames);
     void setDownstreamKeyInvertKey(quint8 keyer, bool invert);
     void setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultiplied);
+    void setDownstreamKeyClip(quint8 keyer, quint16 clip);
+    void setDownstreamKeyGain(quint8 keyer, quint16 gain);
 
     void saveSettings();
     void clearSettings();
@@ -238,6 +244,8 @@ private:
     QHash<quint8, quint8> m_downstreamKeyKeySource;
     QHash<quint8, bool> m_downstreamKeyInvertKey;
     QHash<quint8, bool> m_downstreamKeyPreMultiplied;
+    QHash<quint8, quint16> m_downstreamKeyClip;
+    QHash<quint8, quint16> m_downstreamKeyGain;
 
     QHash<quint8, bool> m_upstreamKeyOn;
 
@@ -294,6 +302,8 @@ signals:
     void downstreamKeySourcesChanged(quint8 keyer, quint8 fill, quint8 key);
     void downstreamKeyInvertKeyChanged(quint8 keyer, bool invert);
     void downstreamKeyPreMultipliedChanged(quint8 keyer, bool preMultiplied);
+    void downstreamKeyClipChanged(quint8 keyer, quint16 clip);
+    void downstreamKeyGainChanged(quint8 keyer, quint16 gain);
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
 
