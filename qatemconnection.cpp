@@ -270,6 +270,19 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             val.u8[0] = (quint8)payload.at(13);
             m_downstreamKeyGain[index] = val.u16;
             m_downstreamKeyInvertKey[index] = (quint8)payload.at(14);
+            m_downstreamKeyEnableMask[index] = (quint8)payload.at(15);
+            val.u8[1] = (quint8)payload.at(16);
+            val.u8[0] = (quint8)payload.at(17);
+            m_downstreamKeyTopMask[index] = (qint16)val.u16;
+            val.u8[1] = (quint8)payload.at(18);
+            val.u8[0] = (quint8)payload.at(19);
+            m_downstreamKeyBottomMask[index] = (qint16)val.u16;
+            val.u8[1] = (quint8)payload.at(20);
+            val.u8[0] = (quint8)payload.at(21);
+            m_downstreamKeyLeftMask[index] = (qint16)val.u16;
+            val.u8[1] = (quint8)payload.at(22);
+            val.u8[0] = (quint8)payload.at(23);
+            m_downstreamKeyRightMask[index] = (qint16)val.u16;
 
             emit downstreamKeyTieChanged(index, m_downstreamKeyTie[index]);
             emit downstreamKeyFramesChanged(index, m_downstreamKeyFrames[index]);
@@ -277,6 +290,11 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             emit downstreamKeyPreMultipliedChanged(index, m_downstreamKeyPreMultiplied[index]);
             emit downstreamKeyClipChanged(index, m_downstreamKeyClip[index]);
             emit downstreamKeyGainChanged(index, m_downstreamKeyGain[index]);
+            emit downstreamKeyEnableMaskChanged(index, m_downstreamKeyEnableMask[index]);
+            emit downstreamKeyTopMaskChanged(index, m_downstreamKeyTopMask[index]);
+            emit downstreamKeyBottomMaskChanged(index, m_downstreamKeyBottomMask[index]);
+            emit downstreamKeyLeftMaskChanged(index, m_downstreamKeyLeftMask[index]);
+            emit downstreamKeyRightMaskChanged(index, m_downstreamKeyRightMask[index]);
         }
         else if(cmd == "DskB")
         {
@@ -829,6 +847,131 @@ void QAtemConnection::setDownstreamKeyGain(quint8 keyer, quint16 gain)
     payload.append((char)0x00);
     payload.append((char)0x00);
     payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyEnableMask(quint8 keyer, bool enable)
+{
+    QByteArray cmd = "CDsM";
+    QByteArray payload;
+
+    payload.append((char)0x01);
+    payload.append((char)keyer);
+    payload.append((char)enable);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyTopMask(quint8 keyer, qint16 value)
+{
+    QByteArray cmd = "CDsM";
+    QByteArray payload;
+
+    payload.append((char)0x1e);
+    payload.append((char)keyer);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    U16_U8 val;
+    val.u16 = (quint16)value;
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyBottomMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyLeftMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyRightMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyBottomMask(quint8 keyer, qint16 value)
+{
+    QByteArray cmd = "CDsM";
+    QByteArray payload;
+
+    payload.append((char)0x1e);
+    payload.append((char)keyer);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    U16_U8 val;
+    val.u16 = (quint16)m_downstreamKeyTopMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)value;
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyLeftMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyRightMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyLeftMask(quint8 keyer, qint16 value)
+{
+    QByteArray cmd = "CDsM";
+    QByteArray payload;
+
+    payload.append((char)0x1e);
+    payload.append((char)keyer);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    U16_U8 val;
+    val.u16 = (quint16)m_downstreamKeyTopMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyBottomMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)value;
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyRightMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDownstreamKeyRightMask(quint8 keyer, qint16 value)
+{
+    QByteArray cmd = "CDsM";
+    QByteArray payload;
+
+    payload.append((char)0x1e);
+    payload.append((char)keyer);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    U16_U8 val;
+    val.u16 = (quint16)m_downstreamKeyTopMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyBottomMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)m_downstreamKeyLeftMask[keyer];
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    val.u16 = (quint16)value;
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
 
     sendCommand(cmd, payload);
 }

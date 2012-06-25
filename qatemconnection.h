@@ -123,7 +123,17 @@ public:
     /// @returns the clip set for downstream key @p keyer
     quint16 downstreamKeyClip(quint8 keyer) const { return m_downstreamKeyClip.value(keyer); }
     /// @returns the gain set for downstream key @p keyer
-    quint16 downstreamKeyGain(quint16 keyer) const { return m_downstreamKeyGain.value(keyer); }
+    quint16 downstreamKeyGain(quint8 keyer) const { return m_downstreamKeyGain.value(keyer); }
+    /// @returns true if the mask for downstream key @p keyer is enabled
+    bool downstreamKeyEnableMask(quint8 keyer) const { return m_downstreamKeyEnableMask.value(keyer); }
+    /// @returns the top position of the mask for downstream key @p keyer
+    qint16 downstreamKeyTopMask(quint8 keyer) const { return m_downstreamKeyTopMask.value(keyer); }
+    /// @returns the bottom position of the mask for downstream key @p keyer
+    qint16 downstreamKeyBottomMask(quint8 keyer) const { return m_downstreamKeyBottomMask.value(keyer); }
+    /// @returns the left position of the mask for downstream key @p keyer
+    qint16 downstreamKeyLeftMask(quint8 keyer) const { return m_downstreamKeyLeftMask.value(keyer); }
+    /// @returns the right position of the mask for downstream key @p keyer
+    qint16 downstreamKeyRightMask(quint8 keyer) const { return m_downstreamKeyRightMask.value(keyer); }
 
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOn(quint8 keyer) const;
@@ -189,6 +199,11 @@ public slots:
     void setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultiplied);
     void setDownstreamKeyClip(quint8 keyer, quint16 clip);
     void setDownstreamKeyGain(quint8 keyer, quint16 gain);
+    void setDownstreamKeyEnableMask(quint8 keyer, bool enable);
+    void setDownstreamKeyTopMask(quint8 keyer, qint16 value);
+    void setDownstreamKeyBottomMask(quint8 keyer, qint16 value);
+    void setDownstreamKeyLeftMask(quint8 keyer, qint16 value);
+    void setDownstreamKeyRightMask(quint8 keyer, qint16 value);
 
     void saveSettings();
     void clearSettings();
@@ -246,6 +261,11 @@ private:
     QHash<quint8, bool> m_downstreamKeyPreMultiplied;
     QHash<quint8, quint16> m_downstreamKeyClip;
     QHash<quint8, quint16> m_downstreamKeyGain;
+    QHash<quint8, bool> m_downstreamKeyEnableMask;
+    QHash<quint8, qint16> m_downstreamKeyTopMask;
+    QHash<quint8, qint16> m_downstreamKeyBottomMask;
+    QHash<quint8, qint16> m_downstreamKeyLeftMask;
+    QHash<quint8, qint16> m_downstreamKeyRightMask;
 
     QHash<quint8, bool> m_upstreamKeyOn;
 
@@ -304,6 +324,11 @@ signals:
     void downstreamKeyPreMultipliedChanged(quint8 keyer, bool preMultiplied);
     void downstreamKeyClipChanged(quint8 keyer, quint16 clip);
     void downstreamKeyGainChanged(quint8 keyer, quint16 gain);
+    void downstreamKeyEnableMaskChanged(quint8 keyer, bool enable);
+    void downstreamKeyTopMaskChanged(quint8 keyer, qint16 value);
+    void downstreamKeyBottomMaskChanged(quint8 keyer, qint16 value);
+    void downstreamKeyLeftMaskChanged(quint8 keyer, qint16 value);
+    void downstreamKeyRightMaskChanged(quint8 keyer, qint16 value);
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
 
