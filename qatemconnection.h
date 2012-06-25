@@ -180,6 +180,7 @@ public slots:
     void doCut();
     void doAuto();
     void toggleFadeToBlack();
+    void setFadeToBlackFrameRate(quint8 frames);
     void setTransitionPosition(quint16 position);
     void signalTransitionPositionChangeDone();
     void setTransitionPreview(bool state);

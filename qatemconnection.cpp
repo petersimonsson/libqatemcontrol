@@ -569,6 +569,19 @@ void QAtemConnection::toggleFadeToBlack()
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setFadeToBlackFrameRate(quint8 frames)
+{
+    QByteArray cmd = "FtbC";
+    QByteArray payload;
+
+    payload.append((char)0x01);
+    payload.append((char)0x00);
+    payload.append((char)frames);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::setTransitionPosition(quint16 position)
 {
     QByteArray cmd = "CTPs";
