@@ -91,10 +91,14 @@ public:
     /// @returns the tally state of the input @p id
     quint8 tallyState(quint8 id) const;
 
+    /// @returns true if transition preview is enabled
     bool transitionPreviewEnabled() const { return m_transitionPreviewEnabled; }
+    /// @returns number of frames left of transition
     quint8 transitionFrameCount() const { return m_transitionFrameCount; }
+    /// @returns percent left of transition
     quint16 transitionPosition() const { return m_transitionPosition; }
     quint8 keyersOnNextTransition() const { return m_keyersOnNextTransition; }
+    /// @returns index of selected transition style
     quint8 transitionStyle() const { return m_transitionStyle; }
 
     /// @returns true if fade to black is on.
@@ -164,14 +168,37 @@ public:
 
     /// @returns duration in number of frames for mix transition
     quint8 mixFrames() const { return m_mixFrames; }
+
     /// @returns duration in number of frames for dip transition
     quint8 dipFrames() const { return m_dipFrames; }
+
     /// @returns duration in number of frames for wipe transition
     quint8 wipeFrames() const { return m_wipeFrames; }
+    /// @returns border width for wipe transition
+    quint16 wipeBorderWidth() const { return m_wipeBorderWidth; }
+    /// @returns border softness for wipe transition
+    quint16 wipeBorderSoftness() const { return m_wipeBorderSoftness; }
+    /// @returns type of wipe transition
+    quint8 wipeType() const { return m_wipeType; }
+    /// @returns symmetry of wipe transition
+    quint16 wipeSymmetry() const { return m_wipeSymmetry; }
+    /// @returns x position of wipe transition
+    quint16 wipeXPosition() const { return m_wipeXPosition; }
+    /// @returns y position of wipe transition
+    quint16 wipeYPosition() const { return m_wipeYPosition; }
+    /// @returns true if wipe transition direction should be reversed
+    bool wipeReverseDirection() const { return m_wipeReverseDirection; }
+    /// @returns true if wipe transition direction should flip flop
+    bool wipeFlipFlop() const { return m_wipeFlipFlop; }
+
     /// @returns duration in number of frames for dve transition
     quint8 dveFrames() const { return m_dveFrames; }
+
     /// @returns duration in number of frames for sting transition
     quint8 stingFrames() const { return m_stingFrames; }
+
+    /// @returns the border source index, used for both dip and wipe transition
+    quint8 borderSource() const { return m_borderSource; }
 
 public slots:
     void changeProgramInput(char index);
@@ -212,6 +239,22 @@ public slots:
     void setColorGeneratorColor(quint8 generator, const QColor& color);
 
     void setMediaPlayerSource(quint8 player, bool clip, quint8 source);
+
+    void setMixFrames(quint8 frames);
+
+    void setDipFrames(quint8 frames);
+
+    void setBorderSource(quint8 index);
+
+    void setWipeFrames(quint8 frames);
+    void setWipeBorderWidth(quint16 width);
+    void setWipeBorderSoftness(quint16 softness);
+    void setWipeType(quint8 type);
+    void setWipeSymmetry(quint16 value);
+    void setWipeXPosition(quint16 value);
+    void setWipeYPosition(quint16 value);
+    void setWipeReverseDirection(bool reverse);
+    void setWipeFlipFlop(bool flipFlop);
 
 protected slots:
     void handleSocketData();
@@ -292,10 +335,24 @@ private:
     quint8 m_videoFormatIndex;
 
     quint8 m_mixFrames;
+
     quint8 m_dipFrames;
+
     quint8 m_wipeFrames;
+    quint16 m_wipeBorderWidth;
+    quint16 m_wipeBorderSoftness;
+    quint8 m_wipeType;
+    quint16 m_wipeSymmetry;
+    quint16 m_wipeXPosition;
+    quint16 m_wipeYPosition;
+    bool m_wipeReverseDirection;
+    bool m_wipeFlipFlop;
+
     quint8 m_dveFrames;
+
     quint8 m_stingFrames;
+
+    quint8 m_borderSource;
 
 signals:
     void connected();
@@ -349,10 +406,24 @@ signals:
     void timeChanged(quint32 time);
 
     void mixFramesChanged(quint8 frames);
+
     void dipFramesChanged(quint8 frames);
+
     void wipeFramesChanged(quint8 frames);
+    void wipeBorderWidthChanged(quint16 width);
+    void wipeBorderSoftnessChanged(quint16 softness);
+    void wipeTypeChanged(quint8 type);
+    void wipeSymmetryChanged(quint16 value);
+    void wipeXPositionChanged(quint16 value);
+    void wipeYPositionChanged(quint16 value);
+    void wipeReverseDirectionChanged(bool reverse);
+    void wipeFlipFlopChanged(bool flipFlop);
+
     void dveFramesChanged(quint8 frames);
+
     void stingFramesChanged(quint8 frames);
+
+    void borderSourceChanged(quint8 index);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

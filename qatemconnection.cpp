@@ -426,8 +426,36 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
         else if(cmd == "TWpP")
         {
             m_wipeFrames = (quint8)payload.at(7);
+            m_wipeType = (quint8)payload.at(8);
+
+            U16_U8 val;
+            val.u8[1] = (quint8)payload.at(10);
+            val.u8[0] = (quint8)payload.at(11);
+            m_wipeBorderWidth = val.u16;
+            val.u8[1] = (quint8)payload.at(12);
+            val.u8[0] = (quint8)payload.at(13);
+            m_wipeSymmetry = val.u16;
+            val.u8[1] = (quint8)payload.at(14);
+            val.u8[0] = (quint8)payload.at(15);
+            m_wipeBorderSoftness = val.u16;
+            val.u8[1] = (quint8)payload.at(16);
+            val.u8[0] = (quint8)payload.at(17);
+            m_wipeXPosition = val.u16;
+            val.u8[1] = (quint8)payload.at(18);
+            val.u8[0] = (quint8)payload.at(19);
+            m_wipeYPosition = val.u16;
+            m_wipeReverseDirection = (quint8)payload.at(20);
+            m_wipeFlipFlop = (quint8)payload.at(21);
 
             emit wipeFramesChanged(m_wipeFrames);
+            emit wipeBorderWidthChanged(m_wipeBorderWidth);
+            emit wipeBorderSoftnessChanged(m_wipeBorderSoftness);
+            emit wipeTypeChanged(m_wipeType);
+            emit wipeSymmetryChanged(m_wipeSymmetry);
+            emit wipeXPositionChanged(m_wipeXPosition);
+            emit wipeYPositionChanged(m_wipeYPosition);
+            emit wipeReverseDirectionChanged(m_wipeReverseDirection);
+            emit wipeFlipFlopChanged(m_wipeFlipFlop);
         }
         else if(cmd == "TDvP")
         {
@@ -440,6 +468,12 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             m_stingFrames = (quint8)payload.at(7);
 
             emit stingFramesChanged(m_stingFrames);
+        }
+        else if(cmd == "BrdI")
+        {
+            m_borderSource = (quint8)payload.at(7);
+
+            emit borderSourceChanged(m_borderSource);
         }
         else
         {
@@ -1126,4 +1160,314 @@ quint8 QAtemConnection::mediaPlayerSelectedClip(quint8 player) const
 quint8 QAtemConnection::auxSource(quint8 aux) const
 {
     return m_auxSource.value(aux);
+}
+
+void QAtemConnection::setMixFrames(quint8 frames)
+{
+    QByteArray cmd = "CTMx";
+    QByteArray payload;
+
+    payload.append((char)0x00);
+    payload.append((char)frames);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDipFrames(quint8 frames)
+{
+    QByteArray cmd = "CTDp";
+    QByteArray payload;
+
+    payload.append((char)0x00);
+    payload.append((char)frames);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setBorderSource(quint8 index)
+{
+    QByteArray cmd = "CBrI";
+    QByteArray payload;
+
+    payload.append((char)0x00);
+    payload.append((char)index);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeFrames(quint8 frames)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+
+    payload.append((char)0x00);
+    payload.append((char)0x01);
+    payload.append((char)0x00);
+    payload.append((char)frames);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeBorderWidth(quint16 width)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+    U16_U8 val;
+    val.u16 = width;
+
+    payload.append((char)0x00);
+    payload.append((char)0x04);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeBorderSoftness(quint16 softness)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+    U16_U8 val;
+    val.u16 = softness;
+
+    payload.append((char)0x00);
+    payload.append((char)0x10);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeType(quint8 type)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+
+    payload.append((char)0x00);
+    payload.append((char)0x02);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)type);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeSymmetry(quint16 value)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+    U16_U8 val;
+    val.u16 = value;
+
+    payload.append((char)0x00);
+    payload.append((char)0x08);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeXPosition(quint16 value)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+    U16_U8 val;
+    val.u16 = value;
+
+    payload.append((char)0x00);
+    payload.append((char)0x08);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)val.u8[0]);
+    payload.append((char)val.u8[1]);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeYPosition(quint16 value)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+    U16_U8 val;
+    val.u16 = value;
+
+    payload.append((char)0x00);
+    payload.append((char)0x40);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)val.u8[1]);
+    payload.append((char)val.u8[0]);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeReverseDirection(bool reverse)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+
+    payload.append((char)0x00);
+    payload.append((char)0x80);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)reverse);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setWipeFlipFlop(bool flipFlop)
+{
+    QByteArray cmd = "CTWp";
+    QByteArray payload;
+
+    payload.append((char)0x01);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)flipFlop);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
 }
