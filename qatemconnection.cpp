@@ -1186,7 +1186,7 @@ void QAtemConnection::setMediaPlayerSource(quint8 player, bool clip, quint8 sour
 
         if(source <= 1)
         {
-            payload[3] = (char)source;
+            payload[4] = (char)source;
         }
     }
     else
