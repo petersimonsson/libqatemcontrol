@@ -165,6 +165,30 @@ public:
     quint16 upstreamKeyLumaClip(quint8 keyer) const { return m_upstreamKeyLumaClip.value(keyer); }
     /// @returns gain for luma upstream key @p keyer
     quint16 upstreamKeyLumaGain(quint8 keyer) const { return m_upstreamKeyLumaGain.value(keyer); }
+    /// @returns hue for chroma upstream key @p keyer
+    quint16 upstreamKeyChromaHue(quint8 keyer) const { return m_upstreamKeyChromaHue.value(keyer); }
+    /// @returns gain for chroma upstream key @p keyer
+    quint16 upstreamKeyChromaGain(quint8 keyer) const { return m_upstreamKeyChromaGain.value(keyer); }
+    /// @returns y suppress for chroma upstream key @p keyer
+    quint16 upstreamKeyChromaYSuppress(quint8 keyer) const { return m_upstreamKeyChromaYSuppress.value(keyer); }
+    /// @returns lift for chroma upstream key @p keyer
+    quint16 upstreamKeyChromaLift(quint8 keyer) const { return m_upstreamKeyChromaLift.value(keyer); }
+    /// @returns true if chroma upstream key @p keyer should have narrow chroma key range
+    bool upstreamKeyChromaNarrowRange(quint8 keyer) const { return m_upstreamKeyChromaNarrowRange.value(keyer); }
+    /// @returns pattern of pattern upstream key @p keyer
+    quint8 upstreamKeyPatternPattern(quint8 keyer) const { return m_upstreamKeyPatternPattern.value(keyer); }
+    /// @returns true if pattern upstream key @p keyer should invert the pattern
+    bool upstreamKeyPatternInvertPattern(quint8 keyer) const { return m_upstreamKeyPatternInvertPattern.value(keyer); }
+    /// @returns size for pattern upstream key @p keyer
+    quint16 upstreamKeyPatternSize(quint8 keyer) const { return m_upstreamKeyPatternSize.value(keyer); }
+    /// @returns symmetry for pattern upstream key @p keyer
+    quint16 upstreamKeyPatternSymmetry(quint8 keyer) const { return m_upstreamKeyPatternSymmetry.value(keyer); }
+    /// @returns softness for pattern upstream key @p keyer
+    quint16 upstreamKeyPatternSoftness(quint8 keyer) const { return m_upstreamKeyPatternSoftness.value(keyer); }
+    /// @returns x position for pattern upstream key @p keyer
+    quint16 upstreamKeyPatternXPosition(quint8 keyer) const { return m_upstreamKeyPatternXPosition.value(keyer); }
+    /// @returns y position for pattern upstream key @p keyer
+    quint16 upstreamKeyPatternYPosition(quint8 keyer) const { return m_upstreamKeyPatternYPosition.value(keyer); }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -252,6 +276,18 @@ public slots:
     void setUpstreamKeyLumaInvertKey(quint8 keyer, bool invert);
     void setUpstreamKeyLumaClip(quint8 keyer, quint16 clip);
     void setUpstreamKeyLumaGain(quint8 keyer, quint16 gain);
+    void setUpstreamKeyChromaHue(quint8 keyer, quint16 hue);
+    void setUpstreamKeyChromaGain(quint8 keyer, quint16 hue);
+    void setUpstreamKeyChromaYSuppress(quint8 keyer, quint16 ySuppress);
+    void setUpstreamKeyChromaLift(quint8 keyer, quint16 lift);
+    void setUpstreamKeyChromaNarrowRange(quint8 keyer, bool narrowRange);
+    void setUpstreamKeyPatternPattern(quint8 keyer, quint8 pattern);
+    void setUpstreamKeyPatternInvertPattern(quint8 keyer, bool invert);
+    void setUpstreamKeyPatternSize(quint8 keyer, quint16 size);
+    void setUpstreamKeyPatternSymmetry(quint8 keyer, quint16 symmetry);
+    void setUpstreamKeyPatternSoftness(quint8 keyer, quint16 softness);
+    void setUpstreamKeyPatternXPosition(quint8 keyer, quint16 xPosition);
+    void setUpstreamKeyPatternYPosition(quint8 keyer, quint16 yPosition);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -350,6 +386,18 @@ private:
     QHash<quint8, bool> m_upstreamKeyLumaInvertKey;
     QHash<quint8, quint16> m_upstreamKeyLumaClip;
     QHash<quint8, quint16> m_upstreamKeyLumaGain;
+    QHash<quint8, quint16> m_upstreamKeyChromaHue;
+    QHash<quint8, quint16> m_upstreamKeyChromaGain;
+    QHash<quint8, quint16> m_upstreamKeyChromaYSuppress;
+    QHash<quint8, quint16> m_upstreamKeyChromaLift;
+    QHash<quint8, bool> m_upstreamKeyChromaNarrowRange;
+    QHash<quint8, quint8> m_upstreamKeyPatternPattern;
+    QHash<quint8, bool> m_upstreamKeyPatternInvertPattern;
+    QHash<quint8, quint16> m_upstreamKeyPatternSize;
+    QHash<quint8, quint16> m_upstreamKeyPatternSymmetry;
+    QHash<quint8, quint16> m_upstreamKeyPatternSoftness;
+    QHash<quint8, quint16> m_upstreamKeyPatternXPosition;
+    QHash<quint8, quint16> m_upstreamKeyPatternYPosition;
 
     QHash<quint8, bool> m_upstreamKeyOn;
     QHash<quint8, quint8> m_upstreamKeyType;
@@ -449,6 +497,18 @@ signals:
     void upstreamKeyLumaInvertKeyChanged(quint8 keyer, bool invert);
     void upstreamKeyLumaClipChanged(quint8 keyer, quint16 clip);
     void upstreamKeyLumaGainChanged(quint8 keyer, quint16 gain);
+    void upstreamKeyChromaHueChanged(quint8 keyer, quint16 hue);
+    void upstreamKeyChromaGainChanged(quint8 keyer, quint16 gain);
+    void upstreamKeyChromaYSuppressChanged(quint8 keyer, quint16 ySuppress);
+    void upstreamKeyChromaLiftChanged(quint8 keyer, quint16 lift);
+    void upstreamKeyChromaNarrowRangeChanged(quint8 keyer, bool narrowRange);
+    void upstreamKeyPatternPatternChanged(quint8 keyer, quint8 pattern);
+    void upstreamKeyPatternInvertPatternChanged(quint8 keyer, bool invert);
+    void upstreamKeyPatternSize(quint8 keyer, quint16 size);
+    void upstreamKeyPatternSymmetry(quint8 keyer, quint16 symmetry);
+    void upstreamKeyPatternSoftness(quint8 keyer, quint16 softness);
+    void upstreamKeyPatternXPosition(quint8 keyer, quint16 xPosition);
+    void upstreamKeyPatternYPosition(quint8 keyer, quint16 yPosition);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 
