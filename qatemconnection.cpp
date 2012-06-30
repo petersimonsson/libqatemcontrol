@@ -1176,39 +1176,39 @@ void QAtemConnection::setColorGeneratorColor(quint8 generator, const QColor& col
 void QAtemConnection::setMediaPlayerSource(quint8 player, bool clip, quint8 source)
 {
     QByteArray cmd = "MPSS";
-    QByteArray payload(12, 0);
+    QByteArray payload(8, 0);
 
     payload[1] = (char)player;
 
     if(clip) // Not available on TVS
     {
-        payload[0] = (char)4;
+        payload[0] = (char)0x04;
 
         if(source <= 1)
         {
-            payload[4] = (char)source;
+            payload[3] = (char)source;
         }
     }
     else
     {
-        payload[0] = (char)2;
+        payload[0] = (char)0x02;
 
         if(source <= 31) // Only 20 sources on TVS
         {
-            payload[4] = (char)source;
+            payload[3] = (char)source;
         }
     }
 
     sendCommand(cmd, payload);
 
-    payload.resize(8);
+    payload.clear();
     payload.append((char)0x01);
     payload.append((char)player);
     payload.append((char)clip ? 2 : 1);
     payload.append((char)0xbf);
-    payload.append((char)clip ? 0x96 : 0xd5);
-    payload.append((char)0xb6);
-    payload.append((char)0x04);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
     payload.append((char)0x00);
 
     sendCommand(cmd, payload);
