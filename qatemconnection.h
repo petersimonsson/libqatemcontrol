@@ -141,6 +141,30 @@ public:
 
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOn(quint8 keyer) const;
+    /// @returns the key type for upstream key @p keyer, 0 = luma, 1 = chroma, 2 = pattern, 3 = DVE
+    quint8 upstreamKeyType(quint8 keyer) const { return m_upstreamKeyType.value(keyer); }
+    /// @returns the source used as fill for upstream key @p keyer
+    quint8 upstreamKeyFillSource(quint8 keyer) const { return m_upstreamKeyFillSource.value(keyer); }
+    /// @returns the source used as key for upstream key @p keyer
+    quint8 upstreamKeyKeySource(quint8 keyer) const { return m_upstreamKeyKeySource.value(keyer); }
+    /// @returns true if the mask is enabled for upstream key @p keyer
+    bool upstreamKeyEnableMask(quint8 keyer) const { return m_upstreamKeyEnableMask.value(keyer); }
+    /// @returns top mask for upstream key @p keyer
+    qint16 upstreamKeyTopMask(quint8 keyer) const { return m_upstreamKeyTopMask.value(keyer); }
+    /// @returns bottom mask for upstream key @p keyer
+    qint16 upstreamKeyBottomMask(quint8 keyer) const { return m_upstreamKeyBottomMask.value(keyer); }
+    /// @returns left mask for upstream key @p keyer
+    qint16 upstreamKeyLeftMask(quint8 keyer) const { return m_upstreamKeyLeftMask.value(keyer); }
+    /// @returns right mask for upstream key @p keyer
+    qint16 upstreamKeyRightMask(quint8 keyer) const { return m_upstreamKeyRightMask.value(keyer); }
+    /// @returns true if the key is pre multiplied for luma upstream key @p keyer
+    bool upstreamKeyLumaPreMultipliedKey(quint8 keyer) const { return m_upstreamKeyLumaPreMultipliedKey.value(keyer); }
+    /// @returns true if the key source should be inverted for luma upstream key @p keyer
+    bool upstreamKeyLumaInvertKey(quint8 keyer) const { return m_upstreamKeyLumaInvertKey.value(keyer); }
+    /// @returns clip for luma upstream key @p keyer
+    quint16 upstreamKeyLumaClip(quint8 keyer) const { return m_upstreamKeyLumaClip.value(keyer); }
+    /// @returns gain for luma upstream key @p keyer
+    quint16 upstreamKeyLumaGain(quint8 keyer) const { return m_upstreamKeyLumaGain.value(keyer); }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -216,6 +240,18 @@ public slots:
     void setUpstreamKeyOn(quint8 keyer, bool state);
     void setUpstreamKeyOnNextTransition(quint8 keyer, bool state);
     void setBackgroundOnNextTransition(bool state);
+    void setUpstreamKeyType(quint8 keyer, quint8 type);
+    void setUpstreamKeyFillSource(quint8 keyer, quint8 source);
+    void setUpstreamKeyKeySource(quint8 keyer, quint8 source);
+    void setUpstreamKeyEnableMask(quint8 keyer, bool enable);
+    void setUpstreamKeyTopMask(quint8 keyer, qint16 value);
+    void setUpstreamKeyBottomMask(quint8 keyer, qint16 value);
+    void setUpstreamKeyLeftMask(quint8 keyer, qint16 value);
+    void setUpstreamKeyRightMask(quint8 keyer, qint16 value);
+    void setUpstreamKeyLumaPreMultipliedKey(quint8 keyer, bool preMultiplied);
+    void setUpstreamKeyLumaInvertKey(quint8 keyer, bool invert);
+    void setUpstreamKeyLumaClip(quint8 keyer, quint16 clip);
+    void setUpstreamKeyLumaGain(quint8 keyer, quint16 gain);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -310,8 +346,20 @@ private:
     QHash<quint8, qint16> m_downstreamKeyBottomMask;
     QHash<quint8, qint16> m_downstreamKeyLeftMask;
     QHash<quint8, qint16> m_downstreamKeyRightMask;
+    QHash<quint8, bool> m_upstreamKeyLumaPreMultipliedKey;
+    QHash<quint8, bool> m_upstreamKeyLumaInvertKey;
+    QHash<quint8, quint16> m_upstreamKeyLumaClip;
+    QHash<quint8, quint16> m_upstreamKeyLumaGain;
 
     QHash<quint8, bool> m_upstreamKeyOn;
+    QHash<quint8, quint8> m_upstreamKeyType;
+    QHash<quint8, quint8> m_upstreamKeyFillSource;
+    QHash<quint8, quint8> m_upstreamKeyKeySource;
+    QHash<quint8, bool> m_upstreamKeyEnableMask;
+    QHash<quint8, qint16> m_upstreamKeyTopMask;
+    QHash<quint8, qint16> m_upstreamKeyBottomMask;
+    QHash<quint8, qint16> m_upstreamKeyLeftMask;
+    QHash<quint8, qint16> m_upstreamKeyRightMask;
 
     QHash<quint8, QColor> m_colorGeneratorColors;
 
@@ -389,6 +437,18 @@ signals:
     void downstreamKeyRightMaskChanged(quint8 keyer, qint16 value);
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
+    void upstreamKeyTypeChanged(quint8 keyer, quint8 type);
+    void upstreamKeyFillSourceChanged(quint8 keyer, quint8 source);
+    void upstreamKeyKeySourceChanged(quint8 keyer, quint8 source);
+    void upstreamKeyEnableMaskChanged(quint8 keyer, bool enable);
+    void upstreamKeyTopMaskChanged(quint8 keyer, qint16 value);
+    void upstreamKeyBottomMaskChanged(quint8 keyer, qint16 value);
+    void upstreamKeyLeftMaskChanged(quint8 keyer, qint16 value);
+    void upstreamKeyRightMaskChanged(quint8 keyer, qint16 value);
+    void upstreamKeyLumaPreMultipliedKeyChanged(quint8 keyer, bool preMultiplied);
+    void upstreamKeyLumaInvertKeyChanged(quint8 keyer, bool invert);
+    void upstreamKeyLumaClipChanged(quint8 keyer, quint16 clip);
+    void upstreamKeyLumaGainChanged(quint8 keyer, quint16 gain);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 
