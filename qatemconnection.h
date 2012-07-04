@@ -328,6 +328,8 @@ public slots:
     void setWipeReverseDirection(bool reverse);
     void setWipeFlipFlop(bool flipFlop);
 
+    void setAuxSource(quint8 aux, quint8 source);
+
 protected slots:
     void handleSocketData();
 

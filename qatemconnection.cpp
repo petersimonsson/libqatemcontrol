@@ -2149,3 +2149,16 @@ void QAtemConnection::setUpstreamKeyPatternYPosition(quint8 keyer, quint16 yPosi
 
     sendCommand(cmd, payload);
 }
+
+void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
+{
+    QByteArray cmd = "CAuS";
+    QByteArray payload;
+
+    payload.append((char)aux);
+    payload.append((char)source);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
