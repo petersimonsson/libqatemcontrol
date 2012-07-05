@@ -51,10 +51,31 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_fadeToBlackFrameCount = 0;
 
     m_mixFrames = 0;
+
     m_dipFrames = 0;
+
     m_wipeFrames = 0;
+    m_wipeBorderWidth = 0;
+    m_wipeBorderSoftness = 0;
+    m_wipeType = 0;
+    m_wipeSymmetry = 0;
+    m_wipeXPosition = 0;
+    m_wipeYPosition = 0;
+    m_wipeReverseDirection = false;
+    m_wipeFlipFlop = false;
+
     m_dveFrames = 0;
+
     m_stingFrames = 0;
+
+    m_borderSource = 0;
+
+    m_multiViewLayoutIndex = 0;
+
+    m_videoFormatIndex = 0;
+
+    m_majorversion = 0;
+    m_minorversion = 0;
 }
 
 void QAtemConnection::connectToSwitcher(const QHostAddress &address)
