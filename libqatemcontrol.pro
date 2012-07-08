@@ -8,7 +8,8 @@ DEFINES += LIBQATEMCONTROL_LIBRARY
 SOURCES += qatemconnection.cpp
 
 HEADERS += qatemconnection.h\
-        libqatemcontrol_global.h
+        libqatemcontrol_global.h \
+    qdownstreamkeysettings.h
 
 unix {
     target.path = /usr/lib

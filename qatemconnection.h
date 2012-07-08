@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef QATEMCONNECTION_H
 #define QATEMCONNECTION_H
+#include "qdownstreamkeysettings.h"
 
 #include <QObject>
 #include <QUdpSocket>
@@ -113,31 +114,31 @@ public:
     /// @returns true if downstream key @p keyer is tied to next transition
     bool downstreamKeyTie(quint8 keyer) const;
     /// @returns number of frames left of key transition for @p keyer
-    quint8 downstreamKeyFrameCount(quint8 keyer) const { return m_downstreamKeyFrameCount.value(keyer); }
+    quint8 downstreamKeyFrameCount(quint8 keyer) const { return m_downstreamKey.value(keyer).m_frameCount; }
     /// @returns duration in number of frames for key transition of dsk @p keyer
-    quint8 downstreamKeyFrames(quint8 keyer) const { return m_downstreamKeyFrames.value(keyer); }
+    quint8 downstreamKeyFrames(quint8 keyer) const { return m_downstreamKey.value(keyer).m_frames; }
     /// @returns the input selected as fill source for downstream key @p keyer
-    quint8 downstreamKeyFillSource(quint8 keyer) const { return m_downstreamKeyFillSource.value(keyer); }
+    quint8 downstreamKeyFillSource(quint8 keyer) const { return m_downstreamKey.value(keyer).m_fillSource; }
     /// @returns the input selected as key source for downstream key @p keyer
-    quint8 downstreamKeyKeySource(quint8 keyer) const { return m_downstreamKeyKeySource.value(keyer); }
+    quint8 downstreamKeyKeySource(quint8 keyer) const { return m_downstreamKey.value(keyer).m_keySource; }
     /// @returns true if the should be inverted for downstream key @p keyer
-    bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKeyInvertKey.value(keyer); }
+    bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKey.value(keyer).m_keySource; }
     /// @returns true if the key is pre multiplied for downstream key @p keyer
-    bool donwstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKeyPreMultiplied.value(keyer); }
+    bool donwstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKey.value(keyer).m_preMultiplied; }
     /// @returns the clip set for downstream key @p keyer
-    quint16 downstreamKeyClip(quint8 keyer) const { return m_downstreamKeyClip.value(keyer); }
+    quint16 downstreamKeyClip(quint8 keyer) const { return m_downstreamKey.value(keyer).m_clip; }
     /// @returns the gain set for downstream key @p keyer
-    quint16 downstreamKeyGain(quint8 keyer) const { return m_downstreamKeyGain.value(keyer); }
+    quint16 downstreamKeyGain(quint8 keyer) const { return m_downstreamKey.value(keyer).m_gain; }
     /// @returns true if the mask for downstream key @p keyer is enabled
-    bool downstreamKeyEnableMask(quint8 keyer) const { return m_downstreamKeyEnableMask.value(keyer); }
+    bool downstreamKeyEnableMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_enableMask; }
     /// @returns the top position of the mask for downstream key @p keyer
-    qint16 downstreamKeyTopMask(quint8 keyer) const { return m_downstreamKeyTopMask.value(keyer); }
+    qint16 downstreamKeyTopMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_topMask; }
     /// @returns the bottom position of the mask for downstream key @p keyer
-    qint16 downstreamKeyBottomMask(quint8 keyer) const { return m_downstreamKeyBottomMask.value(keyer); }
+    qint16 downstreamKeyBottomMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_bottomMask; }
     /// @returns the left position of the mask for downstream key @p keyer
-    qint16 downstreamKeyLeftMask(quint8 keyer) const { return m_downstreamKeyLeftMask.value(keyer); }
+    qint16 downstreamKeyLeftMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_leftMask; }
     /// @returns the right position of the mask for downstream key @p keyer
-    qint16 downstreamKeyRightMask(quint8 keyer) const { return m_downstreamKeyRightMask.value(keyer); }
+    qint16 downstreamKeyRightMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_rightMask; }
 
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOn(quint8 keyer) const;
@@ -297,13 +298,13 @@ public slots:
     void setDownstreamKeyFrameRate(quint8 keyer, quint8 frames);
     void setDownstreamKeyInvertKey(quint8 keyer, bool invert);
     void setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultiplied);
-    void setDownstreamKeyClip(quint8 keyer, quint16 clip);
-    void setDownstreamKeyGain(quint8 keyer, quint16 gain);
+    void setDownstreamKeyClip(quint8 keyer, float clip);
+    void setDownstreamKeyGain(quint8 keyer, float gain);
     void setDownstreamKeyEnableMask(quint8 keyer, bool enable);
-    void setDownstreamKeyTopMask(quint8 keyer, qint16 value);
-    void setDownstreamKeyBottomMask(quint8 keyer, qint16 value);
-    void setDownstreamKeyLeftMask(quint8 keyer, qint16 value);
-    void setDownstreamKeyRightMask(quint8 keyer, qint16 value);
+    void setDownstreamKeyTopMask(quint8 keyer, float value);
+    void setDownstreamKeyBottomMask(quint8 keyer, float value);
+    void setDownstreamKeyLeftMask(quint8 keyer, float value);
+    void setDownstreamKeyRightMask(quint8 keyer, float value);
 
     void saveSettings();
     void clearSettings();
@@ -369,21 +370,17 @@ private:
     quint8 m_fadeToBlackFrameCount;
     quint8 m_fadeToBlackFrames;
 
-    QHash<quint8, bool> m_downstreamKeyOn;
-    QHash<quint8, bool> m_downstreamKeyTie;
-    QHash<quint8, quint8> m_downstreamKeyFrames;
-    QHash<quint8, quint8> m_downstreamKeyFrameCount;
-    QHash<quint8, quint8> m_downstreamKeyFillSource;
-    QHash<quint8, quint8> m_downstreamKeyKeySource;
-    QHash<quint8, bool> m_downstreamKeyInvertKey;
-    QHash<quint8, bool> m_downstreamKeyPreMultiplied;
-    QHash<quint8, quint16> m_downstreamKeyClip;
-    QHash<quint8, quint16> m_downstreamKeyGain;
-    QHash<quint8, bool> m_downstreamKeyEnableMask;
-    QHash<quint8, qint16> m_downstreamKeyTopMask;
-    QHash<quint8, qint16> m_downstreamKeyBottomMask;
-    QHash<quint8, qint16> m_downstreamKeyLeftMask;
-    QHash<quint8, qint16> m_downstreamKeyRightMask;
+    QHash<quint8, QDownstreamKeySettings> m_downstreamKey;
+
+    QHash<quint8, bool> m_upstreamKeyOn;
+    QHash<quint8, quint8> m_upstreamKeyType;
+    QHash<quint8, quint8> m_upstreamKeyFillSource;
+    QHash<quint8, quint8> m_upstreamKeyKeySource;
+    QHash<quint8, bool> m_upstreamKeyEnableMask;
+    QHash<quint8, qint16> m_upstreamKeyTopMask;
+    QHash<quint8, qint16> m_upstreamKeyBottomMask;
+    QHash<quint8, qint16> m_upstreamKeyLeftMask;
+    QHash<quint8, qint16> m_upstreamKeyRightMask;
     QHash<quint8, bool> m_upstreamKeyLumaPreMultipliedKey;
     QHash<quint8, bool> m_upstreamKeyLumaInvertKey;
     QHash<quint8, quint16> m_upstreamKeyLumaClip;
@@ -400,16 +397,6 @@ private:
     QHash<quint8, quint16> m_upstreamKeyPatternSoftness;
     QHash<quint8, quint16> m_upstreamKeyPatternXPosition;
     QHash<quint8, quint16> m_upstreamKeyPatternYPosition;
-
-    QHash<quint8, bool> m_upstreamKeyOn;
-    QHash<quint8, quint8> m_upstreamKeyType;
-    QHash<quint8, quint8> m_upstreamKeyFillSource;
-    QHash<quint8, quint8> m_upstreamKeyKeySource;
-    QHash<quint8, bool> m_upstreamKeyEnableMask;
-    QHash<quint8, qint16> m_upstreamKeyTopMask;
-    QHash<quint8, qint16> m_upstreamKeyBottomMask;
-    QHash<quint8, qint16> m_upstreamKeyLeftMask;
-    QHash<quint8, qint16> m_upstreamKeyRightMask;
 
     QHash<quint8, QColor> m_colorGeneratorColors;
 
@@ -478,13 +465,13 @@ signals:
     void downstreamKeySourcesChanged(quint8 keyer, quint8 fill, quint8 key);
     void downstreamKeyInvertKeyChanged(quint8 keyer, bool invert);
     void downstreamKeyPreMultipliedChanged(quint8 keyer, bool preMultiplied);
-    void downstreamKeyClipChanged(quint8 keyer, quint16 clip);
-    void downstreamKeyGainChanged(quint8 keyer, quint16 gain);
+    void downstreamKeyClipChanged(quint8 keyer, float clip);
+    void downstreamKeyGainChanged(quint8 keyer, float gain);
     void downstreamKeyEnableMaskChanged(quint8 keyer, bool enable);
-    void downstreamKeyTopMaskChanged(quint8 keyer, qint16 value);
-    void downstreamKeyBottomMaskChanged(quint8 keyer, qint16 value);
-    void downstreamKeyLeftMaskChanged(quint8 keyer, qint16 value);
-    void downstreamKeyRightMaskChanged(quint8 keyer, qint16 value);
+    void downstreamKeyTopMaskChanged(quint8 keyer, float value);
+    void downstreamKeyBottomMaskChanged(quint8 keyer, float value);
+    void downstreamKeyLeftMaskChanged(quint8 keyer, float value);
+    void downstreamKeyRightMaskChanged(quint8 keyer, float value);
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
     void upstreamKeyTypeChanged(quint8 keyer, quint8 type);
