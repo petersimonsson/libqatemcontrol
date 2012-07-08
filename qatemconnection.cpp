@@ -70,9 +70,9 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_borderSource = 0;
 
-    m_multiViewLayoutIndex = 0;
+    m_multiViewLayout = 0;
 
-    m_videoFormatIndex = 0;
+    m_videoFormat = 0;
 
     m_majorversion = 0;
     m_minorversion = 0;
@@ -417,11 +417,11 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
         }
         else if(cmd == "MvPr")
         {
-            m_multiViewLayoutIndex = (quint8)payload.at(7);
+            m_multiViewLayout = (quint8)payload.at(7);
         }
         else if(cmd == "VidM")
         {
-            m_videoFormatIndex = (quint8)payload.at(6);
+            m_videoFormat = (quint8)payload.at(6);
         }
         else if(cmd == "Time")
         {
@@ -2273,6 +2273,32 @@ void QAtemConnection::setInputShortName(quint8 input, const QString &name)
     payload.append((char)0x00);
     payload.append(namearray);
     payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setVideoFormat(quint8 format)
+{
+    QByteArray cmd = "CVdM";
+    QByteArray payload;
+
+    payload.append((char)format);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setMultiViewLayout(quint8 layout)
+{
+    QByteArray cmd = "CMvP";
+    QByteArray payload;
+
+    payload.append((char)0x01);
+    payload.append((char)0x00);
+    payload.append((char)layout);
     payload.append((char)0x00);
 
     sendCommand(cmd, payload);

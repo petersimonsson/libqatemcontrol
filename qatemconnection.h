@@ -209,12 +209,12 @@ public:
     MediaInfo mediaInfo(quint8 index) const { return m_mediaInfos.value(index); }
 
     /// @returns index of the multi view layout, 0 = prg/prv on top, 1 = prg/prv on bottom, 2 = prg/prv on left, 3 = prg/prv on right
-    quint8 multiViewLayoutIndex() const { return m_multiViewLayoutIndex; }
+    quint8 multiViewLayout() const { return m_multiViewLayout; }
     /// @returns index of the input mapped to @p multiViewOutput
     quint8 multiViewInput(quint8 multiViewOutput) const { return m_multiViewInputs.value(multiViewOutput); }
 
     /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 720p50, 3 = 720p5994, 4 = 1080i50, 5 = 1080i5994
-    quint8 videoFormatIndex() const { return m_videoFormatIndex; }
+    quint8 videoFormat() const { return m_videoFormat; }
 
     /// @returns duration in number of frames for mix transition
     quint8 mixFrames() const { return m_mixFrames; }
@@ -336,6 +336,10 @@ public slots:
     void setInputLongName(quint8 input, const QString& name);
     void setInputShortName(quint8 input, const QString& name);
 
+    void setVideoFormat(quint8 format);
+
+    void setMultiViewLayout(quint8 layout);
+
 protected slots:
     void handleSocketData();
 
@@ -420,9 +424,9 @@ private:
     QHash<quint8, MediaInfo> m_mediaInfos;
 
     QHash<quint8, quint8> m_multiViewInputs;
-    quint8 m_multiViewLayoutIndex;
+    quint8 m_multiViewLayout;
 
-    quint8 m_videoFormatIndex;
+    quint8 m_videoFormat;
 
     quint8 m_mixFrames;
 
