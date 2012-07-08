@@ -68,6 +68,7 @@ public:
     struct InputInfo
     {
         quint8 index;
+        quint8 type;
         QString longText;
         QString shortText;
     };
@@ -330,6 +331,10 @@ public slots:
     void setWipeFlipFlop(bool flipFlop);
 
     void setAuxSource(quint8 aux, quint8 source);
+
+    void setInputType(quint8 input, quint8 type);
+    void setInputLongName(quint8 input, const QString& name);
+    void setInputShortName(quint8 input, const QString& name);
 
 protected slots:
     void handleSocketData();

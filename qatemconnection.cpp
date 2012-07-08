@@ -389,6 +389,7 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             info.index = (quint8)payload.at(6);
             info.longText = payload.mid(7, 20);
             info.shortText = payload.mid(27, 4);
+            info.type = (quint8)payload.at(32); // 1 = SDI, 2 = HDMI, 32 = Internal (on TVS)
             m_inputInfos.insert(info.index, info);
 
             emit inputInfoChanged(info);
@@ -2178,6 +2179,99 @@ void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
 
     payload.append((char)aux);
     payload.append((char)source);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setInputType(quint8 input, quint8 type)
+{
+    QByteArray cmd = "CInL";
+    QByteArray payload;
+
+    payload.append((char)0x04);
+    payload.append((char)input);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)type);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setInputLongName(quint8 input, const QString &name)
+{
+    QByteArray cmd = "CInL";
+    QByteArray payload;
+    QByteArray namearray = name.toLatin1();
+    namearray.resize(20);
+
+    payload.append((char)0x01);
+    payload.append((char)input);
+    payload.append(namearray);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setInputShortName(quint8 input, const QString &name)
+{
+    QByteArray cmd = "CInL";
+    QByteArray payload;
+    QByteArray namearray = name.toLatin1();
+    namearray.resize(4);
+
+    payload.append((char)0x02);
+    payload.append((char)input);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append((char)0x00);
+    payload.append(namearray);
     payload.append((char)0x00);
     payload.append((char)0x00);
 
