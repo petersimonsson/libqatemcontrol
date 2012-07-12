@@ -112,18 +112,9 @@ void QAtemConnection::handleSocketData()
         QAtemConnection::CommandHeader header = parseCommandHeader(datagram);
         m_currentUid = header.uid;
 
-        if(!m_isInitialized && !(header.bitmask & Cmd_Ack))
-        {
-            m_isInitialized = (header.size == SIZE_OF_HEADER);
-
-            if(m_isInitialized)
-            {
-                emit connected();
-            }
-        }
-
         if(header.bitmask & Cmd_HelloPacket)
         {
+            m_isInitialized = false;
             QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, 0x0, 0x0, 0x0);
             sendDatagram(ackDatagram);
         }
@@ -598,6 +589,11 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             emit upstreamKeyPatternXPosition(index, m_upstreamKeys[index].m_patternXPosition);
             emit upstreamKeyPatternYPosition(index, m_upstreamKeys[index].m_patternYPosition);
             emit upstreamKeyPatternInvertPatternChanged(index, m_upstreamKeys[index].m_patternInvertPattern);
+        }
+        else if(cmd == "InCm")
+        {
+            m_isInitialized = true;
+            emit connected();
         }
         else
         {
