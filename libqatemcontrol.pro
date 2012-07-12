@@ -9,7 +9,8 @@ SOURCES += qatemconnection.cpp
 
 HEADERS += qatemconnection.h\
         libqatemcontrol_global.h \
-    qdownstreamkeysettings.h
+    qdownstreamkeysettings.h \
+    qupstreamkeysettings.h
 
 unix {
     target.path = /usr/lib

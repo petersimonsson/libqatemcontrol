@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef QATEMCONNECTION_H
 #define QATEMCONNECTION_H
 #include "qdownstreamkeysettings.h"
+#include "qupstreamkeysettings.h"
 
 #include <QObject>
 #include <QUdpSocket>
@@ -90,7 +91,7 @@ public:
     /// @returns the index of the input that is on preview
     quint8 previewInput() const { return m_previewInput; }
 
-    /// @returns the tally state of the input @p id
+    /// @returns the tally state of the input @p id. 1 = program, 2 = preview and 3 = both
     quint8 tallyState(quint8 id) const;
 
     /// @returns true if transition preview is enabled
@@ -115,82 +116,82 @@ public:
     /// @returns true if downstream key @p keyer is tied to next transition
     bool downstreamKeyTie(quint8 keyer) const;
     /// @returns number of frames left of key transition for @p keyer
-    quint8 downstreamKeyFrameCount(quint8 keyer) const { return m_downstreamKey.value(keyer).m_frameCount; }
+    quint8 downstreamKeyFrameCount(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_frameCount; }
     /// @returns duration in number of frames for key transition of dsk @p keyer
-    quint8 downstreamKeyFrames(quint8 keyer) const { return m_downstreamKey.value(keyer).m_frames; }
+    quint8 downstreamKeyFrames(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_frames; }
     /// @returns the input selected as fill source for downstream key @p keyer
-    quint8 downstreamKeyFillSource(quint8 keyer) const { return m_downstreamKey.value(keyer).m_fillSource; }
+    quint8 downstreamKeyFillSource(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_fillSource; }
     /// @returns the input selected as key source for downstream key @p keyer
-    quint8 downstreamKeyKeySource(quint8 keyer) const { return m_downstreamKey.value(keyer).m_keySource; }
+    quint8 downstreamKeyKeySource(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_keySource; }
     /// @returns true if the should be inverted for downstream key @p keyer
-    bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKey.value(keyer).m_keySource; }
+    bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_keySource; }
     /// @returns true if the key is pre multiplied for downstream key @p keyer
-    bool donwstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKey.value(keyer).m_preMultiplied; }
+    bool donwstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_preMultiplied; }
     /// @returns the clip set for downstream key @p keyer
-    quint16 downstreamKeyClip(quint8 keyer) const { return m_downstreamKey.value(keyer).m_clip; }
+    quint16 downstreamKeyClip(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_clip; }
     /// @returns the gain set for downstream key @p keyer
-    quint16 downstreamKeyGain(quint8 keyer) const { return m_downstreamKey.value(keyer).m_gain; }
+    quint16 downstreamKeyGain(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_gain; }
     /// @returns true if the mask for downstream key @p keyer is enabled
-    bool downstreamKeyEnableMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_enableMask; }
+    bool downstreamKeyEnableMask(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_enableMask; }
     /// @returns the top position of the mask for downstream key @p keyer
-    qint16 downstreamKeyTopMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_topMask; }
+    qint16 downstreamKeyTopMask(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_topMask; }
     /// @returns the bottom position of the mask for downstream key @p keyer
-    qint16 downstreamKeyBottomMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_bottomMask; }
+    qint16 downstreamKeyBottomMask(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_bottomMask; }
     /// @returns the left position of the mask for downstream key @p keyer
-    qint16 downstreamKeyLeftMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_leftMask; }
+    qint16 downstreamKeyLeftMask(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_leftMask; }
     /// @returns the right position of the mask for downstream key @p keyer
-    qint16 downstreamKeyRightMask(quint8 keyer) const { return m_downstreamKey.value(keyer).m_rightMask; }
+    qint16 downstreamKeyRightMask(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_rightMask; }
 
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOn(quint8 keyer) const;
     /// @returns the key type for upstream key @p keyer, 0 = luma, 1 = chroma, 2 = pattern, 3 = DVE
-    quint8 upstreamKeyType(quint8 keyer) const { return m_upstreamKeyType.value(keyer); }
+    quint8 upstreamKeyType(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_type; }
     /// @returns the source used as fill for upstream key @p keyer
-    quint8 upstreamKeyFillSource(quint8 keyer) const { return m_upstreamKeyFillSource.value(keyer); }
+    quint8 upstreamKeyFillSource(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_fillSource; }
     /// @returns the source used as key for upstream key @p keyer
-    quint8 upstreamKeyKeySource(quint8 keyer) const { return m_upstreamKeyKeySource.value(keyer); }
+    quint8 upstreamKeyKeySource(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_keySource; }
     /// @returns true if the mask is enabled for upstream key @p keyer
-    bool upstreamKeyEnableMask(quint8 keyer) const { return m_upstreamKeyEnableMask.value(keyer); }
+    bool upstreamKeyEnableMask(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_enableMask; }
     /// @returns top mask for upstream key @p keyer
-    qint16 upstreamKeyTopMask(quint8 keyer) const { return m_upstreamKeyTopMask.value(keyer); }
+    float upstreamKeyTopMask(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_topMask; }
     /// @returns bottom mask for upstream key @p keyer
-    qint16 upstreamKeyBottomMask(quint8 keyer) const { return m_upstreamKeyBottomMask.value(keyer); }
+    float upstreamKeyBottomMask(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_bottomMask; }
     /// @returns left mask for upstream key @p keyer
-    qint16 upstreamKeyLeftMask(quint8 keyer) const { return m_upstreamKeyLeftMask.value(keyer); }
+    float upstreamKeyLeftMask(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_leftMask; }
     /// @returns right mask for upstream key @p keyer
-    qint16 upstreamKeyRightMask(quint8 keyer) const { return m_upstreamKeyRightMask.value(keyer); }
+    float upstreamKeyRightMask(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_rightMask; }
     /// @returns true if the key is pre multiplied for luma upstream key @p keyer
-    bool upstreamKeyLumaPreMultipliedKey(quint8 keyer) const { return m_upstreamKeyLumaPreMultipliedKey.value(keyer); }
+    bool upstreamKeyLumaPreMultipliedKey(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_lumaPreMultipliedKey; }
     /// @returns true if the key source should be inverted for luma upstream key @p keyer
-    bool upstreamKeyLumaInvertKey(quint8 keyer) const { return m_upstreamKeyLumaInvertKey.value(keyer); }
+    bool upstreamKeyLumaInvertKey(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_lumaInvertKey; }
     /// @returns clip for luma upstream key @p keyer
-    quint16 upstreamKeyLumaClip(quint8 keyer) const { return m_upstreamKeyLumaClip.value(keyer); }
+    float upstreamKeyLumaClip(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_lumaClip; }
     /// @returns gain for luma upstream key @p keyer
-    quint16 upstreamKeyLumaGain(quint8 keyer) const { return m_upstreamKeyLumaGain.value(keyer); }
+    float upstreamKeyLumaGain(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_lumaGain; }
     /// @returns hue for chroma upstream key @p keyer
-    quint16 upstreamKeyChromaHue(quint8 keyer) const { return m_upstreamKeyChromaHue.value(keyer); }
+    float upstreamKeyChromaHue(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_chromaHue; }
     /// @returns gain for chroma upstream key @p keyer
-    quint16 upstreamKeyChromaGain(quint8 keyer) const { return m_upstreamKeyChromaGain.value(keyer); }
+    float upstreamKeyChromaGain(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_chromaGain; }
     /// @returns y suppress for chroma upstream key @p keyer
-    quint16 upstreamKeyChromaYSuppress(quint8 keyer) const { return m_upstreamKeyChromaYSuppress.value(keyer); }
+    float upstreamKeyChromaYSuppress(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_chromaYSuppress; }
     /// @returns lift for chroma upstream key @p keyer
-    quint16 upstreamKeyChromaLift(quint8 keyer) const { return m_upstreamKeyChromaLift.value(keyer); }
+    float upstreamKeyChromaLift(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_chromaLift; }
     /// @returns true if chroma upstream key @p keyer should have narrow chroma key range
-    bool upstreamKeyChromaNarrowRange(quint8 keyer) const { return m_upstreamKeyChromaNarrowRange.value(keyer); }
+    bool upstreamKeyChromaNarrowRange(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_chromaNarrowRange; }
     /// @returns pattern of pattern upstream key @p keyer
-    quint8 upstreamKeyPatternPattern(quint8 keyer) const { return m_upstreamKeyPatternPattern.value(keyer); }
+    quint8 upstreamKeyPatternPattern(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternPattern; }
     /// @returns true if pattern upstream key @p keyer should invert the pattern
-    bool upstreamKeyPatternInvertPattern(quint8 keyer) const { return m_upstreamKeyPatternInvertPattern.value(keyer); }
+    bool upstreamKeyPatternInvertPattern(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternInvertPattern; }
     /// @returns size for pattern upstream key @p keyer
-    quint16 upstreamKeyPatternSize(quint8 keyer) const { return m_upstreamKeyPatternSize.value(keyer); }
+    float upstreamKeyPatternSize(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSize; }
     /// @returns symmetry for pattern upstream key @p keyer
-    quint16 upstreamKeyPatternSymmetry(quint8 keyer) const { return m_upstreamKeyPatternSymmetry.value(keyer); }
+    float upstreamKeyPatternSymmetry(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSymmetry; }
     /// @returns softness for pattern upstream key @p keyer
-    quint16 upstreamKeyPatternSoftness(quint8 keyer) const { return m_upstreamKeyPatternSoftness.value(keyer); }
+    float upstreamKeyPatternSoftness(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSoftness; }
     /// @returns x position for pattern upstream key @p keyer
-    quint16 upstreamKeyPatternXPosition(quint8 keyer) const { return m_upstreamKeyPatternXPosition.value(keyer); }
+    float upstreamKeyPatternXPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternXPosition; }
     /// @returns y position for pattern upstream key @p keyer
-    quint16 upstreamKeyPatternYPosition(quint8 keyer) const { return m_upstreamKeyPatternYPosition.value(keyer); }
+    float upstreamKeyPatternYPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternYPosition; }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -270,26 +271,26 @@ public slots:
     void setUpstreamKeyFillSource(quint8 keyer, quint8 source);
     void setUpstreamKeyKeySource(quint8 keyer, quint8 source);
     void setUpstreamKeyEnableMask(quint8 keyer, bool enable);
-    void setUpstreamKeyTopMask(quint8 keyer, qint16 value);
-    void setUpstreamKeyBottomMask(quint8 keyer, qint16 value);
-    void setUpstreamKeyLeftMask(quint8 keyer, qint16 value);
-    void setUpstreamKeyRightMask(quint8 keyer, qint16 value);
+    void setUpstreamKeyTopMask(quint8 keyer, float value);
+    void setUpstreamKeyBottomMask(quint8 keyer, float value);
+    void setUpstreamKeyLeftMask(quint8 keyer, float value);
+    void setUpstreamKeyRightMask(quint8 keyer, float value);
     void setUpstreamKeyLumaPreMultipliedKey(quint8 keyer, bool preMultiplied);
     void setUpstreamKeyLumaInvertKey(quint8 keyer, bool invert);
-    void setUpstreamKeyLumaClip(quint8 keyer, quint16 clip);
-    void setUpstreamKeyLumaGain(quint8 keyer, quint16 gain);
-    void setUpstreamKeyChromaHue(quint8 keyer, quint16 hue);
-    void setUpstreamKeyChromaGain(quint8 keyer, quint16 hue);
-    void setUpstreamKeyChromaYSuppress(quint8 keyer, quint16 ySuppress);
-    void setUpstreamKeyChromaLift(quint8 keyer, quint16 lift);
+    void setUpstreamKeyLumaClip(quint8 keyer, float clip);
+    void setUpstreamKeyLumaGain(quint8 keyer, float gain);
+    void setUpstreamKeyChromaHue(quint8 keyer, float hue);
+    void setUpstreamKeyChromaGain(quint8 keyer, float gain);
+    void setUpstreamKeyChromaYSuppress(quint8 keyer, float ySuppress);
+    void setUpstreamKeyChromaLift(quint8 keyer, float lift);
     void setUpstreamKeyChromaNarrowRange(quint8 keyer, bool narrowRange);
     void setUpstreamKeyPatternPattern(quint8 keyer, quint8 pattern);
     void setUpstreamKeyPatternInvertPattern(quint8 keyer, bool invert);
-    void setUpstreamKeyPatternSize(quint8 keyer, quint16 size);
-    void setUpstreamKeyPatternSymmetry(quint8 keyer, quint16 symmetry);
-    void setUpstreamKeyPatternSoftness(quint8 keyer, quint16 softness);
-    void setUpstreamKeyPatternXPosition(quint8 keyer, quint16 xPosition);
-    void setUpstreamKeyPatternYPosition(quint8 keyer, quint16 yPosition);
+    void setUpstreamKeyPatternSize(quint8 keyer, float size);
+    void setUpstreamKeyPatternSymmetry(quint8 keyer, float symmetry);
+    void setUpstreamKeyPatternSoftness(quint8 keyer, float softness);
+    void setUpstreamKeyPatternXPosition(quint8 keyer, float xPosition);
+    void setUpstreamKeyPatternYPosition(quint8 keyer, float yPosition);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -379,33 +380,8 @@ private:
     quint8 m_fadeToBlackFrameCount;
     quint8 m_fadeToBlackFrames;
 
-    QHash<quint8, QDownstreamKeySettings> m_downstreamKey;
-
-    QHash<quint8, bool> m_upstreamKeyOn;
-    QHash<quint8, quint8> m_upstreamKeyType;
-    QHash<quint8, quint8> m_upstreamKeyFillSource;
-    QHash<quint8, quint8> m_upstreamKeyKeySource;
-    QHash<quint8, bool> m_upstreamKeyEnableMask;
-    QHash<quint8, qint16> m_upstreamKeyTopMask;
-    QHash<quint8, qint16> m_upstreamKeyBottomMask;
-    QHash<quint8, qint16> m_upstreamKeyLeftMask;
-    QHash<quint8, qint16> m_upstreamKeyRightMask;
-    QHash<quint8, bool> m_upstreamKeyLumaPreMultipliedKey;
-    QHash<quint8, bool> m_upstreamKeyLumaInvertKey;
-    QHash<quint8, quint16> m_upstreamKeyLumaClip;
-    QHash<quint8, quint16> m_upstreamKeyLumaGain;
-    QHash<quint8, quint16> m_upstreamKeyChromaHue;
-    QHash<quint8, quint16> m_upstreamKeyChromaGain;
-    QHash<quint8, quint16> m_upstreamKeyChromaYSuppress;
-    QHash<quint8, quint16> m_upstreamKeyChromaLift;
-    QHash<quint8, bool> m_upstreamKeyChromaNarrowRange;
-    QHash<quint8, quint8> m_upstreamKeyPatternPattern;
-    QHash<quint8, bool> m_upstreamKeyPatternInvertPattern;
-    QHash<quint8, quint16> m_upstreamKeyPatternSize;
-    QHash<quint8, quint16> m_upstreamKeyPatternSymmetry;
-    QHash<quint8, quint16> m_upstreamKeyPatternSoftness;
-    QHash<quint8, quint16> m_upstreamKeyPatternXPosition;
-    QHash<quint8, quint16> m_upstreamKeyPatternYPosition;
+    QHash<quint8, QDownstreamKeySettings> m_downstreamKeys;
+    QHash<quint8, QUpstreamKeySettings> m_upstreamKeys;
 
     QHash<quint8, QColor> m_colorGeneratorColors;
 
@@ -487,26 +463,26 @@ signals:
     void upstreamKeyFillSourceChanged(quint8 keyer, quint8 source);
     void upstreamKeyKeySourceChanged(quint8 keyer, quint8 source);
     void upstreamKeyEnableMaskChanged(quint8 keyer, bool enable);
-    void upstreamKeyTopMaskChanged(quint8 keyer, qint16 value);
-    void upstreamKeyBottomMaskChanged(quint8 keyer, qint16 value);
-    void upstreamKeyLeftMaskChanged(quint8 keyer, qint16 value);
-    void upstreamKeyRightMaskChanged(quint8 keyer, qint16 value);
+    void upstreamKeyTopMaskChanged(quint8 keyer, float value);
+    void upstreamKeyBottomMaskChanged(quint8 keyer, float value);
+    void upstreamKeyLeftMaskChanged(quint8 keyer, float value);
+    void upstreamKeyRightMaskChanged(quint8 keyer, float value);
     void upstreamKeyLumaPreMultipliedKeyChanged(quint8 keyer, bool preMultiplied);
     void upstreamKeyLumaInvertKeyChanged(quint8 keyer, bool invert);
-    void upstreamKeyLumaClipChanged(quint8 keyer, quint16 clip);
-    void upstreamKeyLumaGainChanged(quint8 keyer, quint16 gain);
-    void upstreamKeyChromaHueChanged(quint8 keyer, quint16 hue);
-    void upstreamKeyChromaGainChanged(quint8 keyer, quint16 gain);
-    void upstreamKeyChromaYSuppressChanged(quint8 keyer, quint16 ySuppress);
-    void upstreamKeyChromaLiftChanged(quint8 keyer, quint16 lift);
+    void upstreamKeyLumaClipChanged(quint8 keyer, float clip);
+    void upstreamKeyLumaGainChanged(quint8 keyer, float gain);
+    void upstreamKeyChromaHueChanged(quint8 keyer, float hue);
+    void upstreamKeyChromaGainChanged(quint8 keyer, float gain);
+    void upstreamKeyChromaYSuppressChanged(quint8 keyer, float ySuppress);
+    void upstreamKeyChromaLiftChanged(quint8 keyer, float lift);
     void upstreamKeyChromaNarrowRangeChanged(quint8 keyer, bool narrowRange);
     void upstreamKeyPatternPatternChanged(quint8 keyer, quint8 pattern);
     void upstreamKeyPatternInvertPatternChanged(quint8 keyer, bool invert);
-    void upstreamKeyPatternSize(quint8 keyer, quint16 size);
-    void upstreamKeyPatternSymmetry(quint8 keyer, quint16 symmetry);
-    void upstreamKeyPatternSoftness(quint8 keyer, quint16 softness);
-    void upstreamKeyPatternXPosition(quint8 keyer, quint16 xPosition);
-    void upstreamKeyPatternYPosition(quint8 keyer, quint16 yPosition);
+    void upstreamKeyPatternSize(quint8 keyer, float size);
+    void upstreamKeyPatternSymmetry(quint8 keyer, float symmetry);
+    void upstreamKeyPatternSoftness(quint8 keyer, float softness);
+    void upstreamKeyPatternXPosition(quint8 keyer, float xPosition);
+    void upstreamKeyPatternYPosition(quint8 keyer, float yPosition);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 
