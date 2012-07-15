@@ -86,6 +86,9 @@ public:
     /// Connect to ATEM switcher at @p address
     void connectToSwitcher(const QHostAddress& address);
 
+    void setDebugEnabled(bool enabled) { m_debugEnabled = enabled; }
+    bool debugEnabled() const { return m_debugEnabled; }
+
     /// @returns the index of the input that is on program
     quint8 programInput() const { return m_programInput; }
     /// @returns the index of the input that is on preview
@@ -346,6 +349,40 @@ protected slots:
 
     void handleError(QAbstractSocket::SocketError);
 
+    void onPrgI(const QByteArray& payload);
+    void onPrvI(const QByteArray& payload);
+    void onTlIn(const QByteArray& payload);
+    void onTrPr(const QByteArray& payload);
+    void onTrPs(const QByteArray& payload);
+    void onTrSS(const QByteArray& payload);
+    void onFtbS(const QByteArray& payload);
+    void onFtbP(const QByteArray& payload);
+    void onDskS(const QByteArray& payload);
+    void onDskP(const QByteArray& payload);
+    void onDskB(const QByteArray& payload);
+    void onKeOn(const QByteArray& payload);
+    void onColV(const QByteArray& payload);
+    void onMPCE(const QByteArray& payload);
+    void onAuxS(const QByteArray& payload);
+    void on_pin(const QByteArray& payload);
+    void on_ver(const QByteArray& payload);
+    void onInPr(const QByteArray& payload);
+    void onMPSE(const QByteArray& payload);
+    void onMvIn(const QByteArray& payload);
+    void onMvPr(const QByteArray& payload);
+    void onVidM(const QByteArray& payload);
+    void onTime(const QByteArray& payload);
+    void onTMxP(const QByteArray& payload);
+    void onTDpP(const QByteArray& payload);
+    void onTWpP(const QByteArray& payload);
+    void onTDvP(const QByteArray& payload);
+    void onTStP(const QByteArray& payload);
+    void onBrdI(const QByteArray& payload);
+    void onKeBP(const QByteArray& payload);
+    void onKeLm(const QByteArray& payload);
+    void onKeCk(const QByteArray& payload);
+    void onKePt(const QByteArray& payload);
+
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 undefined1, quint16 undefined2);
 
@@ -354,6 +391,10 @@ protected:
 
     void sendDatagram(const QByteArray& datagram);
     void sendCommand(const QByteArray& cmd, const QByteArray &payload);
+
+    void initCommandSlotHash();
+
+    void setKeyOnNextTransition (int index, bool state);
 
 private:
     QUdpSocket* m_socket;
@@ -364,6 +405,10 @@ private:
     quint16 m_packetCounter;
     bool m_isInitialized;
     quint16 m_currentUid;
+
+    QHash<QByteArray, QByteArray> m_commandSlotHash;
+
+    bool m_debugEnabled;
 
     quint8 m_programInput;
     quint8 m_previewInput;
