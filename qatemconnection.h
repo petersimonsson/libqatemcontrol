@@ -96,6 +96,8 @@ public:
 
     /// @returns the tally state of the input @p id. 1 = program, 2 = preview and 3 = both
     quint8 tallyState(quint8 id) const;
+    /// @returns number of tally states
+    quint8 tallyStateCount() const { return m_tallyStateCount; }
 
     /// @returns true if transition preview is enabled
     bool transitionPreviewEnabled() const { return m_transitionPreviewEnabled; }
@@ -208,6 +210,7 @@ public:
     quint16 majorVersion() const { return m_majorversion; }
     quint16 minorVersion() const { return m_minorversion; }
 
+    /// @returns Info about the input @p index
     InputInfo inputInfo(quint8 index) const { return m_inputInfos.value(index); }
 
     MediaInfo mediaInfo(quint8 index) const { return m_mediaInfos.value(index); }
