@@ -476,8 +476,8 @@ signals:
     void connected();
     void socketError(const QString& errorString);
 
-    void programInputChanged(quint8 id);
-    void previewInputChanged(quint8 id);
+    void programInputChanged(quint8 oldIndex, quint8 newIndex);
+    void previewInputChanged(quint8 oldIndex, quint8 newIndex);
 
     void tallyStatesChanged();
 

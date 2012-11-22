@@ -2178,14 +2178,16 @@ void QAtemConnection::setMultiViewLayout(quint8 layout)
 
 void QAtemConnection::onPrgI(const QByteArray& payload)
 {
+    quint8 old = m_programInput;
     m_programInput = (quint8)payload.at(7);
-    emit programInputChanged(m_programInput);
+    emit programInputChanged(old, m_programInput);
 }
 
 void QAtemConnection::onPrvI(const QByteArray& payload)
 {
+    quint8 old = m_previewInput;
     m_previewInput = (quint8)payload.at(7);
-    emit previewInputChanged(m_previewInput);
+    emit previewInputChanged(old, m_previewInput);
 }
 
 void QAtemConnection::onTlIn(const QByteArray& payload)
