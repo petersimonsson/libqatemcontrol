@@ -286,12 +286,9 @@ void QAtemConnection::changeProgramInput(char index)
     }
 
     QByteArray cmd = "CPgI";
-    QByteArray payload;
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append(index);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = index;
 
     sendCommand(cmd, payload);
 }
@@ -304,12 +301,9 @@ void QAtemConnection::changePreviewInput(char index)
     }
 
     QByteArray cmd = "CPvI";
-    QByteArray payload;
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append(index);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = index;
 
     sendCommand(cmd, payload);
 }
@@ -317,12 +311,7 @@ void QAtemConnection::changePreviewInput(char index)
 void QAtemConnection::doCut()
 {
     QByteArray cmd = "DCut";
-    QByteArray payload;
-
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    QByteArray payload(4, (char)0x0);
 
     sendCommand(cmd, payload);
 }
@@ -330,12 +319,7 @@ void QAtemConnection::doCut()
 void QAtemConnection::doAuto()
 {
     QByteArray cmd = "DAut";
-    QByteArray payload;
-
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    QByteArray payload(4, (char)0x0);
 
     sendCommand(cmd, payload);
 }
@@ -343,12 +327,9 @@ void QAtemConnection::doAuto()
 void QAtemConnection::toggleFadeToBlack()
 {
     QByteArray cmd = "FtbA";
-    QByteArray payload;
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append((char)0x02);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = (char)0x02; // Does not toggle without this set
 
     sendCommand(cmd, payload);
 }
@@ -413,12 +394,9 @@ void QAtemConnection::setTransitionPreview(bool state)
     }
 
     QByteArray cmd = "CTPr";
-    QByteArray payload;
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append((char)state);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = (char)state;
 
     sendCommand(cmd, payload);
 }
