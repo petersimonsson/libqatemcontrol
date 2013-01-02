@@ -1782,6 +1782,57 @@ void QAtemConnection::setUpstreamKeyPatternYPosition(quint8 keyer, float yPositi
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setUpstreamKeyDVEPosition(quint8 keyer, float xPosition, float yPosition)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[3] = (char)0x0c;
+    payload[5] = (char)keyer;
+    val.u16 = xPosition * 1000;
+    payload[18] = (char)val.u8[1];
+    payload[19] = (char)val.u8[0];
+    val.u16 = yPosition * 1000;
+    payload[22] = (char)val.u8[1];
+    payload[23] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVESize(quint8 keyer, float xSize, float ySize)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[3] = (char)0x03;
+    payload[5] = (char)keyer;
+    val.u16 = xSize * 1000;
+    payload[10] = (char)val.u8[1];
+    payload[11] = (char)val.u8[0];
+    val.u16 = ySize * 1000;
+    payload[14] = (char)val.u8[1];
+    payload[15] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVERotation(quint8 keyer, float rotation)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[3] = (char)0x10;
+    payload[5] = (char)keyer;
+    val.u16 = rotation * 10;
+    payload[26] = (char)val.u8[1];
+    payload[27] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
 {
     if(source == m_auxSource.value(aux))

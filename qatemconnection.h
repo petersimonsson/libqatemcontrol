@@ -297,6 +297,9 @@ public slots:
     void setUpstreamKeyPatternSoftness(quint8 keyer, float softness);
     void setUpstreamKeyPatternXPosition(quint8 keyer, float xPosition);
     void setUpstreamKeyPatternYPosition(quint8 keyer, float yPosition);
+    void setUpstreamKeyDVEPosition(quint8 keyer, float xPosition, float yPosition);
+    void setUpstreamKeyDVESize(quint8 keyer, float xSize, float ySize);
+    void setUpstreamKeyDVERotation(quint8 keyer, float rotation);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
