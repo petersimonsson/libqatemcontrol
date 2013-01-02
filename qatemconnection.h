@@ -188,15 +188,25 @@ public:
     /// @returns true if pattern upstream key @p keyer should invert the pattern
     bool upstreamKeyPatternInvertPattern(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternInvertPattern; }
     /// @returns size for pattern upstream key @p keyer
-    float upstreamKeyPatternSizeChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSize; }
+    float upstreamKeyPatternSize(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSize; }
     /// @returns symmetry for pattern upstream key @p keyer
-    float upstreamKeyPatternSymmetryChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSymmetry; }
+    float upstreamKeyPatternSymmetry(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSymmetry; }
     /// @returns softness for pattern upstream key @p keyer
-    float upstreamKeyPatternSoftnessChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSoftness; }
+    float upstreamKeyPatternSoftness(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSoftness; }
     /// @returns x position for pattern upstream key @p keyer
-    float upstreamKeyPatternXPositionChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternXPosition; }
+    float upstreamKeyPatternXPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternXPosition; }
     /// @returns y position for pattern upstream key @p keyer
-    float upstreamKeyPatternYPositionChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternYPosition; }
+    float upstreamKeyPatternYPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternYPosition; }
+    /// @returns x position of DVE for upstream key @p keyer
+    float upstreamKeyDVEXPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveXPosition; }
+    /// @returns y position of DVE for upstream key @p keyer
+    float upstreamKeyDVEYPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveYPosition; }
+    /// @returns x size of DVE for upstream key @p keyer
+    float upstreamKeyDVEXSize(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveXSize; }
+    /// @returns y size of DVE for upstream key @p keyer
+    float upstreamKeyDVEYSize(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveYSize; }
+    /// @returns rotation of DVE for upstream key @p keyer
+    float upstreamKeyDVERotation(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveRotation; }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
