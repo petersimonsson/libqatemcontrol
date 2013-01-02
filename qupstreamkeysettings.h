@@ -47,6 +47,11 @@ struct QUpstreamKeySettings
         m_patternSoftness = 0;
         m_patternXPosition = 0;
         m_patternYPosition = 0;
+        m_dveXPosition = 0;
+        m_dveYPosition = 0;
+        m_dveXSize = 0;
+        m_dveYSize = 0;
+        m_dveRotation = 0;
     }
 
     bool m_onAir;
@@ -74,6 +79,11 @@ struct QUpstreamKeySettings
     float m_patternSoftness;
     float m_patternXPosition;
     float m_patternYPosition;
+    float m_dveXPosition;
+    float m_dveYPosition;
+    float m_dveXSize;
+    float m_dveYSize;
+    float m_dveRotation;
 };
 
 #endif // QUPSTREAMKEYSETTINGS_H

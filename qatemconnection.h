@@ -188,15 +188,15 @@ public:
     /// @returns true if pattern upstream key @p keyer should invert the pattern
     bool upstreamKeyPatternInvertPattern(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternInvertPattern; }
     /// @returns size for pattern upstream key @p keyer
-    float upstreamKeyPatternSize(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSize; }
+    float upstreamKeyPatternSizeChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSize; }
     /// @returns symmetry for pattern upstream key @p keyer
-    float upstreamKeyPatternSymmetry(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSymmetry; }
+    float upstreamKeyPatternSymmetryChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSymmetry; }
     /// @returns softness for pattern upstream key @p keyer
-    float upstreamKeyPatternSoftness(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSoftness; }
+    float upstreamKeyPatternSoftnessChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternSoftness; }
     /// @returns x position for pattern upstream key @p keyer
-    float upstreamKeyPatternXPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternXPosition; }
+    float upstreamKeyPatternXPositionChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternXPosition; }
     /// @returns y position for pattern upstream key @p keyer
-    float upstreamKeyPatternYPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternYPosition; }
+    float upstreamKeyPatternYPositionChanged(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_patternYPosition; }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -385,6 +385,7 @@ protected slots:
     void onKeLm(const QByteArray& payload);
     void onKeCk(const QByteArray& payload);
     void onKePt(const QByteArray& payload);
+    void onKeDV(const QByteArray& payload);
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 undefined1, quint16 undefined2);
@@ -526,11 +527,16 @@ signals:
     void upstreamKeyChromaNarrowRangeChanged(quint8 keyer, bool narrowRange);
     void upstreamKeyPatternPatternChanged(quint8 keyer, quint8 pattern);
     void upstreamKeyPatternInvertPatternChanged(quint8 keyer, bool invert);
-    void upstreamKeyPatternSize(quint8 keyer, float size);
-    void upstreamKeyPatternSymmetry(quint8 keyer, float symmetry);
-    void upstreamKeyPatternSoftness(quint8 keyer, float softness);
-    void upstreamKeyPatternXPosition(quint8 keyer, float xPosition);
-    void upstreamKeyPatternYPosition(quint8 keyer, float yPosition);
+    void upstreamKeyPatternSizeChanged(quint8 keyer, float size);
+    void upstreamKeyPatternSymmetryChanged(quint8 keyer, float symmetry);
+    void upstreamKeyPatternSoftnessChanged(quint8 keyer, float softness);
+    void upstreamKeyPatternXPositionChanged(quint8 keyer, float xPosition);
+    void upstreamKeyPatternYPositionChanged(quint8 keyer, float yPosition);
+    void upstreamKeyDVEXPositionChanged(quint8 keyer, float xPosition);
+    void upstreamKeyDVEYPositionChanged(quint8 keyer, float yPosition);
+    void upstreamKeyDVEXSizeChanged(quint8 keyer, float xSize);
+    void upstreamKeyDVEYSizeChanged(quint8 keyer, float ySize);
+    void upstreamKeyDVERotationChanged(quint8 keyer, float rotation);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 

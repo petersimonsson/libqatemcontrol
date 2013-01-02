@@ -2359,12 +2359,39 @@ void QAtemConnection::onKePt(const QByteArray& payload)
     m_upstreamKeys[index].m_patternInvertPattern = (quint8)payload.at(20);
 
     emit upstreamKeyPatternPatternChanged(index, m_upstreamKeys[index].m_patternPattern);
-    emit upstreamKeyPatternSize(index, m_upstreamKeys[index].m_patternSize);
-    emit upstreamKeyPatternSymmetry(index, m_upstreamKeys[index].m_patternSymmetry);
-    emit upstreamKeyPatternSoftness(index, m_upstreamKeys[index].m_patternSoftness);
-    emit upstreamKeyPatternXPosition(index, m_upstreamKeys[index].m_patternXPosition);
-    emit upstreamKeyPatternYPosition(index, m_upstreamKeys[index].m_patternYPosition);
+    emit upstreamKeyPatternSizeChanged(index, m_upstreamKeys[index].m_patternSize);
+    emit upstreamKeyPatternSymmetryChanged(index, m_upstreamKeys[index].m_patternSymmetry);
+    emit upstreamKeyPatternSoftnessChanged(index, m_upstreamKeys[index].m_patternSoftness);
+    emit upstreamKeyPatternXPositionChanged(index, m_upstreamKeys[index].m_patternXPosition);
+    emit upstreamKeyPatternYPositionChanged(index, m_upstreamKeys[index].m_patternYPosition);
     emit upstreamKeyPatternInvertPatternChanged(index, m_upstreamKeys[index].m_patternInvertPattern);
+}
+
+void QAtemConnection::onKeDV(const QByteArray& payload)
+{
+    quint8 index = (quint8)payload.at(7);
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(12);
+    val.u8[0] = (quint8)payload.at(13);
+    m_upstreamKeys[index].m_dveXSize = val.u16 / 1000.0;
+    val.u8[1] = (quint8)payload.at(16);
+    val.u8[0] = (quint8)payload.at(17);
+    m_upstreamKeys[index].m_dveYSize = val.u16 / 1000.0;
+    val.u8[1] = (quint8)payload.at(20);
+    val.u8[0] = (quint8)payload.at(21);
+    m_upstreamKeys[index].m_dveXPosition = val.u16 / 1000.0;
+    val.u8[1] = (quint8)payload.at(24);
+    val.u8[0] = (quint8)payload.at(25);
+    m_upstreamKeys[index].m_dveYPosition = val.u16 / 1000.0;
+    val.u8[1] = (quint8)payload.at(28);
+    val.u8[0] = (quint8)payload.at(29);
+    m_upstreamKeys[index].m_dveRotation = val.u16 / 10.0;
+
+    emit upstreamKeyDVEXPositionChanged(index, m_upstreamKeys[index].m_dveXPosition);
+    emit upstreamKeyDVEYPositionChanged(index, m_upstreamKeys[index].m_dveYPosition);
+    emit upstreamKeyDVEXSizeChanged(index, m_upstreamKeys[index].m_dveXSize);
+    emit upstreamKeyDVEYSizeChanged(index, m_upstreamKeys[index].m_dveYSize);
+    emit upstreamKeyDVERotationChanged(index, m_upstreamKeys[index].m_dveRotation);
 }
 
 void QAtemConnection::initCommandSlotHash()
@@ -2402,4 +2429,5 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("KeLm", "onKeLm");
     m_commandSlotHash.insert("KeCk", "onKeCk");
     m_commandSlotHash.insert("KePt", "onKePt");
+    m_commandSlotHash.insert("KeDV", "onKeDV");
 }
