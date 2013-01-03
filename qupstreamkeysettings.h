@@ -52,6 +52,9 @@ struct QUpstreamKeySettings
         m_dveXSize = 0;
         m_dveYSize = 0;
         m_dveRotation = 0;
+        m_dveEnableDropShadow = false;
+        m_dveLightSourceDirection = 0;
+        m_dveLightSourceAltitude = 0;
     }
 
     bool m_onAir;
@@ -84,6 +87,9 @@ struct QUpstreamKeySettings
     float m_dveXSize;
     float m_dveYSize;
     float m_dveRotation;
+    bool m_dveEnableDropShadow;
+    float m_dveLightSourceDirection;
+    quint8 m_dveLightSourceAltitude;
 };
 
 #endif // QUPSTREAMKEYSETTINGS_H

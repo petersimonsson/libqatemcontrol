@@ -1833,6 +1833,34 @@ void QAtemConnection::setUpstreamKeyDVERotation(quint8 keyer, float rotation)
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setUpstreamKeyDVELightSource(quint8 keyer, float direction, quint8 altitude)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[1] = (char)0x0c;
+    payload[5] = (char)keyer;
+    val.u16 = direction * 10;
+    payload[48] = (char)val.u8[1];
+    payload[49] = (char)val.u8[0];
+    payload[50] = (char)altitude;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEDropShadowEnabled(quint8 keyer, bool enabled)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[3] = (char)0x40;
+    payload[5] = (char)keyer;
+    payload[29] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
 {
     if(source == m_auxSource.value(aux))
@@ -2437,12 +2465,20 @@ void QAtemConnection::onKeDV(const QByteArray& payload)
     val.u8[1] = (quint8)payload.at(28);
     val.u8[0] = (quint8)payload.at(29);
     m_upstreamKeys[index].m_dveRotation = val.u16 / 10.0;
+    m_upstreamKeys[index].m_dveEnableDropShadow = (bool)payload.at(31);
+    val.u8[1] = (quint8)payload.at(50);
+    val.u8[0] = (quint8)payload.at(51);
+    m_upstreamKeys[index].m_dveLightSourceDirection = val.u16 / 10.0;
+    m_upstreamKeys[index].m_dveLightSourceAltitude = (quint8)payload.at(52);
 
     emit upstreamKeyDVEXPositionChanged(index, m_upstreamKeys[index].m_dveXPosition);
     emit upstreamKeyDVEYPositionChanged(index, m_upstreamKeys[index].m_dveYPosition);
     emit upstreamKeyDVEXSizeChanged(index, m_upstreamKeys[index].m_dveXSize);
     emit upstreamKeyDVEYSizeChanged(index, m_upstreamKeys[index].m_dveYSize);
     emit upstreamKeyDVERotationChanged(index, m_upstreamKeys[index].m_dveRotation);
+    emit upstreamKeyDVEEnableDropShadowChanged(index, m_upstreamKeys[index].m_dveEnableDropShadow);
+    emit upstreamKeyDVELighSourceDirectionChanged(index, m_upstreamKeys[index].m_dveLightSourceDirection);
+    emit upstreamKeyDVELightSourceAltitudeChanged(index, m_upstreamKeys[index].m_dveLightSourceAltitude);
 }
 
 void QAtemConnection::initCommandSlotHash()

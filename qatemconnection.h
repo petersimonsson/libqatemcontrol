@@ -207,6 +207,12 @@ public:
     float upstreamKeyDVEYSize(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveYSize; }
     /// @returns rotation of DVE for upstream key @p keyer
     float upstreamKeyDVERotation(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveRotation; }
+    /// @returns true if the drop shadow is enabled on the DVE for upstream key @p keyer
+    bool upstreamKeyDVEDropShadowEnabled(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveEnableDropShadow; }
+    /// @returns direction of the light source for the drop shadow on the DVE for upstream key @p keyer
+    float upstreamKeyDVELightSourceDirection(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveLightSourceDirection; }
+    /// @returns altitude of the light source for the drop shadow on the DVE for upstream keu @p keyer
+    quint8 upstreamKeyDVELightSourceAltitude(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveLightSourceAltitude; }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -310,6 +316,8 @@ public slots:
     void setUpstreamKeyDVEPosition(quint8 keyer, float xPosition, float yPosition);
     void setUpstreamKeyDVESize(quint8 keyer, float xSize, float ySize);
     void setUpstreamKeyDVERotation(quint8 keyer, float rotation);
+    void setUpstreamKeyDVELightSource(quint8 keyer, float direction, quint8 altitude);
+    void setUpstreamKeyDVEDropShadowEnabled(quint8 keyer, bool enabled);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -550,6 +558,9 @@ signals:
     void upstreamKeyDVEXSizeChanged(quint8 keyer, float xSize);
     void upstreamKeyDVEYSizeChanged(quint8 keyer, float ySize);
     void upstreamKeyDVERotationChanged(quint8 keyer, float rotation);
+    void upstreamKeyDVEEnableDropShadowChanged(quint8 keyer, bool enable);
+    void upstreamKeyDVELighSourceDirectionChanged(quint8 keyer, float direction);
+    void upstreamKeyDVELightSourceAltitudeChanged(quint8 keyer, quint8 altitude);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 
