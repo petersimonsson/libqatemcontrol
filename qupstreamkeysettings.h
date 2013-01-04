@@ -18,6 +18,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef QUPSTREAMKEYSETTINGS_H
 #define QUPSTREAMKEYSETTINGS_H
 
+#include <QColor>
+
 struct QUpstreamKeySettings
 {
     QUpstreamKeySettings ()
@@ -55,6 +57,15 @@ struct QUpstreamKeySettings
         m_dveEnableDropShadow = false;
         m_dveLightSourceDirection = 0;
         m_dveLightSourceAltitude = 0;
+        m_dveEnableBorder = false;
+        m_dveBorderStyle = 0;
+        m_dveBorderOutsideWidth = 0;
+        m_dveBorderInsideWidth = 0;
+        m_dveBorderOutsideSoften = 0;
+        m_dveBorderInsideSoften = 0;
+        m_dveBorderOpacity = 0;
+        m_dveBorderBevelPosition = 0;
+        m_dveBorderBevelSoften = 0;
     }
 
     bool m_onAir;
@@ -90,6 +101,16 @@ struct QUpstreamKeySettings
     bool m_dveEnableDropShadow;
     float m_dveLightSourceDirection;
     quint8 m_dveLightSourceAltitude;
+    bool m_dveEnableBorder;
+    quint8 m_dveBorderStyle;
+    QColor m_dveBorderColor;
+    float m_dveBorderOutsideWidth;
+    float m_dveBorderInsideWidth;
+    quint8 m_dveBorderOutsideSoften;
+    quint8 m_dveBorderInsideSoften;
+    quint8 m_dveBorderOpacity;
+    float m_dveBorderBevelPosition;
+    quint8 m_dveBorderBevelSoften;
 };
 
 #endif // QUPSTREAMKEYSETTINGS_H

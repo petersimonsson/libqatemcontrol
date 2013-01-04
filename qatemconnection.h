@@ -213,6 +213,26 @@ public:
     float upstreamKeyDVELightSourceDirection(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveLightSourceDirection; }
     /// @returns altitude of the light source for the drop shadow on the DVE for upstream keu @p keyer
     quint8 upstreamKeyDVELightSourceAltitude(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveLightSourceAltitude; }
+    /// @returns true if the border is enabled on the DVE for upstream key @p keyer
+    bool upstreamKeyDVEBorderEnabled(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveEnableBorder; }
+    /// @returns the border style of the DVE for upstream key @p keyer. 0 = No Bevel, 1 = Bevel In Out, 2 = Bevel In, 3 = Bevel Out
+    quint8 upstreamKeyDVEBorderStyle(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderStyle; }
+    /// @returns the border color of the DVE for upstream key @p keyer
+    QColor upstreamKeyDVEBorderColor(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderColor; }
+    /// @returns the outside width of the border of the DVE for upstream key @p keyer
+    float upstreamKeyDVEBorderOutsideWidth(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderOutsideWidth; }
+    /// @returns the inside width of the border of the DVE for upstream key @p keyer
+    float upstreamKeyDVEBorderInsideWidth(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderInsideWidth; }
+    /// @returns the outside soften (%) of the border of the DVE for upstream key @p keyer
+    quint8 upstreamKeyDVEBorderOutsideSoften(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderOutsideSoften; }
+    /// @returns the inside soften (%) of the border of the DVE for upstream key @p keyer
+    quint8 upstreamKeyDVEBorderInsideSoften(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderInsideSoften; }
+    /// @returns the opacity of the border of the DVE for upstream key @p keyer
+    quint8 upstreamKeyDVEBorderOpacity(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderOpacity; }
+    /// @returns the bevel position of the border of the DVE for upstream key @p keyer
+    float upstreamKeyDVEBorderBevelPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderBevelPosition; }
+    /// @returns the bevel soften (%) of the border of the DVE for upstream key @p keyer
+    quint8 upstreamKeyDVEBorderBevelSofter(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderBevelSoften; }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -318,6 +338,18 @@ public slots:
     void setUpstreamKeyDVERotation(quint8 keyer, float rotation);
     void setUpstreamKeyDVELightSource(quint8 keyer, float direction, quint8 altitude);
     void setUpstreamKeyDVEDropShadowEnabled(quint8 keyer, bool enabled);
+    void setUpstreamKeyDVEBorderEnabled(quint8 keyer, bool enabled);
+    /// Set the border style of the upstream key DVE. 0 = No Bevel, 1 = Bevel In Out, 2 = Bevel In, 3 = Bevel Out
+    void setUpstreamKeyDVEBorderStyle(quint8 keyer, quint8 style);
+    void setUpstreamKeyDVEBorderColorH(quint8 keyer, float h);
+    void setUpstreamKeyDVEBorderColorS(quint8 keyer, float s);
+    void setUpstreamKeyDVEBorderColorL(quint8 keyer, float l);
+    void setUpstreamKeyDVEBorderColor(quint8 keyer, const QColor& color);
+    void setUpstreamKeyDVEBorderWidth(quint8 keyer, float outside, float inside);
+    void setUpstreamKeyDVEBorderSoften(quint8 keyer, quint8 outside, quint8 inside);
+    void setUpstreamKeyDVEBorderOpacity(quint8 keyer, quint8 opacity);
+    void setUpstreamKeyDVEBorderBevelPosition(quint8 keyer, float position);
+    void setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 soften);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -561,6 +593,14 @@ signals:
     void upstreamKeyDVEEnableDropShadowChanged(quint8 keyer, bool enable);
     void upstreamKeyDVELighSourceDirectionChanged(quint8 keyer, float direction);
     void upstreamKeyDVELightSourceAltitudeChanged(quint8 keyer, quint8 altitude);
+    void upstreamKeyDVEEnableBorderChanged(quint8 keyer, bool enable);
+    void upstreamKeyDVEBorderStyleChanged(quint8 keyer, quint8 style);
+    void upstreamKeyDVEBorderColorChanged(quint8 keyer, QColor color);
+    void upstreamKeyDVEBorderOutsideWidthChanged(quint8 keyer, float width);
+    void upstreamKeyDVEBorderInsideWidthChanged(quint8 keyer, float width);
+    void upstreamKeyDVEBorderOutsideSoftenChanged(quint8 keyer, quint8 soften);
+    void upstreamKeyDVEBorderInsideSoftenChanged(quint8 keyer, quint8 soften);
+    void upstreamKeyDVEBorderOpacityChanged(quint8 keyer, quint8 opacity);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 

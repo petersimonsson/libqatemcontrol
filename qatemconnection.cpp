@@ -826,7 +826,7 @@ void QAtemConnection::setColorGeneratorColor(quint8 generator, const QColor& col
     QByteArray payload;
 
     U16_U8 h, s, l;
-    h.u16 = (color.hslHueF() * 360.0) * 10;
+    h.u16 = (qMax(0.0, color.hslHueF()) * 360.0) * 10;
     s.u16 = color.hslSaturationF() * 1000;
     l.u16 = color.lightnessF() * 1000;
 
@@ -1861,6 +1861,149 @@ void QAtemConnection::setUpstreamKeyDVEDropShadowEnabled(quint8 keyer, bool enab
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setUpstreamKeyDVEBorderEnabled(quint8 keyer, bool enabled)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[3] = (char)0x20;
+    payload[5] = (char)keyer;
+    payload[28] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderStyle(quint8 keyer, quint8 style)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[3] = (char)0x80;
+    payload[5] = (char)keyer;
+    payload[30] = (char)style;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderColorH(quint8 keyer, float h)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[2] = (char)0x80;
+    payload[5] = (char)keyer;
+    val.u16 = h * 10;
+    payload[42] = (char)val.u8[1];
+    payload[43] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderColorS(quint8 keyer, float s)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[1] = (char)0x01;
+    payload[5] = (char)keyer;
+    val.u16 = s * 10;
+    payload[44] = (char)val.u8[1];
+    payload[45] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderColorL(quint8 keyer, float l)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[1] = (char)0x02;
+    payload[5] = (char)keyer;
+    val.u16 = l * 10;
+    payload[46] = (char)val.u8[1];
+    payload[47] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderColor(quint8 keyer, const QColor& color)
+{
+    setUpstreamKeyDVEBorderColorH(keyer, qMax(0.0, color.hslHueF()) * 360.0);
+    setUpstreamKeyDVEBorderColorS(keyer, color.hslSaturationF() * 100);
+    setUpstreamKeyDVEBorderColorL(keyer, color.lightnessF() * 100);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderWidth(quint8 keyer, float outside, float inside)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+    U16_U8 val;
+
+    payload[2] = (char)0x03;
+    payload[5] = (char)keyer;
+    val.u16 = outside * 100;
+    payload[32] = (char)val.u8[1];
+    payload[33] = (char)val.u8[0];
+    val.u16 = inside * 100;
+    payload[34] = (char)val.u8[1];
+    payload[35] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderSoften(quint8 keyer, quint8 outside, quint8 inside)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[2] = (char)0x0c;
+    payload[5] = (char)keyer;
+    payload[36] = (char)outside;
+    payload[37] = (char)inside;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderOpacity(quint8 keyer, quint8 opacity)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[2] = (char)0x40;
+    payload[5] = (char)keyer;
+    payload[40] = (char)opacity;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderBevelPosition(quint8 keyer, float position)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[2] = (char)0x20;
+    payload[5] = (char)keyer;
+    payload[39] = (char)(position * 100);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 soften)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[2] = (char)0x10;
+    payload[5] = (char)keyer;
+    payload[38] = (char)soften;
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
 {
     if(source == m_auxSource.value(aux))
@@ -2465,7 +2608,33 @@ void QAtemConnection::onKeDV(const QByteArray& payload)
     val.u8[1] = (quint8)payload.at(28);
     val.u8[0] = (quint8)payload.at(29);
     m_upstreamKeys[index].m_dveRotation = val.u16 / 10.0;
+    m_upstreamKeys[index].m_dveEnableBorder = (bool)payload.at(30);
     m_upstreamKeys[index].m_dveEnableDropShadow = (bool)payload.at(31);
+    m_upstreamKeys[index].m_dveBorderStyle = (quint8)payload.at(32);
+    val.u8[1] = (quint8)payload.at(34);
+    val.u8[0] = (quint8)payload.at(35);
+    m_upstreamKeys[index].m_dveBorderOutsideWidth = val.u16 / 100.0;
+    val.u8[1] = (quint8)payload.at(36);
+    val.u8[0] = (quint8)payload.at(37);
+    m_upstreamKeys[index].m_dveBorderInsideWidth = val.u16 / 100.0;
+    m_upstreamKeys[index].m_dveBorderOutsideSoften = (quint8)payload.at(38);
+    m_upstreamKeys[index].m_dveBorderInsideSoften = (quint8)payload.at(39);
+    m_upstreamKeys[index].m_dveBorderBevelSoften = (quint8)payload.at(40);
+    m_upstreamKeys[index].m_dveBorderBevelPosition = ((quint8)payload.at(41)) / 100.0;
+    m_upstreamKeys[index].m_dveBorderOpacity = (quint8)payload.at(42);
+    U16_U8 h, s, l;
+
+    h.u8[1] = (quint8)payload.at(44);
+    h.u8[0] = (quint8)payload.at(45);
+    s.u8[1] = (quint8)payload.at(46);
+    s.u8[0] = (quint8)payload.at(47);
+    l.u8[1] = (quint8)payload.at(48);
+    l.u8[0] = (quint8)payload.at(49);
+
+    QColor color;
+    float hf = ((h.u16 / 10) % 360) / 360.0;
+    color.setHslF(hf, s.u16 / 1000.0, l.u16 / 1000.0);
+    m_upstreamKeys[index].m_dveBorderColor = color;
     val.u8[1] = (quint8)payload.at(50);
     val.u8[0] = (quint8)payload.at(51);
     m_upstreamKeys[index].m_dveLightSourceDirection = val.u16 / 10.0;
@@ -2479,6 +2648,14 @@ void QAtemConnection::onKeDV(const QByteArray& payload)
     emit upstreamKeyDVEEnableDropShadowChanged(index, m_upstreamKeys[index].m_dveEnableDropShadow);
     emit upstreamKeyDVELighSourceDirectionChanged(index, m_upstreamKeys[index].m_dveLightSourceDirection);
     emit upstreamKeyDVELightSourceAltitudeChanged(index, m_upstreamKeys[index].m_dveLightSourceAltitude);
+    emit upstreamKeyDVEEnableBorderChanged(index, m_upstreamKeys[index].m_dveEnableBorder);
+    emit upstreamKeyDVEBorderStyleChanged(index, m_upstreamKeys[index].m_dveBorderStyle);
+    emit upstreamKeyDVEBorderColorChanged(index, m_upstreamKeys[index].m_dveBorderColor);
+    emit upstreamKeyDVEBorderOutsideWidthChanged(index, m_upstreamKeys[index].m_dveBorderOutsideWidth);
+    emit upstreamKeyDVEBorderInsideWidthChanged(index, m_upstreamKeys[index].m_dveBorderInsideWidth);
+    emit upstreamKeyDVEBorderOutsideSoftenChanged(index, m_upstreamKeys[index].m_dveBorderOutsideSoften);
+    emit upstreamKeyDVEBorderInsideSoftenChanged(index, m_upstreamKeys[index].m_dveBorderInsideSoften);
+    emit upstreamKeyDVEBorderOpacityChanged(index, m_upstreamKeys[index].m_dveBorderOpacity);
 }
 
 void QAtemConnection::initCommandSlotHash()
