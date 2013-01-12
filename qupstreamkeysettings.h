@@ -69,6 +69,7 @@ struct QUpstreamKeySettings
         m_dveRate = 0;
         m_dveKeyFrameASet = 0;
         m_dveKeyFrameBSet = 0;
+        m_enableFly = false;
     }
 
     bool m_onAir;
@@ -117,6 +118,7 @@ struct QUpstreamKeySettings
     quint8 m_dveRate;
     bool m_dveKeyFrameASet;
     bool m_dveKeyFrameBSet;
+    bool m_enableFly;
 };
 
 #endif // QUPSTREAMKEYSETTINGS_H

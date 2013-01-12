@@ -2045,6 +2045,18 @@ void QAtemConnection::runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 dir
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setUpstreamKeyFlyEnabled(quint8 keyer, bool enable)
+{
+    QByteArray cmd = "CKTp";
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x02;
+    payload[2] = (char)keyer;
+    payload[4] = (char)enable;
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
 {
     if(source == m_auxSource.value(aux))
@@ -2528,6 +2540,7 @@ void QAtemConnection::onKeBP(const QByteArray& payload)
 {
     quint8 index = (quint8)payload.at(6);
     m_upstreamKeys[index].m_type = (quint8)payload.at(8);
+    m_upstreamKeys[index].m_enableFly = (bool)payload.at(11);
     m_upstreamKeys[index].m_fillSource = (quint8)payload.at(12);
     m_upstreamKeys[index].m_keySource = (quint8)payload.at(13);
     m_upstreamKeys[index].m_enableMask = (quint8)payload.at(14);
@@ -2546,6 +2559,7 @@ void QAtemConnection::onKeBP(const QByteArray& payload)
     m_upstreamKeys[index].m_rightMask = (qint16)val.u16 / 1000.0;
 
     emit upstreamKeyTypeChanged(index, m_upstreamKeys[index].m_type);
+    emit upstreamKeyEnableFlyChanged(index, m_upstreamKeys[index].m_enableFly);
     emit upstreamKeyFillSourceChanged(index, m_upstreamKeys[index].m_fillSource);
     emit upstreamKeyKeySourceChanged(index, m_upstreamKeys[index].m_keySource);
     emit upstreamKeyEnableMaskChanged(index, m_upstreamKeys[index].m_enableMask);

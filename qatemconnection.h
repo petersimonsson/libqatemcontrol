@@ -239,6 +239,8 @@ public:
     bool upstreamKeyDVEKeyFrameASet(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveKeyFrameASet; }
     /// @returns true if key frame B has been set for the DVE for upstream key @p keyer
     bool upstreamKeyDVEKeyFrameBSet(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveKeyFrameBSet; }
+    /// @returns true if fly is enabled for non DVE type of the upstream key @p keyer
+    bool upstreamKeyEnableFly(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_enableFly; }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -375,6 +377,8 @@ public slots:
      * 9 = Bottom right
      */
     void runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 direction);
+    /// Enable fly on the non DVE key types of the upstream key @p keyer
+    void setUpstreamKeyFlyEnabled(quint8 keyer, bool enable);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -630,6 +634,7 @@ signals:
     void upstreamKeyDVERateChanged(quint8 keyer, quint8 rate);
     void upstreamKeyDVEKeyFrameASetChanged(quint8 keyer, bool set);
     void upstreamKeyDVEKeyFrameBSetChanged(quint8 keyer, bool set);
+    void upstreamKeyEnableFlyChanged(quint8 keyer, bool enabled);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 
