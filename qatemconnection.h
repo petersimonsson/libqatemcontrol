@@ -295,8 +295,17 @@ public:
     /// @returns duration in number of frames for dve transition
     quint8 dveFrames() const { return m_dveFrames; }
 
-    /// @returns duration in number of frames for sting transition
-    quint8 stingFrames() const { return m_stingFrames; }
+    /// @returns source used for the Stinger transition. 1 = Media player 1, 2 = Media player 2
+    quint8 stingerSource() const { return m_stingerSource; }
+    /// @returns true if the Stinger transition has a pre multiplied key
+    bool stingerPreMultipliedKeyEnabled() const { return m_stingerEnablePreMultipliedKey; }
+    float stingerClip() const { return m_stingerClip; }
+    float stingerGain() const { return m_stingerGain; }
+    bool stingerInvertKeyEnabled() const { return m_stingerEnableInvertKey; }
+    quint16 stingerPreRoll() const { return m_stingerPreRoll; }
+    quint16 stingerClipDuration() const { return m_stingerClipDuration; }
+    quint16 stingerTriggerPoint() const { return m_stingerTriggerPoint; }
+    quint16 stingerMixRate() const { return m_stingerMixRate; }
 
     /// @returns the border source index, used for both dip and wipe transition
     quint8 borderSource() const { return m_borderSource; }
@@ -418,6 +427,18 @@ public slots:
     void setWipeYPosition(quint16 value);
     void setWipeReverseDirection(bool reverse);
     void setWipeFlipFlop(bool flipFlop);
+
+    /// Set the source used for Stinger transition to @p source. 1 = Media player 1, 2 = Media player 2
+    void setStingerSource(quint8 source);
+    /// Enable if the key is pre multiplied in the source for the Stinger transition
+    void setStingerPreMultipliedKeyEnabled(bool enabled);
+    void setStingerClip(float percent);
+    void setStingerGain(float percent);
+    void setStingerInvertKeyEnabled(bool enabled);
+    void setStingerPreRoll(quint16 frames);
+    void setStingerClipDuration(quint16 frames);
+    void setStingerTriggerPoint(quint16 frames);
+    void setStingerMixRate(quint16 frames);
 
     void setAuxSource(quint8 aux, quint8 source);
 
@@ -552,7 +573,15 @@ private:
 
     quint8 m_dveFrames;
 
-    quint8 m_stingFrames;
+    quint8 m_stingerSource;
+    bool m_stingerEnablePreMultipliedKey;
+    float m_stingerClip;
+    float m_stingerGain;
+    bool m_stingerEnableInvertKey;
+    quint16 m_stingerPreRoll;
+    quint16 m_stingerClipDuration;
+    quint16 m_stingerTriggerPoint;
+    quint16 m_stingerMixRate;
 
     quint8 m_borderSource;
 
@@ -667,7 +696,15 @@ signals:
 
     void dveFramesChanged(quint8 frames);
 
-    void stingFramesChanged(quint8 frames);
+    void stingerSourceChanged(quint8 frames);
+    void stingerEnablePreMultipliedKeyChanged(bool enabled);
+    void stingerClipChanged(float percent);
+    void stingerGainChanged(float percent);
+    void stingerEnableInvertKeyChanged(bool enabled);
+    void stingerPreRollChanged(quint16 frames);
+    void stingerClipDurationChanged(quint16 frames);
+    void stingerTriggerPointChanged(quint16 frames);
+    void stingerMixRateChanged(quint16 frames);
 
     void borderSourceChanged(quint8 index);
 };

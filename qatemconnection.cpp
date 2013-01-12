@@ -68,7 +68,15 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_dveFrames = 0;
 
-    m_stingFrames = 0;
+    m_stingerSource = 0;
+    m_stingerEnablePreMultipliedKey = false;
+    m_stingerClip = 0;
+    m_stingerGain = 0;
+    m_stingerEnableInvertKey = false;
+    m_stingerPreRoll = 0;
+    m_stingerClipDuration = 0;
+    m_stingerTriggerPoint = 0;
+    m_stingerMixRate = 0;
 
     m_borderSource = 0;
 
@@ -1082,6 +1090,123 @@ void QAtemConnection::setWipeFlipFlop(bool flipFlop)
 
     payload[0] = (char)0x01;
     payload[17] = (char)flipFlop;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerSource(quint8 source)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x01;
+    payload[3] = (char)source;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerPreMultipliedKeyEnabled(bool enabled)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x02;
+    payload[4] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerClip(float percent)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = percent * 10;
+
+    payload[1] = (char)0x04;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerGain(float percent)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = percent * 10;
+
+    payload[1] = (char)0x08;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerInvertKeyEnabled(bool enabled)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x10;
+    payload[10] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerPreRoll(quint16 frames)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = frames;
+
+    payload[1] = (char)0x20;
+    payload[12] = (char)val.u8[1];
+    payload[13] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerClipDuration(quint16 frames)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = frames;
+
+    payload[1] = (char)0x40;
+    payload[14] = (char)val.u8[1];
+    payload[15] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerTriggerPoint(quint16 frames)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = frames;
+
+    payload[1] = (char)0x80;
+    payload[16] = (char)val.u8[1];
+    payload[17] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setStingerMixRate(quint16 frames)
+{
+    QByteArray cmd("CTSt");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = frames;
+
+    payload[0] = (char)0x01;
+    payload[18] = (char)val.u8[1];
+    payload[19] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -2263,7 +2388,7 @@ void QAtemConnection::onTrPs(const QByteArray& payload)
 
 void QAtemConnection::onTrSS(const QByteArray& payload)
 {
-    m_transitionStyle = (quint8)payload.at(7); // Bit 0 = Mix, 1 = Dip, 2 = Wipe, 3 = DVE and 4 = Sting, only bit 0-2 available on TVS
+    m_transitionStyle = (quint8)payload.at(7); // Bit 0 = Mix, 1 = Dip, 2 = Wipe, 3 = DVE and 4 = Stinger, only bit 0-2 available on TVS
     m_keyersOnNextTransition = ((quint8)payload.at(8) & 0x1f); // Bit 0 = Background, 1-4 = keys, only bit 0 and 1 available on TVS
 
     emit transitionStyleChanged(m_transitionStyle);
@@ -2524,9 +2649,38 @@ void QAtemConnection::onTDvP(const QByteArray& payload)
 
 void QAtemConnection::onTStP(const QByteArray& payload)
 {
-    m_stingFrames = (quint8)payload.at(7);
+    m_stingerSource = (quint8)payload.at(7);
+    m_stingerEnablePreMultipliedKey = (quint8)payload.at(8);
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(10);
+    val.u8[0] = (quint8)payload.at(11);
+    m_stingerClip = val.u16 / 10.0;
+    val.u8[1] = (quint8)payload.at(12);
+    val.u8[0] = (quint8)payload.at(13);
+    m_stingerGain = val.u16 / 10.0;
+    m_stingerEnableInvertKey = (bool)payload.at(14);
+    val.u8[1] = (quint8)payload.at(16);
+    val.u8[0] = (quint8)payload.at(17);
+    m_stingerPreRoll = val.u16;
+    val.u8[1] = (quint8)payload.at(18);
+    val.u8[0] = (quint8)payload.at(19);
+    m_stingerClipDuration = val.u16;
+    val.u8[1] = (quint8)payload.at(20);
+    val.u8[0] = (quint8)payload.at(21);
+    m_stingerTriggerPoint = val.u16;
+    val.u8[1] = (quint8)payload.at(22);
+    val.u8[0] = (quint8)payload.at(23);
+    m_stingerMixRate = val.u16;
 
-    emit stingFramesChanged(m_stingFrames);
+    emit stingerSourceChanged(m_stingerSource);
+    emit stingerEnablePreMultipliedKeyChanged(m_stingerEnablePreMultipliedKey);
+    emit stingerClipChanged(m_stingerClip);
+    emit stingerGainChanged(m_stingerGain);
+    emit stingerEnableInvertKeyChanged(m_stingerEnableInvertKey);
+    emit stingerPreRollChanged(m_stingerPreRoll);
+    emit stingerClipDurationChanged(m_stingerClipDuration);
+    emit stingerTriggerPointChanged(m_stingerTriggerPoint);
+    emit stingerMixRateChanged(m_stingerMixRate);
 }
 
 void QAtemConnection::onBrdI(const QByteArray& payload)
