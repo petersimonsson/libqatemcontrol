@@ -2004,6 +2004,47 @@ void QAtemConnection::setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 so
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setUpstreamKeyDVERate(quint8 keyer, quint8 rate)
+{
+    QByteArray cmd = "CKDV";
+    QByteArray payload(64, (char)0x0);
+
+    payload[0] = (char)0x02;
+    payload[5] = (char)keyer;
+    payload[60] = (char)rate;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setUpstreamKeyDVEKeyFrame(quint8 keyer, quint8 keyFrame)
+{
+    QByteArray cmd = "SFKF";
+    QByteArray payload(4, (char)0x0);
+
+    payload[1] = (char)keyer;
+    payload[2] = (char)keyFrame;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 direction)
+{
+    QByteArray cmd = "RFlK";
+    QByteArray payload(8, (char)0x0);
+
+    payload[2] = (char)keyer;
+
+    if(position == 4)
+    {
+        payload[0] = (char)0x02; // This is needed else the direction will be ignore
+        payload[4] = (char)direction;
+    }
+
+    payload[5] = (char)position;
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
 {
     if(source == m_auxSource.value(aux))
@@ -2639,6 +2680,7 @@ void QAtemConnection::onKeDV(const QByteArray& payload)
     val.u8[0] = (quint8)payload.at(51);
     m_upstreamKeys[index].m_dveLightSourceDirection = val.u16 / 10.0;
     m_upstreamKeys[index].m_dveLightSourceAltitude = (quint8)payload.at(52);
+    m_upstreamKeys[index].m_dveRate = (quint8)payload.at(62);
 
     emit upstreamKeyDVEXPositionChanged(index, m_upstreamKeys[index].m_dveXPosition);
     emit upstreamKeyDVEYPositionChanged(index, m_upstreamKeys[index].m_dveYPosition);
@@ -2656,6 +2698,17 @@ void QAtemConnection::onKeDV(const QByteArray& payload)
     emit upstreamKeyDVEBorderOutsideSoftenChanged(index, m_upstreamKeys[index].m_dveBorderOutsideSoften);
     emit upstreamKeyDVEBorderInsideSoftenChanged(index, m_upstreamKeys[index].m_dveBorderInsideSoften);
     emit upstreamKeyDVEBorderOpacityChanged(index, m_upstreamKeys[index].m_dveBorderOpacity);
+    emit upstreamKeyDVERateChanged(index, m_upstreamKeys[index].m_dveRate);
+}
+
+void QAtemConnection::onKeFS(const QByteArray& payload)
+{
+    quint8 index = (quint8)payload.at(7);
+    m_upstreamKeys[index].m_dveKeyFrameASet = (bool)payload.at(8);
+    m_upstreamKeys[index].m_dveKeyFrameBSet = (bool)payload.at(9);
+
+    emit upstreamKeyDVEKeyFrameASetChanged(index, m_upstreamKeys[index].m_dveKeyFrameASet);
+    emit upstreamKeyDVEKeyFrameBSetChanged(index, m_upstreamKeys[index].m_dveKeyFrameBSet);
 }
 
 void QAtemConnection::initCommandSlotHash()
@@ -2694,4 +2747,5 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("KeCk", "onKeCk");
     m_commandSlotHash.insert("KePt", "onKePt");
     m_commandSlotHash.insert("KeDV", "onKeDV");
+    m_commandSlotHash.insert("KeFS", "onKeFS");
 }

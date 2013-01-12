@@ -233,6 +233,12 @@ public:
     float upstreamKeyDVEBorderBevelPosition(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderBevelPosition; }
     /// @returns the bevel soften (%) of the border of the DVE for upstream key @p keyer
     quint8 upstreamKeyDVEBorderBevelSofter(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveBorderBevelSoften; }
+    /// @returns the rate in frames the DVE for upstream key @p keyer runs at
+    quint8 upstreamKeyDVERate(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveRate; }
+    /// @returns true if key frame A has been set for the DVE for upstream key @p keyer
+    bool upstreamKeyDVEKeyFrameASet(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveKeyFrameASet; }
+    /// @returns true if key frame B has been set for the DVE for upstream key @p keyer
+    bool upstreamKeyDVEKeyFrameBSet(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_dveKeyFrameBSet; }
 
     QColor colorGeneratorColor(quint8 generator) const;
 
@@ -350,6 +356,25 @@ public slots:
     void setUpstreamKeyDVEBorderOpacity(quint8 keyer, quint8 opacity);
     void setUpstreamKeyDVEBorderBevelPosition(quint8 keyer, float position);
     void setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 soften);
+    void setUpstreamKeyDVERate(quint8 keyer, quint8 rate);
+    /// Set the @p keyFrame of the DVE for upstream keyer @p keyer. 1 = Keyframe A, 2 = Keyframe B
+    void setUpstreamKeyDVEKeyFrame(quint8 keyer, quint8 keyFrame);
+    /**
+     * Make the upstream key @p keyer run to @p position. 1 = Keyframe A, 2 = Keyframe B, 3 = Fullscreen, 4 = Infinite
+     * If the @p position = infinite there is also a @p direction.
+     * Available directions:
+     * 0 = Center
+     * 1 = Top left
+     * 2 = Up
+     * 3 = Top right
+     * 4 = Left
+     * 5 = Center
+     * 6 = Right
+     * 7 = Bottom left
+     * 8 = Down
+     * 9 = Bottom right
+     */
+    void runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 direction);
 
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -439,6 +464,7 @@ protected slots:
     void onKeCk(const QByteArray& payload);
     void onKePt(const QByteArray& payload);
     void onKeDV(const QByteArray& payload);
+    void onKeFS(const QByteArray& payload);
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 undefined1, quint16 undefined2);
@@ -601,6 +627,9 @@ signals:
     void upstreamKeyDVEBorderOutsideSoftenChanged(quint8 keyer, quint8 soften);
     void upstreamKeyDVEBorderInsideSoftenChanged(quint8 keyer, quint8 soften);
     void upstreamKeyDVEBorderOpacityChanged(quint8 keyer, quint8 opacity);
+    void upstreamKeyDVERateChanged(quint8 keyer, quint8 rate);
+    void upstreamKeyDVEKeyFrameASetChanged(quint8 keyer, bool set);
+    void upstreamKeyDVEKeyFrameBSetChanged(quint8 keyer, bool set);
 
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 

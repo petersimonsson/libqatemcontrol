@@ -66,6 +66,9 @@ struct QUpstreamKeySettings
         m_dveBorderOpacity = 0;
         m_dveBorderBevelPosition = 0;
         m_dveBorderBevelSoften = 0;
+        m_dveRate = 0;
+        m_dveKeyFrameASet = 0;
+        m_dveKeyFrameBSet = 0;
     }
 
     bool m_onAir;
@@ -111,6 +114,9 @@ struct QUpstreamKeySettings
     quint8 m_dveBorderOpacity;
     float m_dveBorderBevelPosition;
     quint8 m_dveBorderBevelSoften;
+    quint8 m_dveRate;
+    bool m_dveKeyFrameASet;
+    bool m_dveKeyFrameBSet;
 };
 
 #endif // QUPSTREAMKEYSETTINGS_H
