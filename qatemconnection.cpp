@@ -66,7 +66,15 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_wipeReverseDirection = false;
     m_wipeFlipFlop = false;
 
-    m_dveFrames = 0;
+    m_dveRate = 0;
+    m_dveEffect = 0;
+    m_dveFillSource = 0;
+    m_dveKeySource = 0;
+    m_dveEnableKey = false;
+    m_dveEnablePreMultipliedKey = false;
+    m_dveKeyClip = 0;
+    m_dveKeyGain = 0;
+    m_dveEnableInvertKey = false;
 
     m_stingerSource = 0;
     m_stingerEnablePreMultipliedKey = false;
@@ -1090,6 +1098,114 @@ void QAtemConnection::setWipeFlipFlop(bool flipFlop)
 
     payload[0] = (char)0x01;
     payload[17] = (char)flipFlop;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVERate(quint16 frames)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = frames;
+
+    payload[1] = (char)0x01;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEEffect(quint8 effect)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x04;
+    payload[5] = (char)effect;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEFillSource(quint8 source)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x08;
+    payload[6] = (char)source;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEKeySource(quint8 source)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x10;
+    payload[7] = (char)source;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEKeyEnabled(bool enabled)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x20;
+    payload[8] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEPreMultipliedKeyEnabled(bool enabled)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[1] = (char)0x40;
+    payload[9] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEKeyClip(float percent)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = percent * 10;
+
+    payload[1] = (char)0x80;
+    payload[10] = (char)val.u8[1];
+    payload[11] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEKeyGain(float percent)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = percent * 10;
+
+    payload[0] = (char)0x01;
+    payload[12] = (char)val.u8[1];
+    payload[13] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEInvertKeyEnabled(bool enabled)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[0] = (char)0x02;
+    payload[14] = (char)enabled;
 
     sendCommand(cmd, payload);
 }
@@ -2642,9 +2758,32 @@ void QAtemConnection::onTWpP(const QByteArray& payload)
 
 void QAtemConnection::onTDvP(const QByteArray& payload)
 {
-    m_dveFrames = (quint8)payload.at(7);
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
+    m_dveRate = val.u16;
+    m_dveEffect = (quint8)payload.at(9);
+    m_dveFillSource = (quint8)payload.at(10);
+    m_dveKeySource = (quint8)payload.at(11);
+    m_dveEnableKey = (bool)payload.at(12);
+    m_dveEnablePreMultipliedKey = (bool)payload.at(13);
+    val.u8[1] = (quint8)payload.at(14);
+    val.u8[0] = (quint8)payload.at(15);
+    m_dveKeyClip = val.u16 / 10.0;
+    val.u8[1] = (quint8)payload.at(16);
+    val.u8[0] = (quint8)payload.at(17);
+    m_dveKeyGain = val.u16 / 10.0;
+    m_dveEnableInvertKey = (bool)payload.at(18);
 
-    emit dveFramesChanged(m_dveFrames);
+    emit dveRateChanged(m_dveRate);
+    emit dveEffectChanged(m_dveEffect);
+    emit dveFillSourceChanged(m_dveFillSource);
+    emit dveKeySourceChanged(m_dveKeySource);
+    emit dveEnableKeyChanged(m_dveEnableKey);
+    emit dveEnablePreMultipliedKeyChanged(m_dveEnablePreMultipliedKey);
+    emit dveKeyClipChanged(m_dveKeyClip);
+    emit dveKeyGainChanged(m_dveKeyGain);
+    emit dveEnableInvertKeyChanged(m_dveEnableInvertKey);
 }
 
 void QAtemConnection::onTStP(const QByteArray& payload)

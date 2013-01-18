@@ -292,8 +292,66 @@ public:
     /// @returns true if wipe transition direction should flip flop
     bool wipeFlipFlop() const { return m_wipeFlipFlop; }
 
-    /// @returns duration in number of frames for dve transition
-    quint8 dveFrames() const { return m_dveFrames; }
+    /// @returns duration in number of frames for DVE transition
+    quint16 dveRate() const { return m_dveRate; }
+    /**
+     * @returns the selected effect for DVE transition
+     *
+     * Swosh:
+     * 0 = Top left
+     * 1 = Up
+     * 2 = Top right
+     * 3 = Left
+     * 4 = Right
+     * 5 = Bottom left
+     * 6 = Down
+     * 7 = Bottom right
+     *
+     * Spin:
+     * 8 = Down left, clockwise
+     * 9 = Up left, clockwise
+     * 10 = Down right, clockwise
+     * 11 = Up right, clockwise
+     * 12 = Up right, anti clockwise
+     * 13 = Down right, anti clockwise
+     * 14 = Up left, anti clockwise
+     * 15 = Down left, anti clockwise
+     *
+     * Squeeze:
+     * 16 = Top left
+     * 17 = Up
+     * 18 = Top right
+     * 19 = Left
+     * 20 = Right
+     * 21 = Bottom left
+     * 22 = Down
+     * 23 = Bottom right
+     *
+     * Push:
+     * 24 = Top left
+     * 25 = Up
+     * 26 = Top right
+     * 27 = Left
+     * 28 = Right
+     * 29 = Bottom left
+     * 30 = Down
+     * 31 = Bottom right
+     *
+     * Graphic:
+     * 32 = Spin clockwise
+     * 33 = Spin anti clockwise
+     * 34 = Logo wipe
+     */
+    quint8 dveEffect() const { return m_dveEffect; }
+    quint8 dveFillSource() const { return m_dveFillSource; }
+    quint8 dveKeySource() const { return m_dveKeySource; }
+    bool dveKeyEnabled() const { return m_dveEnableKey; }
+    bool dvePreMultipliedKeyEnabled() const { return m_dveEnablePreMultipliedKey; }
+    /// @returns the clip of the key in per cent for the DVE transition
+    float dveKeyClip() const { return m_dveKeyClip; }
+    /// @returns the gain of the key in per cent for the DVE transition
+    float dveKeyGain() const { return m_dveKeyGain; }
+    bool dveInvertKeyEnabled() const { return m_dveEnableInvertKey; }
 
     /// @returns source used for the Stinger transition. 1 = Media player 1, 2 = Media player 2
     quint8 stingerSource() const { return m_stingerSource; }
@@ -427,6 +485,66 @@ public slots:
     void setWipeYPosition(quint16 value);
     void setWipeReverseDirection(bool reverse);
     void setWipeFlipFlop(bool flipFlop);
+
+    void setDVERate(quint16 frames);
+    /**
+     * Set the effect used for the DVE transition to @p effect
+     *
+     * Swosh:
+     * 0 = Top left
+     * 1 = Up
+     * 2 = Top right
+     * 3 = Left
+     * 4 = Right
+     * 5 = Bottom left
+     * 6 = Down
+     * 7 = Bottom right
+     *
+     * Spin:
+     * 8 = Down left, clockwise
+     * 9 = Up left, clockwise
+     * 10 = Down right, clockwise
+     * 11 = Up right, clockwise
+     * 12 = Up right, anti clockwise
+     * 13 = Down right, anti clockwise
+     * 14 = Up left, anti clockwise
+     * 15 = Down left, anti clockwise
+     *
+     * Squeeze:
+     * 16 = Top left
+     * 17 = Up
+     * 18 = Top right
+     * 19 = Left
+     * 20 = Right
+     * 21 = Bottom left
+     * 22 = Down
+     * 23 = Bottom right
+     *
+     * Push:
+     * 24 = Top left
+     * 25 = Up
+     * 26 = Top right
+     * 27 = Left
+     * 28 = Right
+     * 29 = Bottom left
+     * 30 = Down
+     * 31 = Bottom right
+     *
+     * Graphic:
+     * 32 = Spin clockwise
+     * 33 = Spin anti clockwise
+     * 34 = Logo wipe
+     */
+    void setDVEEffect(quint8 effect);
+    void setDVEFillSource(quint8 source);
+    void setDVEKeySource(quint8 source);
+    void setDVEKeyEnabled(bool enabled);
+    void setDVEPreMultipliedKeyEnabled(bool enabled);
+    /// Set clip of key for DVE transition to @p percent
+    void setDVEKeyClip(float percent);
+    /// Set gain of key for DVE transition to @p percent
+    void setDVEKeyGain(float percent);
+    void setDVEInvertKeyEnabled(bool enabled);
 
     /// Set the source used for Stinger transition to @p source. 1 = Media player 1, 2 = Media player 2
     void setStingerSource(quint8 source);
@@ -571,7 +689,15 @@ private:
     bool m_wipeReverseDirection;
     bool m_wipeFlipFlop;
 
-    quint8 m_dveFrames;
+    quint16 m_dveRate;
+    quint8 m_dveEffect;
+    quint8 m_dveFillSource;
+    quint8 m_dveKeySource;
+    bool m_dveEnableKey;
+    bool m_dveEnablePreMultipliedKey;
+    float m_dveKeyClip;
+    float m_dveKeyGain;
+    bool m_dveEnableInvertKey;
 
     quint8 m_stingerSource;
     bool m_stingerEnablePreMultipliedKey;
@@ -694,7 +820,15 @@ signals:
     void wipeReverseDirectionChanged(bool reverse);
     void wipeFlipFlopChanged(bool flipFlop);
 
-    void dveFramesChanged(quint8 frames);
+    void dveRateChanged(quint16 frames);
+    void dveEffectChanged(quint8 effect);
+    void dveFillSourceChanged(quint8 source);
+    void dveKeySourceChanged(quint8 source);
+    void dveEnableKeyChanged(bool enabled);
+    void dveEnablePreMultipliedKeyChanged(bool enabled);
+    void dveKeyClipChanged(float clip);
+    void dveKeyGainChanged(float gain);
+    void dveEnableInvertKeyChanged(bool enabled);
 
     void stingerSourceChanged(quint8 frames);
     void stingerEnablePreMultipliedKeyChanged(bool enabled);
