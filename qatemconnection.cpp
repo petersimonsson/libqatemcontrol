@@ -118,7 +118,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address)
     m_currentUid = 0x1337; // Just a random UID, we'll get a new one from the server eventually
 
     //Hello
-    QByteArray datagram = createCommandHeader(Cmd_HelloPacket, 8, m_currentUid, 0x0, 0x0, 0x0);
+    QByteArray datagram = createCommandHeader(Cmd_HelloPacket, 8, m_currentUid, 0x0);
     datagram.append(QByteArray::fromHex("0100000000000000")); // The Hello package needs this... no idea what it means
 
     sendDatagram(datagram);
@@ -141,12 +141,12 @@ void QAtemConnection::handleSocketData()
         if(header.bitmask & Cmd_HelloPacket)
         {
             m_isInitialized = false;
-            QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, 0x0, 0x0, 0x0);
+            QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, 0x0);
             sendDatagram(ackDatagram);
         }
         else if(m_isInitialized && (header.bitmask & Cmd_AckRequest))
         {
-            QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packageId, 0x0, 0x0);
+            QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packageId);
             sendDatagram(ackDatagram);
         }
 
@@ -157,9 +157,9 @@ void QAtemConnection::handleSocketData()
     }
 }
 
-QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 undefined1 , quint16 undefined2)
+QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId)
 {
-    QByteArray buffer;
+    QByteArray buffer(12, (char)0x0);
     quint16 packageId = 0;
 
     if(!(bitmask & (Cmd_HelloPacket | Cmd_Ack)))
@@ -173,28 +173,20 @@ QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloa
     val.u16 = bitmask;
     val.u16 = val.u16 << 11;
     val.u16 |= (payloadSize + SIZE_OF_HEADER);
-    buffer.append(val.u8[1]);
-    buffer.append(val.u8[0]);
+    buffer[0] = (char)val.u8[1];
+    buffer[1] = (char)val.u8[0];
 
     val.u16 = uid;
-    buffer.append(val.u8[1]);
-    buffer.append(val.u8[0]);
+    buffer[2] = (char)val.u8[1];
+    buffer[3] = (char)val.u8[0];
 
     val.u16 = ackId;
-    buffer.append(val.u8[1]);
-    buffer.append(val.u8[0]);
-
-    // Unkown bits
-    val.u16 = undefined1;
-    buffer.append(val.u8[1]);
-    buffer.append(val.u8[0]);
-    val.u16 = undefined2;
-    buffer.append(val.u8[1]);
-    buffer.append(val.u8[0]);
+    buffer[4] = (char)val.u8[1];
+    buffer[5] = (char)val.u8[0];
 
     val.u16 = packageId;
-    buffer.append(val.u8[1]);
-    buffer.append(val.u8[0]);
+    buffer[10] = (char)val.u8[1];
+    buffer[11] = (char)val.u8[0];
 
     return buffer;
 }
@@ -281,7 +273,7 @@ void QAtemConnection::sendCommand(const QByteArray& cmd, const QByteArray& paylo
 
     size.u16 = payload.size() + cmd.size() + 4;
 
-    QByteArray datagram = createCommandHeader(Cmd_AckRequest, size.u16, m_currentUid, 0x0, 0x0, 0x0);
+    QByteArray datagram = createCommandHeader(Cmd_AckRequest, size.u16, m_currentUid, 0x0);
 
     datagram.append(size.u8[1]);
     datagram.append(size.u8[0]);
@@ -307,7 +299,7 @@ void QAtemConnection::changeProgramInput(char index)
         return;
     }
 
-    QByteArray cmd = "CPgI";
+    QByteArray cmd("CPgI");
     QByteArray payload(4, (char)0x0);
 
     payload[1] = index;
@@ -322,7 +314,7 @@ void QAtemConnection::changePreviewInput(char index)
         return;
     }
 
-    QByteArray cmd = "CPvI";
+    QByteArray cmd("CPvI");
     QByteArray payload(4, (char)0x0);
 
     payload[1] = index;
@@ -332,7 +324,7 @@ void QAtemConnection::changePreviewInput(char index)
 
 void QAtemConnection::doCut()
 {
-    QByteArray cmd = "DCut";
+    QByteArray cmd("DCut");
     QByteArray payload(4, (char)0x0);
 
     sendCommand(cmd, payload);
@@ -340,7 +332,7 @@ void QAtemConnection::doCut()
 
 void QAtemConnection::doAuto()
 {
-    QByteArray cmd = "DAut";
+    QByteArray cmd("DAut");
     QByteArray payload(4, (char)0x0);
 
     sendCommand(cmd, payload);
@@ -348,7 +340,7 @@ void QAtemConnection::doAuto()
 
 void QAtemConnection::toggleFadeToBlack()
 {
-    QByteArray cmd = "FtbA";
+    QByteArray cmd("FtbA");
     QByteArray payload(4, (char)0x0);
 
     payload[1] = (char)0x02; // Does not toggle without this set
@@ -363,13 +355,11 @@ void QAtemConnection::setFadeToBlackFrameRate(quint8 frames)
         return;
     }
 
-    QByteArray cmd = "FtbC";
-    QByteArray payload;
+    QByteArray cmd("FtbC");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x01);
-    payload.append((char)0x00);
-    payload.append((char)frames);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[2] = (char)frames;
 
     sendCommand(cmd, payload);
 }
@@ -381,29 +371,25 @@ void QAtemConnection::setTransitionPosition(quint16 position)
         return;
     }
 
-    QByteArray cmd = "CTPs";
-    QByteArray payload;
+    QByteArray cmd("CTPs");
+    QByteArray payload(4, (char)0x0);
     U16_U8 val;
 
     val.u16 = position;
 
-    payload.append((char)0x00);
-    payload.append((char)0xe4);
-    payload.append(val.u8[1]);
-    payload.append(val.u8[0]);
+    payload[1] = (char)0xe4;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::signalTransitionPositionChangeDone()
 {
-    QByteArray cmd = "CTPs";
-    QByteArray payload;
+    QByteArray cmd("CTPs");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append((char)0xf6);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = (char)0xf6;
 
     sendCommand(cmd, payload);
 }
@@ -415,7 +401,7 @@ void QAtemConnection::setTransitionPreview(bool state)
         return;
     }
 
-    QByteArray cmd = "CTPr";
+    QByteArray cmd("CTPr");
     QByteArray payload(4, (char)0x0);
 
     payload[1] = (char)state;
@@ -430,13 +416,11 @@ void QAtemConnection::setTransitionType(quint8 type)
         return;
     }
 
-    QByteArray cmd = "CTTp";
-    QByteArray payload;
+    QByteArray cmd("CTTp");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x01);
-    payload.append((char)0x00);
-    payload.append((char)type);
-    payload.append((char)0x02);
+    payload[0] = (char)0x01;
+    payload[2] = (char)type;
 
     sendCommand(cmd, payload);
 }
@@ -448,13 +432,11 @@ void QAtemConnection::setUpstreamKeyOn(quint8 keyer, bool state)
         return;
     }
 
-    QByteArray cmd = "CKOn";
-    QByteArray payload;
+    QByteArray cmd("CKOn");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append((char)keyer);
-    payload.append((char)state);
-    payload.append((char)0x90);
+    payload[1] = (char)keyer;
+    payload[2] = (char)state;
 
     sendCommand(cmd, payload);
 }
@@ -471,8 +453,8 @@ void QAtemConnection::setBackgroundOnNextTransition(bool state)
 
 void QAtemConnection::setKeyOnNextTransition (int index, bool state)
 {
-    QByteArray cmd = "CTTp";
-    QByteArray payload;
+    QByteArray cmd("CTTp");
+    QByteArray payload(4, (char)0x0);
 
     quint8 stateValue = keyersOnNextTransition();
 
@@ -495,10 +477,8 @@ void QAtemConnection::setKeyOnNextTransition (int index, bool state)
         return;
     }
 
-    payload.append((char)0x02);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)stateValue & 0x1f);
+    payload[0] = (char)0x02;
+    payload[3] = (char)stateValue & 0x1f;
 
     sendCommand(cmd, payload);
 }
@@ -510,13 +490,11 @@ void QAtemConnection::setDownstreamKeyOn(quint8 keyer, bool state)
         return;
     }
 
-    QByteArray cmd = "CDsL";
-    QByteArray payload;
+    QByteArray cmd("CDsL");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)state);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
+    payload[1] = (char)state;
 
     sendCommand(cmd, payload);
 }
@@ -528,26 +506,21 @@ void QAtemConnection::setDownstreamKeyTie(quint8 keyer, bool state)
         return;
     }
 
-    QByteArray cmd = "CDsT";
-    QByteArray payload;
+    QByteArray cmd("CDsT");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)state);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
+    payload[1] = (char)state;
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::doDownstreamKeyAuto(quint8 keyer)
 {
-    QByteArray cmd = "DDsA";
-    QByteArray payload;
+    QByteArray cmd("DDsA");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
 
     sendCommand(cmd, payload);
 }
@@ -559,13 +532,11 @@ void QAtemConnection::setDownstreamKeyFillSource(quint8 keyer, quint8 source)
         return;
     }
 
-    QByteArray cmd = "CDsF";
-    QByteArray payload;
+    QByteArray cmd("CDsF");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)source);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
+    payload[1] = (char)source;
 
     sendCommand(cmd, payload);
 }
@@ -577,13 +548,11 @@ void QAtemConnection::setDownstreamKeyKeySource(quint8 keyer, quint8 source)
         return;
     }
 
-    QByteArray cmd = "CDsC";
-    QByteArray payload;
+    QByteArray cmd("CDsC");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)source);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
+    payload[1] = (char)source;
 
     sendCommand(cmd, payload);
 }
@@ -595,13 +564,11 @@ void QAtemConnection::setDownstreamKeyFrameRate(quint8 keyer, quint8 frames)
         return;
     }
 
-    QByteArray cmd = "CDsR";
-    QByteArray payload;
+    QByteArray cmd("CDsR");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)frames);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
+    payload[1] = (char)frames;
 
     sendCommand(cmd, payload);
 }
@@ -613,7 +580,7 @@ void QAtemConnection::setDownstreamKeyInvertKey(quint8 keyer, bool invert)
         return;
     }
 
-    QByteArray cmd = "CDsG";
+    QByteArray cmd("CDsG");
     QByteArray payload(12, (char)0x0);
 
     payload[0] = (char)0x08;
@@ -630,7 +597,7 @@ void QAtemConnection::setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultip
         return;
     }
 
-    QByteArray cmd = "CDsG";
+    QByteArray cmd("CDsG");
     QByteArray payload(12, (char)0x0);
 
     payload[0] = (char)0x01;
@@ -647,7 +614,7 @@ void QAtemConnection::setDownstreamKeyClip(quint8 keyer, float clip)
         return;
     }
 
-    QByteArray cmd = "CDsG";
+    QByteArray cmd("CDsG");
     QByteArray payload(12, (char)0x0);
     U16_U8 val;
     val.u16 = clip * 10;
@@ -667,7 +634,7 @@ void QAtemConnection::setDownstreamKeyGain(quint8 keyer, float gain)
         return;
     }
 
-    QByteArray cmd = "CDsG";
+    QByteArray cmd("CDsG");
     QByteArray payload(12, (char)0x0);
     U16_U8 val;
     val.u16 = gain * 10;
@@ -687,7 +654,7 @@ void QAtemConnection::setDownstreamKeyEnableMask(quint8 keyer, bool enable)
         return;
     }
 
-    QByteArray cmd = "CDsM";
+    QByteArray cmd("CDsM");
     QByteArray payload(12, (char)0x0);
 
     payload[0] = (char)0x01;
@@ -697,133 +664,33 @@ void QAtemConnection::setDownstreamKeyEnableMask(quint8 keyer, bool enable)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setDownstreamKeyTopMask(quint8 keyer, float value)
+void QAtemConnection::setDownstreamKeyMask(quint8 keyer, float top, float bottom, float left, float right)
 {
-    if(value == m_downstreamKeys.value(keyer).m_topMask)
-    {
-        return;
-    }
+    QByteArray cmd("CDsM");
+    QByteArray payload(12, (char)0x0);
 
-    QByteArray cmd = "CDsM";
-    QByteArray payload;
-
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x1e;
+    payload[1] = (char)keyer;
     U16_U8 val;
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_bottomMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_leftMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_rightMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyBottomMask(quint8 keyer, float value)
-{
-    if(value == m_downstreamKeys.value(keyer).m_bottomMask)
-    {
-        return;
-    }
-
-    QByteArray cmd = "CDsM";
-    QByteArray payload;
-
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    U16_U8 val;
-    val.u16 = m_downstreamKeys[keyer].m_topMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_leftMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_rightMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyLeftMask(quint8 keyer, float value)
-{
-    if(value == m_downstreamKeys.value(keyer).m_leftMask)
-    {
-        return;
-    }
-
-    QByteArray cmd = "CDsM";
-    QByteArray payload;
-
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    U16_U8 val;
-    val.u16 = m_downstreamKeys[keyer].m_topMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_bottomMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_rightMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyRightMask(quint8 keyer, float value)
-{
-    if(value == m_downstreamKeys.value(keyer).m_rightMask)
-    {
-        return;
-    }
-
-    QByteArray cmd = "CDsM";
-    QByteArray payload;
-
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    U16_U8 val;
-    val.u16 = m_downstreamKeys[keyer].m_topMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_bottomMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_downstreamKeys[keyer].m_leftMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
+    val.u16 = top * 1000;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
+    val.u16 = bottom * 1000;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
+    val.u16 = left * 1000;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
+    val.u16 = right * 1000;
+    payload[10] = (char)val.u8[1];
+    payload[11] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::saveSettings()
 {
-    QByteArray cmd = "SRsv";
+    QByteArray cmd("SRsv");
     QByteArray payload(4, (char)0x0);
 
     sendCommand(cmd, payload);
@@ -831,7 +698,7 @@ void QAtemConnection::saveSettings()
 
 void QAtemConnection::clearSettings()
 {
-    QByteArray cmd = "SRcl";
+    QByteArray cmd("SRcl");
     QByteArray payload(4, (char)0x0);
 
     sendCommand(cmd, payload);
@@ -844,29 +711,29 @@ void QAtemConnection::setColorGeneratorColor(quint8 generator, const QColor& col
         return;
     }
 
-    QByteArray cmd = "CClV";
-    QByteArray payload;
+    QByteArray cmd("CClV");
+    QByteArray payload(8, (char)0x0);
 
     U16_U8 h, s, l;
     h.u16 = (qMax(0.0, color.hslHueF()) * 360.0) * 10;
     s.u16 = color.hslSaturationF() * 1000;
     l.u16 = color.lightnessF() * 1000;
 
-    payload.append((char)0x07);
-    payload.append((char)generator);
-    payload.append((char)h.u8[1]);
-    payload.append((char)h.u8[0]);
-    payload.append((char)s.u8[1]);
-    payload.append((char)s.u8[0]);
-    payload.append((char)l.u8[1]);
-    payload.append((char)l.u8[0]);
+    payload[0] = (char)0x07;
+    payload[1] = (char)generator;
+    payload[2] = (char)h.u8[1];
+    payload[3] = (char)h.u8[0];
+    payload[4] = (char)s.u8[1];
+    payload[5] = (char)s.u8[0];
+    payload[6] = (char)l.u8[1];
+    payload[7] = (char)l.u8[0];
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::setMediaPlayerSource(quint8 player, bool clip, quint8 source)
 {
-    QByteArray cmd = "MPSS";
+    QByteArray cmd("MPSS");
     QByteArray payload(8, 0);
 
     payload[1] = (char)player;
@@ -892,15 +759,10 @@ void QAtemConnection::setMediaPlayerSource(quint8 player, bool clip, quint8 sour
 
     sendCommand(cmd, payload);
 
-    payload.clear();
-    payload.append((char)0x01);
-    payload.append((char)player);
-    payload.append((char)clip ? 2 : 1);
-    payload.append((char)0xbf);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[2] = (char)clip ? 2 : 1;
+    payload[3] = (char)0xbf;
+    payload[4] = (char)0x00;
 
     sendCommand(cmd, payload);
 }
@@ -1016,46 +878,37 @@ quint8 QAtemConnection::auxSource(quint8 aux) const
 
 void QAtemConnection::setMixFrames(quint8 frames)
 {
-    QByteArray cmd = "CTMx";
-    QByteArray payload;
+    QByteArray cmd("CTMx");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append((char)frames);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = (char)frames;
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::setDipFrames(quint8 frames)
 {
-    QByteArray cmd = "CTDp";
-    QByteArray payload;
+    QByteArray cmd("CTDp");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append((char)frames);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = (char)frames;
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::setBorderSource(quint8 index)
 {
-    QByteArray cmd = "CBrI";
-    QByteArray payload;
+    QByteArray cmd("CBrI");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x00);
-    payload.append((char)index);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[1] = (char)index;
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::setWipeFrames(quint8 frames)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
 
     payload[1] = (char)0x01;
@@ -1066,7 +919,7 @@ void QAtemConnection::setWipeFrames(quint8 frames)
 
 void QAtemConnection::setWipeBorderWidth(quint16 width)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
     U16_U8 val;
     val.u16 = width;
@@ -1080,7 +933,7 @@ void QAtemConnection::setWipeBorderWidth(quint16 width)
 
 void QAtemConnection::setWipeBorderSoftness(quint16 softness)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
     U16_U8 val;
     val.u16 = softness;
@@ -1094,7 +947,7 @@ void QAtemConnection::setWipeBorderSoftness(quint16 softness)
 
 void QAtemConnection::setWipeType(quint8 type)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
 
     payload[1] = (char)0x02;
@@ -1105,7 +958,7 @@ void QAtemConnection::setWipeType(quint8 type)
 
 void QAtemConnection::setWipeSymmetry(quint16 value)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
     U16_U8 val;
     val.u16 = value;
@@ -1119,7 +972,7 @@ void QAtemConnection::setWipeSymmetry(quint16 value)
 
 void QAtemConnection::setWipeXPosition(quint16 value)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
     U16_U8 val;
     val.u16 = value;
@@ -1133,7 +986,7 @@ void QAtemConnection::setWipeXPosition(quint16 value)
 
 void QAtemConnection::setWipeYPosition(quint16 value)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
     U16_U8 val;
     val.u16 = value;
@@ -1147,7 +1000,7 @@ void QAtemConnection::setWipeYPosition(quint16 value)
 
 void QAtemConnection::setWipeReverseDirection(bool reverse)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
 
     payload[1] = (char)0x80;
@@ -1158,7 +1011,7 @@ void QAtemConnection::setWipeReverseDirection(bool reverse)
 
 void QAtemConnection::setWipeFlipFlop(bool flipFlop)
 {
-    QByteArray cmd = "CTWp";
+    QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
 
     payload[0] = (char)0x01;
@@ -1399,19 +1252,12 @@ void QAtemConnection::setUpstreamKeyType(quint8 keyer, quint8 type)
         return;
     }
 
-    QByteArray cmd = "CKTp";
-    QByteArray payload;
+    QByteArray cmd("CKTp");
+    QByteArray payload(10, (char)0x0);
 
-    payload.append((char)0x01);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)type);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[1] = (char)keyer;
+    payload[3] = (char)type;
 
     sendCommand(cmd, payload);
 }
@@ -1423,13 +1269,11 @@ void QAtemConnection::setUpstreamKeyFillSource(quint8 keyer, quint8 source)
         return;
     }
 
-    QByteArray cmd = "CKeF";
-    QByteArray payload;
+    QByteArray cmd("CKeF");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)source);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
+    payload[2] = (char)source;
 
     sendCommand(cmd, payload);
 }
@@ -1441,13 +1285,11 @@ void QAtemConnection::setUpstreamKeyKeySource(quint8 keyer, quint8 source)
         return;
     }
 
-    QByteArray cmd = "CKeC";
-    QByteArray payload;
+    QByteArray cmd("CKeC");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)source);
-    payload.append((char)0x00);
+    payload[0] = (char)keyer;
+    payload[2] = (char)source;
 
     sendCommand(cmd, payload);
 }
@@ -1459,145 +1301,36 @@ void QAtemConnection::setUpstreamKeyEnableMask(quint8 keyer, bool enable)
         return;
     }
 
-    QByteArray cmd = "CKMs";
-    QByteArray payload;
+    QByteArray cmd("CKMs");
+    QByteArray payload(12, (char)0x0);
 
-    payload.append((char)0x01);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)enable);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[1] = (char)keyer;
+    payload[3] = (char)enable;
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setUpstreamKeyTopMask(quint8 keyer, float value)
+void QAtemConnection::setUpstreamKeyMask(quint8 keyer, float top, float bottom, float left, float right)
 {
-    if(value == m_upstreamKeys.value(keyer).m_topMask)
-    {
-        return;
-    }
-
-    QByteArray cmd = "CKMs";
-    QByteArray payload;
+    QByteArray cmd("CKMs");
+    QByteArray payload(12, (char)0x0);
     U16_U8 val;
 
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_bottomMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_leftMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_rightMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setUpstreamKeyBottomMask(quint8 keyer, float value)
-{
-    if(value == m_upstreamKeys.value(keyer).m_bottomMask)
-    {
-        return;
-    }
-
-    QByteArray cmd = "CKMs";
-    QByteArray payload;
-    U16_U8 val;
-
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    val.u16 = m_upstreamKeys[keyer].m_topMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_leftMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_rightMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setUpstreamKeyLeftMask(quint8 keyer, float value)
-{
-    if(value == m_upstreamKeys.value(keyer).m_leftMask)
-    {
-        return;
-    }
-
-    QByteArray cmd = "CKMs";
-    QByteArray payload;
-    U16_U8 val;
-
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    val.u16 = m_upstreamKeys[keyer].m_topMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_bottomMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_rightMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setUpstreamKeyRightMask(quint8 keyer, float value)
-{
-    if(value == m_upstreamKeys.value(keyer).m_rightMask)
-    {
-        return;
-    }
-
-    QByteArray cmd = "CKMs";
-    QByteArray payload;
-    U16_U8 val;
-
-    payload.append((char)0x1e);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    val.u16 = m_upstreamKeys[keyer].m_topMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_bottomMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = m_upstreamKeys[keyer].m_leftMask * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    val.u16 = value * 1000;
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
+    payload[0] = (char)0x1e;
+    payload[1] = (char)keyer;
+    val.u16 = top * 1000;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
+    val.u16 = bottom * 1000;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
+    val.u16 = left * 1000;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
+    val.u16 = right * 1000;
+    payload[10] = (char)val.u8[1];
+    payload[11] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1609,21 +1342,12 @@ void QAtemConnection::setUpstreamKeyLumaPreMultipliedKey(quint8 keyer, bool preM
         return;
     }
 
-    QByteArray cmd = "CKLm";
-    QByteArray payload;
+    QByteArray cmd("CKLm");
+    QByteArray payload(12, (char)0x0);
 
-    payload.append((char)0x01);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)preMultiplied);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[1] = (char)keyer;
+    payload[3] = (char)preMultiplied;
 
     sendCommand(cmd, payload);
 }
@@ -1635,21 +1359,12 @@ void QAtemConnection::setUpstreamKeyLumaInvertKey(quint8 keyer, bool invert)
         return;
     }
 
-    QByteArray cmd = "CKLm";
-    QByteArray payload;
+    QByteArray cmd("CKLm");
+    QByteArray payload(12, (char)0x0);
 
-    payload.append((char)0x08);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)invert);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x08;
+    payload[1] = (char)keyer;
+    payload[8] = (char)invert;
 
     sendCommand(cmd, payload);
 }
@@ -1661,23 +1376,15 @@ void QAtemConnection::setUpstreamKeyLumaClip(quint8 keyer, float clip)
         return;
     }
 
-    QByteArray cmd = "CKLm";
-    QByteArray payload;
+    QByteArray cmd("CKLm");
+    QByteArray payload(12, (char)0x0);
     U16_U8 val;
     val.u16 = clip * 10;
 
-    payload.append((char)0x02);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x02;
+    payload[1] = (char)keyer;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1689,23 +1396,15 @@ void QAtemConnection::setUpstreamKeyLumaGain(quint8 keyer, float gain)
         return;
     }
 
-    QByteArray cmd = "CKLm";
-    QByteArray payload;
+    QByteArray cmd("CKLm");
+    QByteArray payload(12, (char)0x0);
     U16_U8 val;
     val.u16 = gain * 10;
 
-    payload.append((char)0x04);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x04;
+    payload[1] = (char)keyer;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1717,27 +1416,15 @@ void QAtemConnection::setUpstreamKeyChromaHue(quint8 keyer, float hue)
         return;
     }
 
-    QByteArray cmd = "CKCk";
-    QByteArray payload;
+    QByteArray cmd("CKCk");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = hue * 10;
 
-    payload.append((char)0x01);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[1] = (char)keyer;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1749,27 +1436,15 @@ void QAtemConnection::setUpstreamKeyChromaGain(quint8 keyer, float gain)
         return;
     }
 
-    QByteArray cmd = "CKCk";
-    QByteArray payload;
+    QByteArray cmd("CKCk");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = gain * 10;
 
-    payload.append((char)0x02);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x02;
+    payload[1] = (char)keyer;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1781,27 +1456,15 @@ void QAtemConnection::setUpstreamKeyChromaYSuppress(quint8 keyer, float ySuppres
         return;
     }
 
-    QByteArray cmd = "CKCk";
-    QByteArray payload;
+    QByteArray cmd("CKCk");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = ySuppress * 10;
 
-    payload.append((char)0x04);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x04;
+    payload[1] = (char)keyer;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1813,27 +1476,15 @@ void QAtemConnection::setUpstreamKeyChromaLift(quint8 keyer, float lift)
         return;
     }
 
-    QByteArray cmd = "CKCk";
-    QByteArray payload;
+    QByteArray cmd("CKCk");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = lift * 10;
 
-    payload.append((char)0x08);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x08;
+    payload[1] = (char)keyer;
+    payload[10] = (char)val.u8[1];
+    payload[11] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1845,25 +1496,12 @@ void QAtemConnection::setUpstreamKeyChromaNarrowRange(quint8 keyer, bool narrowR
         return;
     }
 
-    QByteArray cmd = "CKCk";
-    QByteArray payload;
+    QByteArray cmd("CKCk");
+    QByteArray payload(16, (char)0x0);
 
-    payload.append((char)0x10);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)narrowRange);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x10;
+    payload[1] = (char)keyer;
+    payload[12] = (char)narrowRange;
 
     sendCommand(cmd, payload);
 }
@@ -1875,25 +1513,12 @@ void QAtemConnection::setUpstreamKeyPatternPattern(quint8 keyer, quint8 pattern)
         return;
     }
 
-    QByteArray cmd = "CKPt";
-    QByteArray payload;
+    QByteArray cmd("CKPt");
+    QByteArray payload(16, (char)0x0);
 
-    payload.append((char)0x01);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)pattern);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[1] = (char)keyer;
+    payload[3] = (char)pattern;
 
     sendCommand(cmd, payload);
 }
@@ -1905,25 +1530,12 @@ void QAtemConnection::setUpstreamKeyPatternInvertPattern(quint8 keyer, bool inve
         return;
     }
 
-    QByteArray cmd = "CKPt";
-    QByteArray payload;
+    QByteArray cmd("CKPt");
+    QByteArray payload(16, (char)0x0);
 
-    payload.append((char)0x40);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)invert);
-    payload.append((char)0x00);
+    payload[0] = (char)0x40;
+    payload[1] = (char)keyer;
+    payload[14] = (char)invert;
 
     sendCommand(cmd, payload);
 }
@@ -1935,27 +1547,15 @@ void QAtemConnection::setUpstreamKeyPatternSize(quint8 keyer, float size)
         return;
     }
 
-    QByteArray cmd = "CKPt";
-    QByteArray payload;
+    QByteArray cmd("CKPt");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = size * 10;
 
-    payload.append((char)0x02);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x02;
+    payload[1] = (char)keyer;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1967,27 +1567,15 @@ void QAtemConnection::setUpstreamKeyPatternSymmetry(quint8 keyer, float symmetry
         return;
     }
 
-    QByteArray cmd = "CKPt";
-    QByteArray payload;
+    QByteArray cmd("CKPt");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = symmetry * 10;
 
-    payload.append((char)0x04);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x04;
+    payload[1] = (char)keyer;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1999,27 +1587,15 @@ void QAtemConnection::setUpstreamKeyPatternSoftness(quint8 keyer, float softness
         return;
     }
 
-    QByteArray cmd = "CKPt";
-    QByteArray payload;
+    QByteArray cmd("CKPt");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = softness * 10;
 
-    payload.append((char)0x08);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x08;
+    payload[1] = (char)keyer;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -2031,27 +1607,15 @@ void QAtemConnection::setUpstreamKeyPatternXPosition(quint8 keyer, float xPositi
         return;
     }
 
-    QByteArray cmd = "CKPt";
-    QByteArray payload;
+    QByteArray cmd("CKPt");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = xPosition * 1000;
 
-    payload.append((char)0x10);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x10;
+    payload[1] = (char)keyer;
+    payload[10] = (char)val.u8[1];
+    payload[11] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -2063,34 +1627,22 @@ void QAtemConnection::setUpstreamKeyPatternYPosition(quint8 keyer, float yPositi
         return;
     }
 
-    QByteArray cmd = "CKPt";
-    QByteArray payload;
+    QByteArray cmd("CKPt");
+    QByteArray payload(16, (char)0x0);
     U16_U8 val;
     val.u16 = yPosition * 1000;
 
-    payload.append((char)0x20);
-    payload.append((char)keyer);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)val.u8[1]);
-    payload.append((char)val.u8[0]);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x20;
+    payload[1] = (char)keyer;
+    payload[12] = (char)val.u8[1];
+    payload[13] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::setUpstreamKeyDVEPosition(quint8 keyer, float xPosition, float yPosition)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2108,7 +1660,7 @@ void QAtemConnection::setUpstreamKeyDVEPosition(quint8 keyer, float xPosition, f
 
 void QAtemConnection::setUpstreamKeyDVESize(quint8 keyer, float xSize, float ySize)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2126,7 +1678,7 @@ void QAtemConnection::setUpstreamKeyDVESize(quint8 keyer, float xSize, float ySi
 
 void QAtemConnection::setUpstreamKeyDVERotation(quint8 keyer, float rotation)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2141,7 +1693,7 @@ void QAtemConnection::setUpstreamKeyDVERotation(quint8 keyer, float rotation)
 
 void QAtemConnection::setUpstreamKeyDVELightSource(quint8 keyer, float direction, quint8 altitude)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2157,7 +1709,7 @@ void QAtemConnection::setUpstreamKeyDVELightSource(quint8 keyer, float direction
 
 void QAtemConnection::setUpstreamKeyDVEDropShadowEnabled(quint8 keyer, bool enabled)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[3] = (char)0x40;
@@ -2169,7 +1721,7 @@ void QAtemConnection::setUpstreamKeyDVEDropShadowEnabled(quint8 keyer, bool enab
 
 void QAtemConnection::setUpstreamKeyDVEBorderEnabled(quint8 keyer, bool enabled)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[3] = (char)0x20;
@@ -2181,7 +1733,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderEnabled(quint8 keyer, bool enabled)
 
 void QAtemConnection::setUpstreamKeyDVEBorderStyle(quint8 keyer, quint8 style)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[3] = (char)0x80;
@@ -2193,7 +1745,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderStyle(quint8 keyer, quint8 style)
 
 void QAtemConnection::setUpstreamKeyDVEBorderColorH(quint8 keyer, float h)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2208,7 +1760,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderColorH(quint8 keyer, float h)
 
 void QAtemConnection::setUpstreamKeyDVEBorderColorS(quint8 keyer, float s)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2223,7 +1775,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderColorS(quint8 keyer, float s)
 
 void QAtemConnection::setUpstreamKeyDVEBorderColorL(quint8 keyer, float l)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2245,7 +1797,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderColor(quint8 keyer, const QColor& c
 
 void QAtemConnection::setUpstreamKeyDVEBorderWidth(quint8 keyer, float outside, float inside)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
     U16_U8 val;
 
@@ -2263,7 +1815,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderWidth(quint8 keyer, float outside, 
 
 void QAtemConnection::setUpstreamKeyDVEBorderSoften(quint8 keyer, quint8 outside, quint8 inside)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[2] = (char)0x0c;
@@ -2276,7 +1828,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderSoften(quint8 keyer, quint8 outside
 
 void QAtemConnection::setUpstreamKeyDVEBorderOpacity(quint8 keyer, quint8 opacity)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[2] = (char)0x40;
@@ -2288,7 +1840,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderOpacity(quint8 keyer, quint8 opacit
 
 void QAtemConnection::setUpstreamKeyDVEBorderBevelPosition(quint8 keyer, float position)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[2] = (char)0x20;
@@ -2300,7 +1852,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderBevelPosition(quint8 keyer, float p
 
 void QAtemConnection::setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 soften)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[2] = (char)0x10;
@@ -2312,7 +1864,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 so
 
 void QAtemConnection::setUpstreamKeyDVERate(quint8 keyer, quint8 rate)
 {
-    QByteArray cmd = "CKDV";
+    QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
 
     payload[0] = (char)0x02;
@@ -2324,7 +1876,7 @@ void QAtemConnection::setUpstreamKeyDVERate(quint8 keyer, quint8 rate)
 
 void QAtemConnection::setUpstreamKeyDVEKeyFrame(quint8 keyer, quint8 keyFrame)
 {
-    QByteArray cmd = "SFKF";
+    QByteArray cmd("SFKF");
     QByteArray payload(4, (char)0x0);
 
     payload[1] = (char)keyer;
@@ -2335,7 +1887,7 @@ void QAtemConnection::setUpstreamKeyDVEKeyFrame(quint8 keyer, quint8 keyFrame)
 
 void QAtemConnection::runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 direction)
 {
-    QByteArray cmd = "RFlK";
+    QByteArray cmd("RFlK");
     QByteArray payload(8, (char)0x0);
 
     payload[2] = (char)keyer;
@@ -2353,7 +1905,7 @@ void QAtemConnection::runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 dir
 
 void QAtemConnection::setUpstreamKeyFlyEnabled(quint8 keyer, bool enable)
 {
-    QByteArray cmd = "CKTp";
+    QByteArray cmd("CKTp");
     QByteArray payload(8, (char)0x0);
 
     payload[0] = (char)0x02;
@@ -2370,13 +1922,11 @@ void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
         return;
     }
 
-    QByteArray cmd = "CAuS";
-    QByteArray payload;
+    QByteArray cmd("CAuS");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)aux);
-    payload.append((char)source);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)aux;
+    payload[1] = (char)source;
 
     sendCommand(cmd, payload);
 }
@@ -2388,37 +1938,12 @@ void QAtemConnection::setInputType(quint8 input, quint8 type)
         return;
     }
 
-    QByteArray cmd = "CInL";
-    QByteArray payload;
+    QByteArray cmd("CInL");
+    QByteArray payload(28, (char)0x0);
 
-    payload.append((char)0x04);
-    payload.append((char)input);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)type);
-    payload.append((char)0x00);
+    payload[0] = (char)0x04;
+    payload[1] = (char)input;
+    payload[26] = (char)type;
 
     sendCommand(cmd, payload);
 }
@@ -2430,20 +1955,14 @@ void QAtemConnection::setInputLongName(quint8 input, const QString &name)
         return;
     }
 
-    QByteArray cmd = "CInL";
-    QByteArray payload;
+    QByteArray cmd("CInL");
+    QByteArray payload(28, (char)0x0);
     QByteArray namearray = name.toLatin1();
     namearray.resize(20);
 
-    payload.append((char)0x01);
-    payload.append((char)input);
-    payload.append(namearray);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[1] = (char)input;
+    payload.replace(2, 20, namearray);
 
     sendCommand(cmd, payload);
 }
@@ -2455,36 +1974,14 @@ void QAtemConnection::setInputShortName(quint8 input, const QString &name)
         return;
     }
 
-    QByteArray cmd = "CInL";
-    QByteArray payload;
+    QByteArray cmd("CInL");
+    QByteArray payload(28, (char)0x0);
     QByteArray namearray = name.toLatin1();
     namearray.resize(4);
 
-    payload.append((char)0x02);
-    payload.append((char)input);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append(namearray);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)0x02;
+    payload[1] = (char)input;
+    payload.replace(22, 4, namearray);
 
     sendCommand(cmd, payload);
 }
@@ -2552,13 +2049,11 @@ void QAtemConnection::setMultiViewLayout(quint8 layout)
         return;
     }
 
-    QByteArray cmd = "CMvP";
-    QByteArray payload;
+    QByteArray cmd("CMvP");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)0x01);
-    payload.append((char)0x00);
-    payload.append((char)layout);
-    payload.append((char)0x00);
+    payload[0] = (char)0x01;
+    payload[2] = (char)layout;
 
     sendCommand(cmd, payload);
 }

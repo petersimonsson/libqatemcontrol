@@ -409,10 +409,7 @@ public slots:
     void setUpstreamKeyFillSource(quint8 keyer, quint8 source);
     void setUpstreamKeyKeySource(quint8 keyer, quint8 source);
     void setUpstreamKeyEnableMask(quint8 keyer, bool enable);
-    void setUpstreamKeyTopMask(quint8 keyer, float value);
-    void setUpstreamKeyBottomMask(quint8 keyer, float value);
-    void setUpstreamKeyLeftMask(quint8 keyer, float value);
-    void setUpstreamKeyRightMask(quint8 keyer, float value);
+    void setUpstreamKeyMask(quint8 keyer, float top, float bottom, float left, float right);
     void setUpstreamKeyLumaPreMultipliedKey(quint8 keyer, bool preMultiplied);
     void setUpstreamKeyLumaInvertKey(quint8 keyer, bool invert);
     void setUpstreamKeyLumaClip(quint8 keyer, float clip);
@@ -479,10 +476,7 @@ public slots:
     void setDownstreamKeyClip(quint8 keyer, float clip);
     void setDownstreamKeyGain(quint8 keyer, float gain);
     void setDownstreamKeyEnableMask(quint8 keyer, bool enable);
-    void setDownstreamKeyTopMask(quint8 keyer, float value);
-    void setDownstreamKeyBottomMask(quint8 keyer, float value);
-    void setDownstreamKeyLeftMask(quint8 keyer, float value);
-    void setDownstreamKeyRightMask(quint8 keyer, float value);
+    void setDownstreamKeyMask(quint8 keyer, float top, float bottom, float left, float right);
 
     void saveSettings();
     void clearSettings();
@@ -653,7 +647,7 @@ protected slots:
     void onRCPS(const QByteArray& payload);
 
 protected:
-    QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 undefined1, quint16 undefined2);
+    QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId);
 
     QAtemConnection::CommandHeader parseCommandHeader(const QByteArray& datagram) const;
     void parsePayLoad(const QByteArray& datagram);
