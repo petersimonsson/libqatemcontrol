@@ -81,6 +81,15 @@ public:
         QString name;
     };
 
+    struct MediaPlayerState
+    {
+        quint8 index;
+        bool loop;
+        bool playing;
+        bool atBegining;
+        quint8 currentFrame;
+    };
+
     explicit QAtemConnection(QObject* parent = NULL);
 
     /// Connect to ATEM switcher at @p address
@@ -247,6 +256,8 @@ public:
     quint8 mediaPlayerType(quint8 player) const;
     quint8 mediaPlayerSelectedStill(quint8 player) const;
     quint8 mediaPlayerSelectedClip(quint8 player) const;
+    /// @returns the current state of the media player @p player
+    MediaPlayerState mediaPlayerState(quint8 player) const { return m_mediaPlayerStates.value(player); }
 
     quint8 auxSource(quint8 aux) const;
 
@@ -479,6 +490,11 @@ public slots:
     void setColorGeneratorColor(quint8 generator, const QColor& color);
 
     void setMediaPlayerSource(quint8 player, bool clip, quint8 source);
+    void setMediaPlayerLoop(quint8 player, bool loop);
+    void setMediaPlayerPlay(quint8 player, bool play);
+    void mediaPlayerGoToBeginning(quint8 player);
+    void mediaPlayerGoFrameBackward(quint8 player);
+    void mediaPlayerGoFrameForward(quint8 player);
 
     void setMixFrames(quint8 frames);
 
@@ -634,6 +650,7 @@ protected slots:
     void onDcOt(const QByteArray& payload);
     void onAMmO(const QByteArray& payload);
     void onMPSp(const QByteArray& payload);
+    void onRCPS(const QByteArray& payload);
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 undefined1, quint16 undefined2);
@@ -685,6 +702,7 @@ private:
     QHash<quint8, quint8> m_mediaPlayerType;
     QHash<quint8, quint8> m_mediaPlayerSelectedStill;
     QHash<quint8, quint8> m_mediaPlayerSelectedClip;
+    QHash<quint8, MediaPlayerState> m_mediaPlayerStates;
 
     QHash<quint8, quint8> m_auxSource;
 
@@ -826,6 +844,7 @@ signals:
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 
     void mediaPlayerChanged(quint8 player, quint8 type, quint8 still, quint8 clip);
+    void mediaPlayerStateChanged(quint8 player, const MediaPlayerState& state);
 
     void auxSourceChanged(quint8 aux, quint8 source);
 

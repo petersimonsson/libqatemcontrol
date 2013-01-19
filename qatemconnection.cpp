@@ -905,6 +905,65 @@ void QAtemConnection::setMediaPlayerSource(quint8 player, bool clip, quint8 sour
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setMediaPlayerLoop(quint8 player, bool loop)
+{
+    QByteArray cmd("SCPS");
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x02;
+    payload[1] = (char)player;
+    payload[3] = (char)loop;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setMediaPlayerPlay(quint8 player, bool play)
+{
+    QByteArray cmd("SCPS");
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x01;
+    payload[1] = (char)player;
+    payload[2] = (char)play;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::mediaPlayerGoToBeginning(quint8 player)
+{
+    QByteArray cmd("SCPS");
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x04;
+    payload[1] = (char)player;
+    payload[4] = (char)0x01;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::mediaPlayerGoFrameBackward(quint8 player)
+{
+    QByteArray cmd("SCPS");
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x08;
+    payload[1] = (char)player;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::mediaPlayerGoFrameForward(quint8 player)
+{
+    QByteArray cmd("SCPS");
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x08;
+    payload[1] = (char)player;
+    payload[7] = (char)0x01;
+
+    sendCommand(cmd, payload);
+}
+
 quint8 QAtemConnection::tallyState(quint8 id) const
 {
     if(id < m_tallyStateCount)
@@ -3080,11 +3139,23 @@ void QAtemConnection::onAMmO(const QByteArray& payload)
 
 void QAtemConnection::onMPSp(const QByteArray& payload)
 {
-    m_mediaPoolClip1Size = payload.at(7);
-    m_mediaPoolClip2Size = payload.at(9);
+    m_mediaPoolClip1Size = (quint8)payload.at(7);
+    m_mediaPoolClip2Size = (quint8)payload.at(9);
 
     emit mediaPoolClip1SizeChanged(m_mediaPoolClip1Size);
     emit mediaPoolClip2SizeChanged(m_mediaPoolClip2Size);
+}
+
+void QAtemConnection::onRCPS(const QByteArray& payload)
+{
+    quint8 index = (quint8)payload.at(6);
+    m_mediaPlayerStates[index].index = index;
+    m_mediaPlayerStates[index].playing = (bool)payload.at(7);
+    m_mediaPlayerStates[index].loop = (bool)payload.at(8);
+    m_mediaPlayerStates[index].atBegining = (bool)payload.at(9);
+    m_mediaPlayerStates[index].currentFrame = (quint8)payload.at(11);
+
+    emit mediaPlayerStateChanged(index, m_mediaPlayerStates.value(index));
 }
 
 void QAtemConnection::initCommandSlotHash()
@@ -3127,4 +3198,5 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("DcOt", "onDcOt");
     m_commandSlotHash.insert("AMmO", "onAMmO");
     m_commandSlotHash.insert("MPSp", "onMPSp");
+    m_commandSlotHash.insert("RCPS", "onRCPS");
 }
