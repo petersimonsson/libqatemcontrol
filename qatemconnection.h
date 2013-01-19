@@ -266,6 +266,16 @@ public:
 
     /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 720p50, 3 = 720p5994, 4 = 1080i50, 5 = 1080i5994
     quint8 videoFormat() const { return m_videoFormat; }
+    /// @returns type of video down coversion, 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
+    quint8 videoDownConvertType() const { return m_videoDownConvertType; }
+
+    /// @returns which audio is output on the audio breakout. 0 = Program audio, 1 = Monitor audio
+    quint8 audioBreakout() const { return m_audioBreakout; }
+
+    /// @returns size of clip 1 in the media pool
+    quint8 mediaPoolClip1Size() const { return m_mediaPoolClip1Size; }
+    /// @returns size of clip 2 in the media pool
+    quint8 mediaPoolClip2Size() const { return m_mediaPoolClip2Size; }
 
     /// @returns duration in number of frames for mix transition
     quint8 mixFrames() const { return m_mixFrames; }
@@ -560,11 +570,24 @@ public slots:
 
     void setAuxSource(quint8 aux, quint8 source);
 
+    /**
+     * Set the type of input to use. 1 = SDI, 2 = HMDI, 4 = Component.
+     * On TVS input 3 and 4 are selectable between HDMI and SDI.
+     * On 1 M/E input 1 is selectable between HDMI and component.
+     */
     void setInputType(quint8 input, quint8 type);
     void setInputLongName(quint8 input, const QString& name);
     void setInputShortName(quint8 input, const QString& name);
 
     void setVideoFormat(quint8 format);
+    /// Set type of video down coversion to @p type. 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
+    void setVideoDownConvertType(quint8 type);
+
+    /// Decides which audio is output on the audio breakout, 0 = Program audio, 1 = Monitor audio
+    void setAudioBreakout(quint8 audio);
+
+    /// Sets the size of media pool clip 1 to @p size, max is 180. Clip 2 size will be 180 - @p size.
+    void setMediaPoolClipSplit(quint8 size);
 
     void setMultiViewLayout(quint8 layout);
 
@@ -608,6 +631,9 @@ protected slots:
     void onKePt(const QByteArray& payload);
     void onKeDV(const QByteArray& payload);
     void onKeFS(const QByteArray& payload);
+    void onDcOt(const QByteArray& payload);
+    void onAMmO(const QByteArray& payload);
+    void onMPSp(const QByteArray& payload);
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 undefined1, quint16 undefined2);
@@ -674,6 +700,12 @@ private:
     quint8 m_multiViewLayout;
 
     quint8 m_videoFormat;
+    quint8 m_videoDownConvertType;
+
+    quint8 m_audioBreakout;
+
+    quint8 m_mediaPoolClip1Size;
+    quint8 m_mediaPoolClip2Size;
 
     quint8 m_mixFrames;
 
@@ -841,6 +873,14 @@ signals:
     void stingerMixRateChanged(quint16 frames);
 
     void borderSourceChanged(quint8 index);
+
+    void videoFormatChanged(quint8 format);
+    void videoDownConvertTypeChanged(quint8 type);
+
+    void audioBreakoutChanged(quint8 audio);
+
+    void mediaPoolClip1SizeChanged(quint8 size);
+    void mediaPoolClip2SizeChanged(quint8 size);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

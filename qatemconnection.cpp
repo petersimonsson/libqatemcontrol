@@ -91,6 +91,12 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_multiViewLayout = 0;
 
     m_videoFormat = 0;
+    m_videoDownConvertType = 0;
+
+    m_audioBreakout = 0;
+
+    m_mediaPoolClip1Size = 0;
+    m_mediaPoolClip2Size = 0;
 
     m_majorversion = 0;
     m_minorversion = 0;
@@ -2431,13 +2437,51 @@ void QAtemConnection::setVideoFormat(quint8 format)
         return;
     }
 
-    QByteArray cmd = "CVdM";
-    QByteArray payload;
+    QByteArray cmd("CVdM");
+    QByteArray payload(4, (char)0x0);
 
-    payload.append((char)format);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
-    payload.append((char)0x00);
+    payload[0] = (char)format;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setVideoDownConvertType(quint8 type)
+{
+    if (type == m_videoDownConvertType)
+    {
+        return;
+    }
+
+    QByteArray cmd("CDcO");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)type;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioBreakout(quint8 audio)
+{
+    if (audio == m_audioBreakout)
+    {
+        return;
+    }
+
+    QByteArray cmd("CAMm");
+    QByteArray payload(12, (char)0x0);
+
+    payload[0] = (char)0x01;
+    payload[1] = (char)audio;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setMediaPoolClipSplit(quint8 size)
+{
+    QByteArray cmd("CMPS");
+    QByteArray payload(4, (char)0x0);
+
+    payload[1] = (char)size;
 
     sendCommand(cmd, payload);
 }
@@ -2657,7 +2701,7 @@ void QAtemConnection::onInPr(const QByteArray& payload)
     info.index = (quint8)payload.at(6);
     info.longText = payload.mid(7, 20);
     info.shortText = payload.mid(27, 4);
-    info.type = (quint8)payload.at(32); // 1 = SDI, 2 = HDMI, 32 = Internal (on TVS)
+    info.type = (quint8)payload.at(32); // 1 = SDI, 2 = HDMI, 4 = Component, 32 = Internal
     m_inputInfos.insert(info.index, info);
 
     emit inputInfoChanged(info);
@@ -2694,6 +2738,8 @@ void QAtemConnection::onMvPr(const QByteArray& payload)
 void QAtemConnection::onVidM(const QByteArray& payload)
 {
     m_videoFormat = (quint8)payload.at(6);
+
+    emit videoFormatChanged(m_videoFormat);
 }
 
 void QAtemConnection::onTime(const QByteArray& payload)
@@ -3018,6 +3064,29 @@ void QAtemConnection::onKeFS(const QByteArray& payload)
     emit upstreamKeyDVEKeyFrameBSetChanged(index, m_upstreamKeys[index].m_dveKeyFrameBSet);
 }
 
+void QAtemConnection::onDcOt(const QByteArray& payload)
+{
+    m_videoDownConvertType = (quint8)payload.at(6);
+
+    emit videoDownConvertTypeChanged(m_videoDownConvertType);
+}
+
+void QAtemConnection::onAMmO(const QByteArray& payload)
+{
+    m_audioBreakout = (quint8)payload.at(6);
+
+    emit audioBreakoutChanged(m_audioBreakout);
+}
+
+void QAtemConnection::onMPSp(const QByteArray& payload)
+{
+    m_mediaPoolClip1Size = payload.at(7);
+    m_mediaPoolClip2Size = payload.at(9);
+
+    emit mediaPoolClip1SizeChanged(m_mediaPoolClip1Size);
+    emit mediaPoolClip2SizeChanged(m_mediaPoolClip2Size);
+}
+
 void QAtemConnection::initCommandSlotHash()
 {
     m_commandSlotHash.insert("PrgI", "onPrgI");
@@ -3055,4 +3124,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("KePt", "onKePt");
     m_commandSlotHash.insert("KeDV", "onKeDV");
     m_commandSlotHash.insert("KeFS", "onKeFS");
+    m_commandSlotHash.insert("DcOt", "onDcOt");
+    m_commandSlotHash.insert("AMmO", "onAMmO");
+    m_commandSlotHash.insert("MPSp", "onMPSp");
 }
