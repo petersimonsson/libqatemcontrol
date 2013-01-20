@@ -90,6 +90,24 @@ public:
         quint8 currentFrame;
     };
 
+    struct AudioInput
+    {
+        quint8 index;
+        quint8 type; // 0 = Video input, 1 = Media player, 2 = External
+        quint8 source;
+        quint8 state; // 0 = Off, 1 = On, 2 = AFV
+        float balance;
+        float gainLeft; // dB
+        float gainRight; // dB
+    };
+
+    struct AudioLevel
+    {
+        quint8 index;
+        float left;
+        float right;
+    };
+
     explicit QAtemConnection(QObject* parent = NULL);
 
     /// Connect to ATEM switcher at @p address
@@ -280,9 +298,6 @@ public:
     /// @returns type of video down coversion, 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
     quint8 videoDownConvertType() const { return m_videoDownConvertType; }
 
-    /// @returns which audio is output on the audio breakout. 0 = Program audio, 1 = Monitor audio
-    quint8 audioBreakout() const { return m_audioBreakout; }
-
     /// @returns size of clip 1 in the media pool
     quint8 mediaPoolClip1Size() const { return m_mediaPoolClip1Size; }
     /// @returns size of clip 2 in the media pool
@@ -388,6 +403,22 @@ public:
 
     /// @returns the border source index, used for both dip and wipe transition
     quint8 borderSource() const { return m_borderSource; }
+
+    /// @returns audio input info for input @p index
+    AudioInput audioInput(quint8 index) { return m_audioInputs.value(index); }
+    /// @return audio tally state for audio input @p index
+    bool audioTallyState(quint8 index) { return m_audioTally.value(index); }
+
+    /// @returns true if the monitor function is enabled on the audio breakout cable.
+    bool audioMonitorEnabled() const { return m_audioMonitorEnabled; }
+    float audioMonitorGainLeft() const { return m_audioMonitorGainLeft; }
+    float audioMonitorGainRight() const { return m_audioMonitorGainRight; }
+    bool audioMonitorMuted() const { return m_audioMonitorMuted; }
+    bool audioMonitorDimmed() const { return m_audioMonitorDimmed; }
+    /// @returns the audio channel that is solo on monitor out. -1 = None.
+    qint8 audioMonitorSolo() const { return m_audioMonitorSolo; }
+    float audioMasterOutputGainLeft() const { return m_audioMasterOutputGainLeft; }
+    float audioMasterOutputGainRight() const { return m_audioMasterOutputGainRight; }
 
 public slots:
     void changeProgramInput(char index);
@@ -593,13 +624,28 @@ public slots:
     /// Set type of video down coversion to @p type. 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
     void setVideoDownConvertType(quint8 type);
 
-    /// Decides which audio is output on the audio breakout, 0 = Program audio, 1 = Monitor audio
-    void setAudioBreakout(quint8 audio);
-
     /// Sets the size of media pool clip 1 to @p size, max is 180. Clip 2 size will be 180 - @p size.
     void setMediaPoolClipSplit(quint8 size);
 
     void setMultiViewLayout(quint8 layout);
+
+    /// Set to true if you want audio data from the mixer
+    void setAudioLevelsEnabled(bool enabled);
+    /// Set the state of the audio input. 0 = Off, 1 = On, 2 = AFV
+    void setAudioInputState(quint8 index, quint8 state);
+    /// Set the balance of the audio input. @p balance is a value between -1.0 and +1.0.
+    void setAudioInputBalance(quint8 index, float balance);
+    /// Set the gain of the audio input @p index. @p left and @p right is between +6dB and -60dB (-infdB)
+    void setAudioInputGain(quint8 index, float left, float right);
+    /// Set the gain of the audio master output. @p left and @p right is between +6dB and -60dB (-infdB)
+    void setAudioMasterOutputGain(float left, float right);
+    /// Enables audio monitoring using the breakout cable.
+    void setAudioMonitorEnabled(bool enabled);
+    /// Set the gain of the audio monitor output. @p left and @p right is between +6dB and -60dB (-infdB)
+    void setAudioMonitorGain(float left, float right);
+    void setAudioMonitorMuted(bool muted);
+    void setAudioMonitorDimmed(bool dimmed);
+    void setAudioMonitorSolo(qint8 solo);
 
 protected slots:
     void handleSocketData();
@@ -645,6 +691,10 @@ protected slots:
     void onAMmO(const QByteArray& payload);
     void onMPSp(const QByteArray& payload);
     void onRCPS(const QByteArray& payload);
+    void onAMLv(const QByteArray& payload);
+    void onAMTl(const QByteArray& payload);
+    void onAMIP(const QByteArray& payload);
+    void onAMMO(const QByteArray& payload);
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId);
@@ -714,8 +764,6 @@ private:
     quint8 m_videoFormat;
     quint8 m_videoDownConvertType;
 
-    quint8 m_audioBreakout;
-
     quint8 m_mediaPoolClip1Size;
     quint8 m_mediaPoolClip2Size;
 
@@ -754,6 +802,20 @@ private:
     quint16 m_stingerMixRate;
 
     quint8 m_borderSource;
+
+    QHash<quint8, AudioInput> m_audioInputs;
+    QHash<quint8, bool> m_audioTally;
+    QHash<quint8, AudioLevel> m_audioLevels;
+
+    bool m_audioMonitorEnabled;
+    float m_audioMonitorGainLeft;
+    float m_audioMonitorGainRight;
+    bool m_audioMonitorDimmed;
+    bool m_audioMonitorMuted;
+    qint8 m_audioMonitorSolo;
+
+    float m_audioMasterOutputGainLeft;
+    float m_audioMasterOutputGainRight;
 
 signals:
     void connected();
@@ -890,10 +952,16 @@ signals:
     void videoFormatChanged(quint8 format);
     void videoDownConvertTypeChanged(quint8 type);
 
-    void audioBreakoutChanged(quint8 audio);
-
     void mediaPoolClip1SizeChanged(quint8 size);
     void mediaPoolClip2SizeChanged(quint8 size);
+
+    void audioInputChanged(quint8 index, const AudioInput& input);
+    void audioMonitorEnabledChanged(bool enabled);
+    void audioMonitorGainChanged(float left, float right);
+    void audioMonitorMutedChanged(bool muted);
+    void audioMonitorDimmedChanged(bool dimmed);
+    void audioMonitorSoloChanged(qint8 solo);
+    void audioMasterOutputGainChanged(float left, float right);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

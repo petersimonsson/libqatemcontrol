@@ -19,6 +19,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDebug>
 
+#include <math.h>
+
 #define SIZE_OF_HEADER 0x0c
 
 QAtemConnection::QAtemConnection(QObject* parent)
@@ -93,13 +95,18 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_videoFormat = 0;
     m_videoDownConvertType = 0;
 
-    m_audioBreakout = 0;
-
     m_mediaPoolClip1Size = 0;
     m_mediaPoolClip2Size = 0;
 
     m_majorversion = 0;
     m_minorversion = 0;
+
+    m_audioMonitorEnabled = false;
+    m_audioMonitorGainLeft = 0;
+    m_audioMonitorGainRight = 0;
+    m_audioMonitorDimmed = false;
+    m_audioMonitorMuted = false;
+    m_audioMonitorSolo = -1;
 
     initCommandSlotHash();
 }
@@ -2016,22 +2023,6 @@ void QAtemConnection::setVideoDownConvertType(quint8 type)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAudioBreakout(quint8 audio)
-{
-    if (audio == m_audioBreakout)
-    {
-        return;
-    }
-
-    QByteArray cmd("CAMm");
-    QByteArray payload(12, (char)0x0);
-
-    payload[0] = (char)0x01;
-    payload[1] = (char)audio;
-
-    sendCommand(cmd, payload);
-}
-
 void QAtemConnection::setMediaPoolClipSplit(quint8 size)
 {
     QByteArray cmd("CMPS");
@@ -2625,13 +2616,6 @@ void QAtemConnection::onDcOt(const QByteArray& payload)
     emit videoDownConvertTypeChanged(m_videoDownConvertType);
 }
 
-void QAtemConnection::onAMmO(const QByteArray& payload)
-{
-    m_audioBreakout = (quint8)payload.at(6);
-
-    emit audioBreakoutChanged(m_audioBreakout);
-}
-
 void QAtemConnection::onMPSp(const QByteArray& payload)
 {
     m_mediaPoolClip1Size = (quint8)payload.at(7);
@@ -2694,4 +2678,234 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("AMmO", "onAMmO");
     m_commandSlotHash.insert("MPSp", "onMPSp");
     m_commandSlotHash.insert("RCPS", "onRCPS");
+    m_commandSlotHash.insert("AMLv", "onAMLv");
+    m_commandSlotHash.insert("AMTl", "onAMTl");
+    m_commandSlotHash.insert("AMIP", "onAMIP");
+    m_commandSlotHash.insert("AMMO", "onAMMO");
+}
+
+void QAtemConnection::setAudioLevelsEnabled(bool enabled)
+{
+    QByteArray cmd("SALN");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioInputState(quint8 index, quint8 state)
+{
+    QByteArray cmd("CAMI");
+    QByteArray payload(12, (char)0x0);
+
+    payload[0] = (char)0x01;
+    payload[1] = (char)index;
+    payload[2] = (char)state;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioInputBalance(quint8 index, float balance)
+{
+    QByteArray cmd("CAMI");
+    QByteArray payload(12, (char)0x0);
+    U16_U8 val;
+    val.u16 = balance * 10000;
+
+    payload[0] = (char)0x08;
+    payload[1] = (char)index;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioInputGain(quint8 index, float left, float right)
+{
+    QByteArray cmd("CAMI");
+    QByteArray payload(12, (char)0x0);
+    U16_U8 val;
+
+    payload[0] = (char)0x06;
+    payload[1] = (char)index;
+    val.u16 = pow(10, left / 20.0) * 32768;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
+    val.u16 = pow(10, right / 20.0) * 32768;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioMasterOutputGain(float left, float right)
+{
+    QByteArray cmd("CAMM");
+    QByteArray payload(8, (char)0x0);
+    U16_U8 val;
+
+    payload[0] = (char)0x03;
+    val.u16 = pow(10, left / 20.0) * 32768;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+    val.u16 = pow(10, right / 20.0) * 32768;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::onAMLv(const QByteArray& payload)
+{
+    // Audio mixer levels
+    qDebug() << payload.mid(6).toHex();
+}
+
+void QAtemConnection::onAMTl(const QByteArray& payload)
+{
+    // Audio mixer tally
+    quint8 count = (quint8)payload.at(7);
+
+    for(int i = 0; i < count; ++i)
+    {
+        m_audioTally[i] = (bool)payload.at(8 + i);
+    }
+}
+
+void QAtemConnection::onAMIP(const QByteArray& payload)
+{
+    // Audio mixer interface preferences
+    quint8 index = (quint8)payload.at(6);
+    m_audioInputs[index].index = index;
+    m_audioInputs[index].type = (quint8)payload.at(7);
+    m_audioInputs[index].source = (quint8)payload.at(8);
+    m_audioInputs[index].state = (quint8)payload.at(9);
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(10);
+    val.u8[0] = (quint8)payload.at(11);
+    m_audioInputs[index].gainLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    val.u8[1] = (quint8)payload.at(12);
+    val.u8[0] = (quint8)payload.at(13);
+    m_audioInputs[index].gainRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    val.u8[1] = (quint8)payload.at(14);
+    val.u8[0] = (quint8)payload.at(15);
+    m_audioInputs[index].balance = (qint16)val.u16 / 10000.0;
+
+    emit audioInputChanged(index, m_audioInputs[index]);
+}
+
+void QAtemConnection::onAMmO(const QByteArray& payload)
+{
+    m_audioMonitorEnabled = (bool)payload.at(6);
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_audioMonitorGainLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    val.u8[1] = (quint8)payload.at(10);
+    val.u8[0] = (quint8)payload.at(11);
+    m_audioMonitorGainRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioMonitorMuted = (bool)payload.at(12);
+    bool solo = (bool)payload.at(13);
+
+    if(solo)
+    {
+        m_audioMonitorSolo = (qint8)payload.at(14);
+    }
+    else
+    {
+        m_audioMonitorSolo = -1;
+    }
+
+    m_audioMonitorDimmed = (bool)payload.at(15);
+
+    emit audioMonitorEnabledChanged(m_audioMonitorEnabled);
+    emit audioMonitorGainChanged(m_audioMonitorGainLeft, m_audioMonitorGainRight);
+    emit audioMonitorMutedChanged(m_audioMonitorMuted);
+    emit audioMonitorDimmedChanged(m_audioMonitorDimmed);
+    emit audioMonitorSoloChanged(m_audioMonitorSolo);
+}
+
+void QAtemConnection::setAudioMonitorEnabled(bool enabled)
+{
+    if (enabled == m_audioMonitorEnabled)
+    {
+        return;
+    }
+
+    QByteArray cmd("CAMm");
+    QByteArray payload(12, (char)0x0);
+
+    payload[0] = (char)0x01;
+    payload[1] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioMonitorGain(float left, float right)
+{
+    QByteArray cmd("CAMm");
+    QByteArray payload(12, (char)0x0);
+    U16_U8 val;
+
+    payload[0] = (char)0x06;
+    val.u16 = pow(10, left / 20.0) * 32768;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+    val.u16 = pow(10, right / 20.0) * 32768;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioMonitorMuted(bool muted)
+{
+    QByteArray cmd("CAMm");
+    QByteArray payload(12, (char)0x0);
+
+    payload[0] = (char)0x08;
+    payload[6] = (char)muted;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioMonitorDimmed(bool dimmed)
+{
+    QByteArray cmd("CAMm");
+    QByteArray payload(12, (char)0x0);
+
+    payload[0] = (char)0x40;
+    payload[9] = (char)dimmed;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setAudioMonitorSolo(qint8 solo)
+{
+    QByteArray cmd("CAMm");
+    QByteArray payload(12, (char)0x0);
+
+    payload[0] = (char)0x30;
+
+    if(solo > -1)
+    {
+        payload[7] = (char)0x01; // Enable
+        payload[8] = (char)solo;
+    }
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::onAMMO(const QByteArray& payload)
+{
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
+    m_audioMasterOutputGainLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_audioMasterOutputGainRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
+
+    emit audioMasterOutputGainChanged(m_audioMasterOutputGainLeft, m_audioMasterOutputGainRight);
 }
