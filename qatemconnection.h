@@ -421,8 +421,8 @@ public:
     float audioMasterOutputGainRight() const { return m_audioMasterOutputGainRight; }
 
 public slots:
-    void changeProgramInput(char index);
-    void changePreviewInput(char index);
+    void changeProgramInput(quint8 index);
+    void changePreviewInput(quint8 index);
 
     void doCut();
     void doAuto();

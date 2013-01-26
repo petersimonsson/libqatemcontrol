@@ -299,7 +299,7 @@ void QAtemConnection::handleError(QAbstractSocket::SocketError)
     emit socketError(m_socket->errorString());
 }
 
-void QAtemConnection::changeProgramInput(char index)
+void QAtemConnection::changeProgramInput(quint8 index)
 {
     if(index == m_programInput)
     {
@@ -309,12 +309,12 @@ void QAtemConnection::changeProgramInput(char index)
     QByteArray cmd("CPgI");
     QByteArray payload(4, (char)0x0);
 
-    payload[1] = index;
+    payload[1] = (char)index;
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::changePreviewInput(char index)
+void QAtemConnection::changePreviewInput(quint8 index)
 {
     if(index == m_previewInput)
     {
@@ -324,7 +324,7 @@ void QAtemConnection::changePreviewInput(char index)
     QByteArray cmd("CPvI");
     QByteArray payload(4, (char)0x0);
 
-    payload[1] = index;
+    payload[1] = (char)index;
 
     sendCommand(cmd, payload);
 }
