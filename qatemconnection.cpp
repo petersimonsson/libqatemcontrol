@@ -2759,7 +2759,66 @@ void QAtemConnection::setAudioMasterOutputGain(float left, float right)
 void QAtemConnection::onAMLv(const QByteArray& payload)
 {
     // Audio mixer levels
-    qDebug() << payload.mid(6).toHex();
+    quint8 numInputs = payload.at(7);
+
+    if(numInputs == 7)
+    {
+        numInputs--;
+    }
+    else
+    {
+        numInputs -= 3;
+    }
+
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(11);
+    val.u8[0] = (quint8)payload.at(12);
+    m_audioMasterOutputLevelLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    val.u8[1] = (quint8)payload.at(15);
+    val.u8[0] = (quint8)payload.at(16);
+    m_audioMasterOutputLevelRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
+
+    for(int i = 0; i < numInputs; ++i)
+    {
+        m_audioLevels[i].index = i;
+        val.u8[1] = (quint8)payload.at(43 + (i * 16));
+        val.u8[0] = (quint8)payload.at(44 + (i * 16));
+        m_audioLevels[i].left = log10f((quint16)val.u16 / 32768.0) * 20.0;
+        val.u8[1] = (quint8)payload.at(47 + (i * 16));
+        val.u8[0] = (quint8)payload.at(48 + (i * 16));
+        m_audioLevels[i].right = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    }
+
+    if(numInputs > 6)
+    {
+        m_audioLevels[numInputs].index = numInputs;
+        val.u8[1] = (quint8)payload.at(171);
+        val.u8[0] = (quint8)payload.at(172);
+        m_audioLevels[numInputs].left = log10f((quint16)val.u16 / 32768.0) * 20.0;
+        val.u8[1] = (quint8)payload.at(175);
+        val.u8[0] = (quint8)payload.at(176);
+        m_audioLevels[numInputs].right = log10f((quint16)val.u16 / 32768.0) * 20.0;
+        numInputs++;
+
+        m_audioLevels[numInputs].index = numInputs;
+        val.u8[1] = (quint8)payload.at(187);
+        val.u8[0] = (quint8)payload.at(188);
+        m_audioLevels[numInputs].left = log10f((quint16)val.u16 / 32768.0) * 20.0;
+        val.u8[1] = (quint8)payload.at(191);
+        val.u8[0] = (quint8)payload.at(192);
+        m_audioLevels[numInputs].right = log10f((quint16)val.u16 / 32768.0) * 20.0;
+        numInputs++;
+    }
+
+    m_audioLevels[numInputs].index = numInputs;
+    val.u8[1] = (quint8)payload.at(203);
+    val.u8[0] = (quint8)payload.at(204);
+    m_audioLevels[numInputs].left = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    val.u8[1] = (quint8)payload.at(207);
+    val.u8[0] = (quint8)payload.at(208);
+    m_audioLevels[numInputs].right = log10f((quint16)val.u16 / 32768.0) * 20.0;
+
+    emit audioLevelsChanged();
 }
 
 void QAtemConnection::onAMTl(const QByteArray& payload)

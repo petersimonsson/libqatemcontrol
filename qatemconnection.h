@@ -420,6 +420,10 @@ public:
     float audioMasterOutputGainLeft() const { return m_audioMasterOutputGainLeft; }
     float audioMasterOutputGainRight() const { return m_audioMasterOutputGainRight; }
 
+    AudioLevel audioLevel(quint8 index) const { return m_audioLevels.value(index); }
+    float audioMasterOutputLevelLeft() const { return m_audioMasterOutputLevelLeft;}
+    float audioMasterOutputLevelRight() const { return m_audioMasterOutputLevelRight;}
+
 public slots:
     void changeProgramInput(quint8 index);
     void changePreviewInput(quint8 index);
@@ -814,6 +818,8 @@ private:
     bool m_audioMonitorMuted;
     qint8 m_audioMonitorSolo;
 
+    float m_audioMasterOutputLevelLeft;
+    float m_audioMasterOutputLevelRight;
     float m_audioMasterOutputGainLeft;
     float m_audioMasterOutputGainRight;
 
@@ -962,6 +968,7 @@ signals:
     void audioMonitorDimmedChanged(bool dimmed);
     void audioMonitorSoloChanged(qint8 solo);
     void audioMasterOutputGainChanged(float left, float right);
+    void audioLevelsChanged();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)
