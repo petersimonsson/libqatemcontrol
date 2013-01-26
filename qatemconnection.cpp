@@ -108,6 +108,11 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_audioMonitorMuted = false;
     m_audioMonitorSolo = -1;
 
+    m_audioMasterOutputLevelLeft = 0;
+    m_audioMasterOutputLevelRight = 0;
+    m_audioMasterOutputGainLeft = 0;
+    m_audioMasterOutputGainRight = 0;
+
     initCommandSlotHash();
 }
 
