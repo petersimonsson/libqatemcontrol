@@ -133,8 +133,11 @@ public:
     /// @returns percent left of transition
     quint16 transitionPosition() const { return m_transitionPosition; }
     quint8 keyersOnNextTransition() const { return m_keyersOnNextTransition; }
-    /// @returns index of selected transition style
-    quint8 transitionStyle() const { return m_transitionStyle; }
+    /// @returns index of selected transition style for next transition
+    quint8 nextTransitionStyle() const { return m_nextTransitionStyle; }
+    quint8 keyersOnCurrentTransition() const { return m_keyersOnCurrentTransition; }
+    /// @returns index of selected transition style for current transition
+    quint8 currentTransitionStyle() const { return m_currentTransitionStyle; }
 
     /// @returns true if fade to black is on.
     bool fadeToBlackEnabled() const { return m_fadeToBlackEnabled; }
@@ -735,8 +738,10 @@ private:
     bool m_transitionPreviewEnabled;
     quint8 m_transitionFrameCount;
     quint16 m_transitionPosition;
+    quint8 m_keyersOnCurrentTransition;
+    quint8 m_currentTransitionStyle;
     quint8 m_keyersOnNextTransition;
-    quint8 m_transitionStyle;
+    quint8 m_nextTransitionStyle;
 
     bool m_fadeToBlackEnabled;
     quint8 m_fadeToBlackFrameCount;
@@ -835,8 +840,10 @@ signals:
     void transitionPreviewChanged(bool state);
     void transitionFrameCountChanged(quint8 count);
     void transitionPositionChanged(quint16 count);
-    void transitionStyleChanged(quint8 style);
+    void nextTransitionStyleChanged(quint8 style);
     void keyersOnNextTransitionChanged(quint8 keyers);
+    void currentTransitionStyleChanged(quint8 style);
+    void keyersOnCurrentTransitionChanged(quint8 keyers);
 
     void fadeToBlackChanged(bool enabled);
     void fadeToBlackFrameCountChanged(quint8 count);

@@ -48,8 +48,10 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_transitionPreviewEnabled = false;
     m_transitionFrameCount = 0;
     m_transitionPosition = 0;
+    m_keyersOnCurrentTransition = 0;
+    m_currentTransitionStyle = 0;
     m_keyersOnNextTransition = 0;
-    m_transitionStyle = 0;
+    m_nextTransitionStyle = 0;
 
     m_fadeToBlackEnabled = false;
     m_fadeToBlackFrameCount = 0;
@@ -423,11 +425,6 @@ void QAtemConnection::setTransitionPreview(bool state)
 
 void QAtemConnection::setTransitionType(quint8 type)
 {
-    if(type == m_transitionStyle)
-    {
-        return;
-    }
-
     QByteArray cmd("CTTp");
     QByteArray payload(4, (char)0x0);
 
@@ -2098,11 +2095,15 @@ void QAtemConnection::onTrPs(const QByteArray& payload)
 
 void QAtemConnection::onTrSS(const QByteArray& payload)
 {
-    m_transitionStyle = (quint8)payload.at(7); // Bit 0 = Mix, 1 = Dip, 2 = Wipe, 3 = DVE and 4 = Stinger, only bit 0-2 available on TVS
-    m_keyersOnNextTransition = ((quint8)payload.at(8) & 0x1f); // Bit 0 = Background, 1-4 = keys, only bit 0 and 1 available on TVS
+    m_currentTransitionStyle = (quint8)payload.at(7); // Bit 0 = Mix, 1 = Dip, 2 = Wipe, 3 = DVE and 4 = Stinger, only bit 0-2 available on TVS
+    m_keyersOnCurrentTransition = ((quint8)payload.at(8) & 0x1f); // Bit 0 = Background, 1-4 = keys, only bit 0 and 1 available on TVS
+    m_nextTransitionStyle = (quint8)payload.at(9); // Bit 0 = Mix, 1 = Dip, 2 = Wipe, 3 = DVE and 4 = Stinger, only bit 0-2 available on TVS
+    m_keyersOnNextTransition = ((quint8)payload.at(10) & 0x1f); // Bit 0 = Background, 1-4 = keys, only bit 0 and 1 available on TVS
 
-    emit transitionStyleChanged(m_transitionStyle);
+    emit nextTransitionStyleChanged(m_nextTransitionStyle);
     emit keyersOnNextTransitionChanged(m_keyersOnNextTransition);
+    emit currentTransitionStyleChanged(m_currentTransitionStyle);
+    emit keyersOnCurrentTransitionChanged(m_keyersOnCurrentTransition);
 }
 
 void QAtemConnection::onFtbS(const QByteArray& payload)
