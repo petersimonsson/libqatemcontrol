@@ -2240,8 +2240,13 @@ void QAtemConnection::on_pin(const QByteArray& payload)
 
 void QAtemConnection::on_ver(const QByteArray& payload)
 {
-    m_majorversion = payload.at(7);
-    m_minorversion = payload.at(9);
+    U16_U8 ver;
+    ver.u8[1] = payload.at(6);
+    ver.u8[0] = payload.at(7);
+    m_majorversion = ver.u16;
+    ver.u8[1] = payload.at(8);
+    ver.u8[0] = payload.at(9);
+    m_minorversion = ver.u16;
 
     emit versionChanged(m_majorversion, m_minorversion);
 }
