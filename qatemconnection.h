@@ -24,6 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QUdpSocket>
 #include <QColor>
 
+class QTimer;
+class QHostAddress;
+
 typedef union
 {
     quint16 u16;
@@ -112,6 +115,7 @@ public:
 
     /// Connect to ATEM switcher at @p address
     void connectToSwitcher(const QHostAddress& address);
+    void disconnectFromSwitcher();
 
     void setDebugEnabled(bool enabled) { m_debugEnabled = enabled; }
     bool debugEnabled() const { return m_debugEnabled; }
@@ -658,6 +662,7 @@ protected slots:
     void handleSocketData();
 
     void handleError(QAbstractSocket::SocketError);
+    void handleConnectionTimeout();
 
     void onPrgI(const QByteArray& payload);
     void onPrvI(const QByteArray& payload);
@@ -718,6 +723,7 @@ protected:
 
 private:
     QUdpSocket* m_socket;
+    QTimer* m_connectionTimer;
 
     QHostAddress m_address;
     quint16 m_port;

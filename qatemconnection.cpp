@@ -18,6 +18,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "qatemconnection.h"
 
 #include <QDebug>
+#include <QTimer>
+#include <QHostAddress>
 
 #include <math.h>
 
@@ -27,12 +29,16 @@ QAtemConnection::QAtemConnection(QObject* parent)
     : QObject(parent)
 {
     m_socket = new QUdpSocket(this);
-    m_socket->bind();
 
     connect(m_socket, SIGNAL(readyRead()),
             this, SLOT(handleSocketData()));
     connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(handleError(QAbstractSocket::SocketError)));
+
+    m_connectionTimer = new QTimer(this);
+    m_connectionTimer->setInterval(1000);
+    connect(m_connectionTimer, SIGNAL(timeout()),
+            this, SLOT(handleConnectionTimeout()));
 
     m_port = 9910;
     m_packetCounter = 0;
@@ -127,6 +133,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address)
         return;
     }
 
+    m_socket->bind();
     m_packetCounter = 0;
     m_isInitialized = false;
     m_currentUid = 0x1337; // Just a random UID, we'll get a new one from the server eventually
@@ -136,12 +143,20 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address)
     datagram.append(QByteArray::fromHex("0100000000000000")); // The Hello package needs this... no idea what it means
 
     sendDatagram(datagram);
+    m_connectionTimer->start();
+}
+
+void QAtemConnection::disconnectFromSwitcher()
+{
+    m_socket->close();
+    m_connectionTimer->stop();
 }
 
 void QAtemConnection::handleSocketData()
 {
     while (m_socket->hasPendingDatagrams())
     {
+        m_connectionTimer->start();
         QByteArray datagram;
         datagram.resize(m_socket->pendingDatagramSize());
 
@@ -303,7 +318,16 @@ void QAtemConnection::sendCommand(const QByteArray& cmd, const QByteArray& paylo
 
 void QAtemConnection::handleError(QAbstractSocket::SocketError)
 {
+    m_socket->close();
+    m_connectionTimer->stop();
     emit socketError(m_socket->errorString());
+}
+
+void QAtemConnection::handleConnectionTimeout()
+{
+    m_socket->close();
+    m_connectionTimer->stop();
+    emit socketError(tr("The switcher connection timed out"));
 }
 
 void QAtemConnection::changeProgramInput(quint8 index)
