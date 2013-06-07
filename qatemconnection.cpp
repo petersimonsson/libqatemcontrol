@@ -2717,6 +2717,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("AMTl", "onAMTl");
     m_commandSlotHash.insert("AMIP", "onAMIP");
     m_commandSlotHash.insert("AMMO", "onAMMO");
+    m_commandSlotHash.insert("LKST", "onLKST");
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -3002,4 +3003,39 @@ void QAtemConnection::onAMMO(const QByteArray& payload)
     m_audioMasterOutputGainRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
 
     emit audioMasterOutputGainChanged(m_audioMasterOutputGainLeft, m_audioMasterOutputGainRight);
+}
+
+bool QAtemConnection::aquireMediaLock(quint8 id)
+{
+    if(m_mediaLocks.value(id))
+    {
+        return false;
+    }
+
+    QByteArray cmd("LOCK");
+    QByteArray payload(4, (char)0x0);
+
+    payload[1] = (char)id;
+    payload[2] = (char)0x01;
+
+    sendCommand(cmd, payload);
+    return true;
+}
+
+void QAtemConnection::onLKST(const QByteArray& payload)
+{
+    quint8 id = payload.at(7);
+    m_mediaLocks[id] = payload.at(8);
+
+    emit mediaLockStateChanged(id, m_mediaLocks.value(id));
+}
+
+void QAtemConnection::unlockMediaLock(quint8 id)
+{
+    QByteArray cmd("LOCK");
+    QByteArray payload(4, (char)0x0);
+
+    payload[1] = (char)id;
+
+    sendCommand(cmd, payload);
 }

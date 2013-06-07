@@ -431,6 +431,13 @@ public:
     float audioMasterOutputLevelLeft() const { return m_audioMasterOutputLevelLeft;}
     float audioMasterOutputLevelRight() const { return m_audioMasterOutputLevelRight;}
 
+    /// Aquire the media pool lock with ID @p id. @returns false if the lock is already locked.
+    bool aquireMediaLock(quint8 id);
+    /// Unlock the media pool lock with ID @p id.
+    void unlockMediaLock(quint8 id);
+    /// @returns the state of the media pool lock with ID @p id.
+    bool mediaLockState(quint8 id) const { return m_mediaLocks.value(id); }
+
 public slots:
     void changeProgramInput(quint8 index);
     void changePreviewInput(quint8 index);
@@ -707,6 +714,7 @@ protected slots:
     void onAMTl(const QByteArray& payload);
     void onAMIP(const QByteArray& payload);
     void onAMMO(const QByteArray& payload);
+    void onLKST(const QByteArray& payload);
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId);
@@ -833,6 +841,8 @@ private:
     float m_audioMasterOutputLevelRight;
     float m_audioMasterOutputGainLeft;
     float m_audioMasterOutputGainRight;
+
+    QHash<quint8, bool> m_mediaLocks;
 
 signals:
     void connected();
@@ -982,6 +992,8 @@ signals:
     void audioMonitorSoloChanged(qint8 solo);
     void audioMasterOutputGainChanged(float left, float right);
     void audioLevelsChanged();
+
+    void mediaLockStateChanged(quint8 id, bool state);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)
