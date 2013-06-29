@@ -748,7 +748,7 @@ void QAtemConnection::setColorGeneratorColor(quint8 generator, const QColor& col
     QByteArray payload(8, (char)0x0);
 
     U16_U8 h, s, l;
-    h.u16 = (qMax(0.0, color.hslHueF()) * 360.0) * 10;
+    h.u16 = (qMax((qreal)0.0, color.hslHueF()) * 360.0) * 10;
     s.u16 = color.hslSaturationF() * 1000;
     l.u16 = color.lightnessF() * 1000;
 
@@ -1823,7 +1823,7 @@ void QAtemConnection::setUpstreamKeyDVEBorderColorL(quint8 keyer, float l)
 
 void QAtemConnection::setUpstreamKeyDVEBorderColor(quint8 keyer, const QColor& color)
 {
-    setUpstreamKeyDVEBorderColorH(keyer, qMax(0.0, color.hslHueF()) * 360.0);
+    setUpstreamKeyDVEBorderColorH(keyer, qMax((qreal)0.0, color.hslHueF()) * 360.0);
     setUpstreamKeyDVEBorderColorS(keyer, color.hslSaturationF() * 100);
     setUpstreamKeyDVEBorderColorL(keyer, color.lightnessF() * 100);
 }
