@@ -846,6 +846,7 @@ private:
 
 signals:
     void connected();
+    void disconnected();
     void socketError(const QString& errorString);
 
     void programInputChanged(quint8 oldIndex, quint8 newIndex);

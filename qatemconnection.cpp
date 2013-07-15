@@ -321,6 +321,7 @@ void QAtemConnection::handleError(QAbstractSocket::SocketError)
     m_socket->close();
     m_connectionTimer->stop();
     emit socketError(m_socket->errorString());
+    emit disconnected();
 }
 
 void QAtemConnection::handleConnectionTimeout()
@@ -328,6 +329,7 @@ void QAtemConnection::handleConnectionTimeout()
     m_socket->close();
     m_connectionTimer->stop();
     emit socketError(tr("The switcher connection timed out"));
+    emit disconnected();
 }
 
 void QAtemConnection::changeProgramInput(quint8 index)
