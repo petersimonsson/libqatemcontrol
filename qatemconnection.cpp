@@ -2134,8 +2134,8 @@ void QAtemConnection::onTrSS(const QByteArray& payload)
 
 void QAtemConnection::onFtbS(const QByteArray& payload)
 {
-    m_fadeToBlackEnabled = (quint8)payload.at(7);
-    m_fadeToBlackFrameCount = (quint8)payload.at(8);
+    m_fadeToBlackEnabled = (quint8)payload.at(8);
+    m_fadeToBlackFrameCount = (quint8)payload.at(9);
 
     emit fadeToBlackChanged(m_fadeToBlackEnabled);
     emit fadeToBlackFrameCountChanged(m_fadeToBlackFrameCount);
