@@ -2319,7 +2319,30 @@ void QAtemConnection::onMvPr(const QByteArray& payload)
 
 void QAtemConnection::onVidM(const QByteArray& payload)
 {
-    m_videoFormat = (quint8)payload.at(6);
+    m_videoFormat = (quint8)payload.at(6); // 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
+
+    switch(m_videoFormat)
+    {
+    case 0:
+    case 2:
+    case 7:
+        m_framesPerSecond = 30;
+        break;
+    case 5:
+        m_framesPerSecond = 60;
+        break;
+    case 1:
+    case 3:
+    case 6:
+        m_framesPerSecond = 25;
+        break;
+    case 4:
+        m_framesPerSecond = 50;
+        break;
+    default:
+        m_framesPerSecond = 0;
+        break;
+    }
 
     emit videoFormatChanged(m_videoFormat);
 }

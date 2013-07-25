@@ -300,8 +300,9 @@ public:
     /// @returns index of the input mapped to @p multiViewOutput
     quint8 multiViewInput(quint8 multiViewOutput) const { return m_multiViewInputs.value(multiViewOutput); }
 
-    /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 720p50, 3 = 720p5994, 4 = 1080i50, 5 = 1080i5994
+    /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
     quint8 videoFormat() const { return m_videoFormat; }
+    quint8 framesPerSecond() const { return m_framesPerSecond; }
     /// @returns type of video down coversion, 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
     quint8 videoDownConvertType() const { return m_videoDownConvertType; }
 
@@ -785,6 +786,7 @@ private:
     quint8 m_multiViewLayout;
 
     quint8 m_videoFormat;
+    quint8 m_framesPerSecond;
     quint8 m_videoDownConvertType;
 
     quint8 m_mediaPoolClip1Size;
