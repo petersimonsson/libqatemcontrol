@@ -926,7 +926,8 @@ void QAtemConnection::setDipFrames(quint8 frames)
     QByteArray cmd("CTDp");
     QByteArray payload(4, (char)0x0);
 
-    payload[1] = (char)frames;
+    payload[0] = (char)0x01;
+    payload[2] = (char)frames;
 
     sendCommand(cmd, payload);
 }
