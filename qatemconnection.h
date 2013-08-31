@@ -316,6 +316,8 @@ public:
 
     /// @returns duration in number of frames for dip transition
     quint8 dipFrames() const { return m_dipFrames; }
+    /// @returns the source used for a dip transition
+    quint8 dipSource() const { return m_dipSource; }
 
     /// @returns duration in number of frames for wipe transition
     quint8 wipeFrames() const { return m_wipeFrames; }
@@ -409,7 +411,7 @@ public:
     quint16 stingerTriggerPoint() const { return m_stingerTriggerPoint; }
     quint16 stingerMixRate() const { return m_stingerMixRate; }
 
-    /// @returns the border source index, used for both dip and wipe transition
+    /// @returns the border source index, used for wipe transition
     quint8 borderSource() const { return m_borderSource; }
 
     /// @returns audio input info for input @p index
@@ -543,6 +545,7 @@ public slots:
     void setMixFrames(quint8 frames);
 
     void setDipFrames(quint8 frames);
+    void setDipSource(quint8 source);
 
     void setBorderSource(quint8 index);
 
@@ -795,6 +798,7 @@ private:
     quint8 m_mixFrames;
 
     quint8 m_dipFrames;
+    quint8 m_dipSource;
 
     quint8 m_wipeFrames;
     quint16 m_wipeBorderWidth;
@@ -948,6 +952,7 @@ signals:
     void mixFramesChanged(quint8 frames);
 
     void dipFramesChanged(quint8 frames);
+    void dipSourceChanged(quint8 source);
 
     void wipeFramesChanged(quint8 frames);
     void wipeBorderWidthChanged(quint16 width);

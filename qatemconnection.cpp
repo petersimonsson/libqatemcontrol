@@ -65,6 +65,7 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_mixFrames = 0;
 
     m_dipFrames = 0;
+    m_dipSource = 0;
 
     m_wipeFrames = 0;
     m_wipeBorderWidth = 0;
@@ -928,6 +929,17 @@ void QAtemConnection::setDipFrames(quint8 frames)
 
     payload[0] = (char)0x01;
     payload[2] = (char)frames;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDipSource(quint8 source)
+{
+    QByteArray cmd("CTDp");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)0x02;
+    payload[3] = (char)source;
 
     sendCommand(cmd, payload);
 }
@@ -2369,8 +2381,10 @@ void QAtemConnection::onTMxP(const QByteArray& payload)
 void QAtemConnection::onTDpP(const QByteArray& payload)
 {
     m_dipFrames = (quint8)payload.at(7);
+    m_dipSource = (quint8)payload.at(8);
 
     emit dipFramesChanged(m_dipFrames);
+    emit dipSourceChanged(m_dipSource);
 }
 
 void QAtemConnection::onTWpP(const QByteArray& payload)
