@@ -68,6 +68,7 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_dipSource = 0;
 
     m_wipeFrames = 0;
+    m_wipeBorderSource = 0;
     m_wipeBorderWidth = 0;
     m_wipeBorderSoftness = 0;
     m_wipeType = 0;
@@ -96,8 +97,6 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_stingerClipDuration = 0;
     m_stingerTriggerPoint = 0;
     m_stingerMixRate = 0;
-
-    m_borderSource = 0;
 
     m_multiViewLayout = 0;
 
@@ -944,12 +943,13 @@ void QAtemConnection::setDipSource(quint8 source)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setBorderSource(quint8 index)
+void QAtemConnection::setWipeBorderSource(quint8 index)
 {
-    QByteArray cmd("CBrI");
-    QByteArray payload(4, (char)0x0);
+    QByteArray cmd("CTWp");
+    QByteArray payload(20, (char)0x0);
 
-    payload[1] = (char)index;
+    payload[1] = (char)0x08;
+    payload[8] = (char)index;
 
     sendCommand(cmd, payload);
 }
@@ -986,9 +986,9 @@ void QAtemConnection::setWipeBorderSoftness(quint16 softness)
     U16_U8 val;
     val.u16 = softness;
 
-    payload[1] = (char)0x10;
-    payload[10] = (char)val.u8[1];
-    payload[11] = (char)val.u8[0];
+    payload[1] = (char)0x20;
+    payload[12] = (char)val.u8[1];
+    payload[13] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1011,28 +1011,14 @@ void QAtemConnection::setWipeSymmetry(quint16 value)
     U16_U8 val;
     val.u16 = value;
 
-    payload[1] = (char)0x08;
-    payload[8] = (char)val.u8[1];
-    payload[9] = (char)val.u8[0];
+    payload[1] = (char)0x10;
+    payload[10] = (char)val.u8[1];
+    payload[11] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::setWipeXPosition(quint16 value)
-{
-    QByteArray cmd("CTWp");
-    QByteArray payload(20, (char)0x0);
-    U16_U8 val;
-    val.u16 = value;
-
-    payload[1] = (char)0x20;
-    payload[12] = (char)val.u8[1];
-    payload[13] = (char)val.u8[0];
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setWipeYPosition(quint16 value)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
@@ -1046,13 +1032,27 @@ void QAtemConnection::setWipeYPosition(quint16 value)
     sendCommand(cmd, payload);
 }
 
+void QAtemConnection::setWipeYPosition(quint16 value)
+{
+    QByteArray cmd("CTWp");
+    QByteArray payload(20, (char)0x0);
+    U16_U8 val;
+    val.u16 = value;
+
+    payload[1] = (char)0x80;
+    payload[16] = (char)val.u8[1];
+    payload[17] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
 void QAtemConnection::setWipeReverseDirection(bool reverse)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
 
-    payload[1] = (char)0x80;
-    payload[16] = (char)reverse;
+    payload[0] = (char)0x01;
+    payload[18] = (char)reverse;
 
     sendCommand(cmd, payload);
 }
@@ -1062,8 +1062,8 @@ void QAtemConnection::setWipeFlipFlop(bool flipFlop)
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
 
-    payload[0] = (char)0x01;
-    payload[17] = (char)flipFlop;
+    payload[0] = (char)0x02;
+    payload[19] = (char)flipFlop;
 
     sendCommand(cmd, payload);
 }
@@ -2396,23 +2396,25 @@ void QAtemConnection::onTWpP(const QByteArray& payload)
     val.u8[1] = (quint8)payload.at(10);
     val.u8[0] = (quint8)payload.at(11);
     m_wipeBorderWidth = val.u16;
-    val.u8[1] = (quint8)payload.at(12);
-    val.u8[0] = (quint8)payload.at(13);
-    m_wipeSymmetry = val.u16;
+    m_wipeBorderSource = (quint8)payload.at(12);
     val.u8[1] = (quint8)payload.at(14);
     val.u8[0] = (quint8)payload.at(15);
-    m_wipeBorderSoftness = val.u16;
+    m_wipeSymmetry = val.u16;
     val.u8[1] = (quint8)payload.at(16);
     val.u8[0] = (quint8)payload.at(17);
-    m_wipeXPosition = val.u16;
+    m_wipeBorderSoftness = val.u16;
     val.u8[1] = (quint8)payload.at(18);
     val.u8[0] = (quint8)payload.at(19);
+    m_wipeXPosition = val.u16;
+    val.u8[1] = (quint8)payload.at(20);
+    val.u8[0] = (quint8)payload.at(21);
     m_wipeYPosition = val.u16;
-    m_wipeReverseDirection = (quint8)payload.at(20);
-    m_wipeFlipFlop = (quint8)payload.at(21);
+    m_wipeReverseDirection = (quint8)payload.at(22);
+    m_wipeFlipFlop = (quint8)payload.at(23);
 
     emit wipeFramesChanged(m_wipeFrames);
     emit wipeBorderWidthChanged(m_wipeBorderWidth);
+    emit wipeBorderSourceChanged(m_wipeBorderSource);
     emit wipeBorderSoftnessChanged(m_wipeBorderSoftness);
     emit wipeTypeChanged(m_wipeType);
     emit wipeSymmetryChanged(m_wipeSymmetry);
@@ -2486,13 +2488,6 @@ void QAtemConnection::onTStP(const QByteArray& payload)
     emit stingerClipDurationChanged(m_stingerClipDuration);
     emit stingerTriggerPointChanged(m_stingerTriggerPoint);
     emit stingerMixRateChanged(m_stingerMixRate);
-}
-
-void QAtemConnection::onBrdI(const QByteArray& payload)
-{
-    m_borderSource = (quint8)payload.at(7);
-
-    emit borderSourceChanged(m_borderSource);
 }
 
 void QAtemConnection::onKeBP(const QByteArray& payload)
@@ -2742,7 +2737,6 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("TWpP", "onTWpP");
     m_commandSlotHash.insert("TDvP", "onTDvP");
     m_commandSlotHash.insert("TStP", "onTStP");
-    m_commandSlotHash.insert("BrdI", "onBrdI");
     m_commandSlotHash.insert("KeBP", "onKeBP");
     m_commandSlotHash.insert("KeLm", "onKeLm");
     m_commandSlotHash.insert("KeCk", "onKeCk");

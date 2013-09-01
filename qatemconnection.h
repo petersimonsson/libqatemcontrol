@@ -321,6 +321,8 @@ public:
 
     /// @returns duration in number of frames for wipe transition
     quint8 wipeFrames() const { return m_wipeFrames; }
+    /// @returns the border source index, used for wipe transition
+    quint8 wipeBorderSource() const { return m_wipeBorderSource; }
     /// @returns border width for wipe transition
     quint16 wipeBorderWidth() const { return m_wipeBorderWidth; }
     /// @returns border softness for wipe transition
@@ -410,9 +412,6 @@ public:
     quint16 stingerClipDuration() const { return m_stingerClipDuration; }
     quint16 stingerTriggerPoint() const { return m_stingerTriggerPoint; }
     quint16 stingerMixRate() const { return m_stingerMixRate; }
-
-    /// @returns the border source index, used for wipe transition
-    quint8 borderSource() const { return m_borderSource; }
 
     /// @returns audio input info for input @p index
     AudioInput audioInput(quint8 index) { return m_audioInputs.value(index); }
@@ -547,8 +546,7 @@ public slots:
     void setDipFrames(quint8 frames);
     void setDipSource(quint8 source);
 
-    void setBorderSource(quint8 index);
-
+    void setWipeBorderSource(quint8 index);
     void setWipeFrames(quint8 frames);
     void setWipeBorderWidth(quint16 width);
     void setWipeBorderSoftness(quint16 softness);
@@ -703,7 +701,6 @@ protected slots:
     void onTWpP(const QByteArray& payload);
     void onTDvP(const QByteArray& payload);
     void onTStP(const QByteArray& payload);
-    void onBrdI(const QByteArray& payload);
     void onKeBP(const QByteArray& payload);
     void onKeLm(const QByteArray& payload);
     void onKeCk(const QByteArray& payload);
@@ -801,6 +798,7 @@ private:
     quint8 m_dipSource;
 
     quint8 m_wipeFrames;
+    quint8 m_wipeBorderSource;
     quint16 m_wipeBorderWidth;
     quint16 m_wipeBorderSoftness;
     quint8 m_wipeType;
@@ -829,8 +827,6 @@ private:
     quint16 m_stingerClipDuration;
     quint16 m_stingerTriggerPoint;
     quint16 m_stingerMixRate;
-
-    quint8 m_borderSource;
 
     QHash<quint8, AudioInput> m_audioInputs;
     QHash<quint8, bool> m_audioTally;
@@ -984,7 +980,7 @@ signals:
     void stingerTriggerPointChanged(quint16 frames);
     void stingerMixRateChanged(quint16 frames);
 
-    void borderSourceChanged(quint8 index);
+    void wipeBorderSourceChanged(quint8 index);
 
     void videoFormatChanged(quint8 format);
     void videoDownConvertTypeChanged(quint8 type);
