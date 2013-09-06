@@ -400,6 +400,8 @@ public:
     /// @returns the gain of the key in per cent for the DVE transition
     float dveKeyGain() const { return m_dveKeyGain; }
     bool dveInvertKeyEnabled() const { return m_dveEnableInvertKey; }
+    bool dveReverseDirection() const { return m_dveReverseDirection; }
+    bool dveFlipFlopDirection() const { return m_dveFlipFlopDirection; }
 
     /// @returns source used for the Stinger transition. 1 = Media player 1, 2 = Media player 2
     quint8 stingerSource() const { return m_stingerSource; }
@@ -616,6 +618,10 @@ public slots:
     /// Set gain of key for DVE transition to @p percent
     void setDVEKeyGain(float percent);
     void setDVEInvertKeyEnabled(bool enabled);
+    /// Set to true to do the DVE transition in the reverse direction
+    void setDVEReverseDirection(bool reverse);
+    /// Set to true to flip flop the direction of the DVE transition between uses
+    void setDVEFlipFlopDirection(bool flipFlop);
 
     /// Set the source used for Stinger transition to @p source. 1 = Media player 1, 2 = Media player 2
     void setStingerSource(quint8 source);
@@ -817,6 +823,8 @@ private:
     float m_dveKeyClip;
     float m_dveKeyGain;
     bool m_dveEnableInvertKey;
+    bool m_dveReverseDirection;
+    bool m_dveFlipFlopDirection;
 
     quint8 m_stingerSource;
     bool m_stingerEnablePreMultipliedKey;
@@ -969,6 +977,8 @@ signals:
     void dveKeyClipChanged(float clip);
     void dveKeyGainChanged(float gain);
     void dveEnableInvertKeyChanged(bool enabled);
+    void dveReverseDirectionChanged(bool reverse);
+    void dveFlipFlopDirectionChanged(bool flipFlop);
 
     void stingerSourceChanged(quint8 frames);
     void stingerEnablePreMultipliedKeyChanged(bool enabled);

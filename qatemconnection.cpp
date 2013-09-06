@@ -87,6 +87,8 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_dveKeyClip = 0;
     m_dveKeyGain = 0;
     m_dveEnableInvertKey = false;
+    m_dveReverseDirection = false;
+    m_dveFlipFlopDirection = false;
 
     m_stingerSource = 0;
     m_stingerEnablePreMultipliedKey = false;
@@ -1172,6 +1174,28 @@ void QAtemConnection::setDVEInvertKeyEnabled(bool enabled)
 
     payload[0] = (char)0x02;
     payload[14] = (char)enabled;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEReverseDirection(bool reverse)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[0] = (char)0x04;
+    payload[15] = (char)reverse;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setDVEFlipFlopDirection(bool flipFlop)
+{
+    QByteArray cmd("CTDv");
+    QByteArray payload(20, (char)0x0);
+
+    payload[0] = (char)0x08;
+    payload[16] = (char)flipFlop;
 
     sendCommand(cmd, payload);
 }
@@ -2442,6 +2466,8 @@ void QAtemConnection::onTDvP(const QByteArray& payload)
     val.u8[0] = (quint8)payload.at(17);
     m_dveKeyGain = val.u16 / 10.0;
     m_dveEnableInvertKey = (bool)payload.at(18);
+    m_dveReverseDirection = (bool)payload.at(19);
+    m_dveFlipFlopDirection = (bool)payload.at(20);
 
     emit dveRateChanged(m_dveRate);
     emit dveEffectChanged(m_dveEffect);
@@ -2452,6 +2478,8 @@ void QAtemConnection::onTDvP(const QByteArray& payload)
     emit dveKeyClipChanged(m_dveKeyClip);
     emit dveKeyGainChanged(m_dveKeyGain);
     emit dveEnableInvertKeyChanged(m_dveEnableInvertKey);
+    emit dveReverseDirectionChanged(m_dveReverseDirection);
+    emit dveFlipFlopDirectionChanged(m_dveFlipFlopDirection);
 }
 
 void QAtemConnection::onTStP(const QByteArray& payload)
