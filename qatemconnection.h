@@ -292,6 +292,7 @@ public:
 
     /// @returns Info about the input @p index
     InputInfo inputInfo(quint8 index) const { return m_inputInfos.value(index); }
+    QHash<quint8, InputInfo> inputInfos () const { return m_inputInfos; }
 
     MediaInfo mediaInfo(quint8 index) const { return m_mediaInfos.value(index); }
 
@@ -441,6 +442,19 @@ public:
     void unlockMediaLock(quint8 id);
     /// @returns the state of the media pool lock with ID @p id.
     bool mediaLockState(quint8 id) const { return m_mediaLocks.value(id); }
+
+    /**
+     * @brief Send data to a store in the switcher.
+     * @param storeId 0 = Still store, 1 = Clip store, 2 = Sound store, 3 = Multiview labels
+     * @param index Index in the store
+     * @param name Name shown to the user
+     * @param data Actual pixel or sound data
+     * @return Returns the ID of the data transfer if success else 0
+     */
+    quint16 sendDataToSwitcher(quint8 storeId, quint8 index, const QByteArray &name, const QByteArray &data);
+    bool transferActive() const { return m_transferActive; }
+    quint16 transferId () const { return m_transferId; }
+    int remainingTransferDataSize() const { return m_transferData.size(); }
 
 public slots:
     void changeProgramInput(quint8 index);
@@ -722,6 +736,11 @@ protected slots:
     void onAMIP(const QByteArray& payload);
     void onAMMO(const QByteArray& payload);
     void onLKST(const QByteArray& payload);
+    void onFTCD(const QByteArray& payload);
+    void onFTDC(const QByteArray& payload);
+
+    void initDownloadToSwitcher();
+    void flushTransferBuffer();
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId);
@@ -735,6 +754,9 @@ protected:
     void initCommandSlotHash();
 
     void setKeyOnNextTransition (int index, bool state);
+
+    void sendData(quint16 id, const QByteArray &data);
+    void sendFileDescription(quint16 id, const QByteArray &name);
 
 private:
     QUdpSocket* m_socket;
@@ -853,6 +875,14 @@ private:
     float m_audioMasterOutputGainRight;
 
     QHash<quint8, bool> m_mediaLocks;
+
+    bool m_transferActive;
+    QByteArray m_transferData;
+    quint8 m_transferStoreId;
+    quint8 m_transferIndex;
+    QByteArray m_transferName;
+    quint16 m_transferId;
+    quint16 m_lastTransferId;
 
 signals:
     void connected();
@@ -1008,6 +1038,8 @@ signals:
     void audioLevelsChanged();
 
     void mediaLockStateChanged(quint8 id, bool state);
+
+    void dataTransferFinished(quint16 transferId);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

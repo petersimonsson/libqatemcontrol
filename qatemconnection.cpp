@@ -123,6 +123,12 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_audioMasterOutputGainLeft = 0;
     m_audioMasterOutputGainRight = 0;
 
+    m_transferActive = false;
+    m_transferStoreId = 0;
+    m_transferIndex = 0;
+    m_transferId = 0;
+    m_lastTransferId = 0;
+
     initCommandSlotHash();
 }
 
@@ -185,6 +191,8 @@ void QAtemConnection::handleSocketData()
         {
             parsePayLoad(datagram);
         }
+
+        m_socket->flush();
     }
 }
 
@@ -2035,6 +2043,7 @@ void QAtemConnection::setInputLongName(quint8 input, const QString &name)
     payload[0] = (char)0x01;
     payload[1] = (char)input;
     payload.replace(2, 20, namearray);
+    payload[27] = (char)0xff;
 
     sendCommand(cmd, payload);
 }
@@ -2320,7 +2329,7 @@ void QAtemConnection::onInPr(const QByteArray& payload)
     info.index = (quint8)payload.at(6);
     info.longText = payload.mid(7, 20);
     info.shortText = payload.mid(27, 4);
-    info.type = (quint8)payload.at(32); // 1 = SDI, 2 = HDMI, 4 = Component, 32 = Internal
+    info.type = (quint8)payload.at(35); // 1 = SDI, 2 = HDMI, 4 = Component, 32 = Internal
     m_inputInfos.insert(info.index, info);
 
     emit inputInfoChanged(info);
@@ -2780,6 +2789,8 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("AMIP", "onAMIP");
     m_commandSlotHash.insert("AMMO", "onAMMO");
     m_commandSlotHash.insert("LKST", "onLKST");
+    m_commandSlotHash.insert("FTCD", "onFTCD");
+    m_commandSlotHash.insert("FTDC", "onFTDC");
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -3090,6 +3101,11 @@ void QAtemConnection::onLKST(const QByteArray& payload)
     m_mediaLocks[id] = payload.at(8);
 
     emit mediaLockStateChanged(id, m_mediaLocks.value(id));
+
+    if(m_transferStoreId == id && !m_transferData.isEmpty())
+    {
+        initDownloadToSwitcher();
+    }
 }
 
 void QAtemConnection::unlockMediaLock(quint8 id)
@@ -3100,4 +3116,125 @@ void QAtemConnection::unlockMediaLock(quint8 id)
     payload[1] = (char)id;
 
     sendCommand(cmd, payload);
+}
+
+quint16 QAtemConnection::sendDataToSwitcher(quint8 storeId, quint8 index, const QByteArray &name, const QByteArray &data)
+{
+    if (m_transferActive)
+    {
+        return false;
+    }
+
+    m_transferStoreId = storeId;
+    m_transferIndex = index;
+    m_transferName = name;
+    m_transferData = data;
+    m_lastTransferId++;
+    m_transferId = m_lastTransferId;
+
+    initDownloadToSwitcher();
+
+    return true;
+}
+
+void QAtemConnection::initDownloadToSwitcher()
+{
+    QByteArray cmd("FTSD");
+    QByteArray payload(16, (char)0x0);
+
+    U16_U8 id;
+    id.u16 = m_transferId;
+    payload[0] = (char)id.u8[1];
+    payload[1] = (char)id.u8[0];
+    payload[2] = (char)m_transferStoreId;
+    payload[3] = (char)0xb0;
+    payload[7] = (char)m_transferIndex;
+    U32_U8 val;
+    val.u32 = m_transferData.size();
+    payload[8] = val.u8[3];
+    payload[9] = val.u8[2];
+    payload[10] = val.u8[1];
+    payload[11] = val.u8[0];
+    payload[12] = (char)0x01; // 0x01 == write, 0x02 == Clear
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::onFTCD(const QByteArray& payload)
+{
+    U16_U8 id;
+    id.u8[1] = (quint8)payload.at(6);
+    id.u8[0] = (quint8)payload.at(7);
+
+    if(id.u16 == m_transferId && !m_transferActive)
+    {
+        flushTransferBuffer();
+        sendFileDescription(id.u16, m_transferName);
+    }
+}
+
+void QAtemConnection::flushTransferBuffer()
+{
+    int i = 0;
+
+    while (!m_transferData.isEmpty() && i < 25)
+    {
+        QByteArray data = m_transferData.left(1392);
+        sendData(m_transferId, data);
+        m_transferData = m_transferData.remove(0, data.size());
+        ++i;
+    }
+
+    m_transferActive = !m_transferData.isEmpty();
+    m_socket->flush();
+
+    if(m_transferActive)
+    {
+        QTimer::singleShot(10, this, SLOT(flushTransferBuffer()));
+    }
+}
+
+void QAtemConnection::sendData(quint16 id, const QByteArray &data)
+{
+    QByteArray cmd("FTDa");
+    QByteArray payload(1400, (char)0x0);
+
+    U16_U8 val;
+    val.u16 = id;
+    payload[0] = val.u8[1];
+    payload[1] = val.u8[0];
+    val.u16 = qMin(1392, data.size());
+    payload[2] = val.u8[1];
+    payload[3] = val.u8[0];
+    payload.replace(4, val.u16, data);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::sendFileDescription(quint16 id, const QByteArray &name)
+{
+    QByteArray cmd("FTFD");
+    QByteArray payload(84, (char)0x0);
+
+    U16_U8 val;
+    val.u16 = id;
+    payload[0] = val.u8[1];
+    payload[1] = val.u8[0];
+    payload.replace(2, qMin(82, name.size()), name);
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::onFTDC(const QByteArray& payload)
+{
+    U16_U8 id;
+    id.u8[1] = (quint8)payload.at(6);
+    id.u8[0] = (quint8)payload.at(7);
+
+    if(m_transferId == id.u16)
+    {
+        unlockMediaLock(m_transferStoreId);
+    }
+
+    emit dataTransferFinished(id.u16);
 }
