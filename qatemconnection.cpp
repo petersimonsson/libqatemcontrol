@@ -1336,7 +1336,7 @@ void QAtemConnection::setUpstreamKeyType(quint8 keyer, quint8 type)
     QByteArray payload(10, (char)0x0);
 
     payload[0] = (char)0x01;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[3] = (char)type;
 
     sendCommand(cmd, payload);
@@ -1352,7 +1352,7 @@ void QAtemConnection::setUpstreamKeyFillSource(quint8 keyer, quint8 source)
     QByteArray cmd("CKeF");
     QByteArray payload(4, (char)0x0);
 
-    payload[0] = (char)keyer;
+    payload[1] = (char)keyer;
     payload[2] = (char)source;
 
     sendCommand(cmd, payload);
@@ -1368,7 +1368,7 @@ void QAtemConnection::setUpstreamKeyKeySource(quint8 keyer, quint8 source)
     QByteArray cmd("CKeC");
     QByteArray payload(4, (char)0x0);
 
-    payload[0] = (char)keyer;
+    payload[1] = (char)keyer;
     payload[2] = (char)source;
 
     sendCommand(cmd, payload);
@@ -1385,7 +1385,7 @@ void QAtemConnection::setUpstreamKeyEnableMask(quint8 keyer, bool enable)
     QByteArray payload(12, (char)0x0);
 
     payload[0] = (char)0x01;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[3] = (char)enable;
 
     sendCommand(cmd, payload);
@@ -1398,7 +1398,7 @@ void QAtemConnection::setUpstreamKeyMask(quint8 keyer, float top, float bottom, 
     U16_U8 val;
 
     payload[0] = (char)0x1e;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     val.u16 = top * 1000;
     payload[4] = (char)val.u8[1];
     payload[5] = (char)val.u8[0];
@@ -1426,7 +1426,7 @@ void QAtemConnection::setUpstreamKeyLumaPreMultipliedKey(quint8 keyer, bool preM
     QByteArray payload(12, (char)0x0);
 
     payload[0] = (char)0x01;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[3] = (char)preMultiplied;
 
     sendCommand(cmd, payload);
@@ -1443,7 +1443,7 @@ void QAtemConnection::setUpstreamKeyLumaInvertKey(quint8 keyer, bool invert)
     QByteArray payload(12, (char)0x0);
 
     payload[0] = (char)0x08;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[8] = (char)invert;
 
     sendCommand(cmd, payload);
@@ -1462,7 +1462,7 @@ void QAtemConnection::setUpstreamKeyLumaClip(quint8 keyer, float clip)
     val.u16 = clip * 10;
 
     payload[0] = (char)0x02;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[4] = (char)val.u8[1];
     payload[5] = (char)val.u8[0];
 
@@ -1482,7 +1482,7 @@ void QAtemConnection::setUpstreamKeyLumaGain(quint8 keyer, float gain)
     val.u16 = gain * 10;
 
     payload[0] = (char)0x04;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[6] = (char)val.u8[1];
     payload[7] = (char)val.u8[0];
 
@@ -1502,7 +1502,7 @@ void QAtemConnection::setUpstreamKeyChromaHue(quint8 keyer, float hue)
     val.u16 = hue * 10;
 
     payload[0] = (char)0x01;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[4] = (char)val.u8[1];
     payload[5] = (char)val.u8[0];
 
@@ -1522,7 +1522,7 @@ void QAtemConnection::setUpstreamKeyChromaGain(quint8 keyer, float gain)
     val.u16 = gain * 10;
 
     payload[0] = (char)0x02;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[6] = (char)val.u8[1];
     payload[7] = (char)val.u8[0];
 
@@ -1542,7 +1542,7 @@ void QAtemConnection::setUpstreamKeyChromaYSuppress(quint8 keyer, float ySuppres
     val.u16 = ySuppress * 10;
 
     payload[0] = (char)0x04;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[8] = (char)val.u8[1];
     payload[9] = (char)val.u8[0];
 
@@ -1562,7 +1562,7 @@ void QAtemConnection::setUpstreamKeyChromaLift(quint8 keyer, float lift)
     val.u16 = lift * 10;
 
     payload[0] = (char)0x08;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[10] = (char)val.u8[1];
     payload[11] = (char)val.u8[0];
 
@@ -1580,7 +1580,7 @@ void QAtemConnection::setUpstreamKeyChromaNarrowRange(quint8 keyer, bool narrowR
     QByteArray payload(16, (char)0x0);
 
     payload[0] = (char)0x10;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[12] = (char)narrowRange;
 
     sendCommand(cmd, payload);
@@ -1597,7 +1597,7 @@ void QAtemConnection::setUpstreamKeyPatternPattern(quint8 keyer, quint8 pattern)
     QByteArray payload(16, (char)0x0);
 
     payload[0] = (char)0x01;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[3] = (char)pattern;
 
     sendCommand(cmd, payload);
@@ -1614,7 +1614,7 @@ void QAtemConnection::setUpstreamKeyPatternInvertPattern(quint8 keyer, bool inve
     QByteArray payload(16, (char)0x0);
 
     payload[0] = (char)0x40;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[14] = (char)invert;
 
     sendCommand(cmd, payload);
@@ -1633,7 +1633,7 @@ void QAtemConnection::setUpstreamKeyPatternSize(quint8 keyer, float size)
     val.u16 = size * 10;
 
     payload[0] = (char)0x02;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[4] = (char)val.u8[1];
     payload[5] = (char)val.u8[0];
 
@@ -1653,7 +1653,7 @@ void QAtemConnection::setUpstreamKeyPatternSymmetry(quint8 keyer, float symmetry
     val.u16 = symmetry * 10;
 
     payload[0] = (char)0x04;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[6] = (char)val.u8[1];
     payload[7] = (char)val.u8[0];
 
@@ -1673,7 +1673,7 @@ void QAtemConnection::setUpstreamKeyPatternSoftness(quint8 keyer, float softness
     val.u16 = softness * 10;
 
     payload[0] = (char)0x08;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[8] = (char)val.u8[1];
     payload[9] = (char)val.u8[0];
 
@@ -1693,7 +1693,7 @@ void QAtemConnection::setUpstreamKeyPatternXPosition(quint8 keyer, float xPositi
     val.u16 = xPosition * 1000;
 
     payload[0] = (char)0x10;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[10] = (char)val.u8[1];
     payload[11] = (char)val.u8[0];
 
@@ -1713,7 +1713,7 @@ void QAtemConnection::setUpstreamKeyPatternYPosition(quint8 keyer, float yPositi
     val.u16 = yPosition * 1000;
 
     payload[0] = (char)0x20;
-    payload[1] = (char)keyer;
+    payload[2] = (char)keyer;
     payload[12] = (char)val.u8[1];
     payload[13] = (char)val.u8[0];
 
@@ -2529,7 +2529,7 @@ void QAtemConnection::onTStP(const QByteArray& payload)
 
 void QAtemConnection::onKeBP(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = (quint8)payload.at(7);
     m_upstreamKeys[index].m_type = (quint8)payload.at(8);
     m_upstreamKeys[index].m_enableFly = (bool)payload.at(11);
     m_upstreamKeys[index].m_fillSource = (quint8)payload.at(12);
@@ -2562,7 +2562,7 @@ void QAtemConnection::onKeBP(const QByteArray& payload)
 
 void QAtemConnection::onKeLm(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = (quint8)payload.at(7);
     m_upstreamKeys[index].m_lumaPreMultipliedKey = (quint8)payload.at(8);
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(10);
@@ -2581,7 +2581,7 @@ void QAtemConnection::onKeLm(const QByteArray& payload)
 
 void QAtemConnection::onKeCk(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = (quint8)payload.at(7);
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(8);
     val.u8[0] = (quint8)payload.at(9);
@@ -2606,7 +2606,7 @@ void QAtemConnection::onKeCk(const QByteArray& payload)
 
 void QAtemConnection::onKePt(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = (quint8)payload.at(7);
     m_upstreamKeys[index].m_patternPattern = (quint8)payload.at(8);
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(10);
