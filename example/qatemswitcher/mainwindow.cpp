@@ -1,0 +1,97 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
+#include "qatemconnection.h"
+
+#include <QInputDialog>
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    m_ui(new Ui::MainWindow)
+{
+    m_ui->setupUi(this);
+
+    connect(m_ui->action_Quit, SIGNAL(triggered()),
+            qApp, SLOT(quit()));
+
+    m_atemConnection = new QAtemConnection(this);
+
+    connect(m_atemConnection, SIGNAL(connected()),
+            this, SLOT(onAtemConnected()));
+
+    QButtonGroup *programGroup = new QButtonGroup (this);
+    programGroup->addButton(m_ui->program1Button, 1);
+    programGroup->addButton(m_ui->program2Button, 2);
+    programGroup->addButton(m_ui->program3Button, 3);
+    programGroup->addButton(m_ui->program4Button, 4);
+    programGroup->addButton(m_ui->program5Button, 5);
+    programGroup->addButton(m_ui->program6Button, 6);
+    programGroup->addButton(m_ui->program7Button, 7);
+    programGroup->addButton(m_ui->program8Button, 8);
+
+    connect(programGroup, SIGNAL(buttonClicked(int)),
+            this, SLOT(changeProgramInput(int)));
+
+    QButtonGroup *previewGroup = new QButtonGroup (this);
+    previewGroup->addButton(m_ui->preview1Button, 1);
+    previewGroup->addButton(m_ui->preview2Button, 2);
+    previewGroup->addButton(m_ui->preview3Button, 3);
+    previewGroup->addButton(m_ui->preview4Button, 4);
+    previewGroup->addButton(m_ui->preview5Button, 5);
+    previewGroup->addButton(m_ui->preview6Button, 6);
+    previewGroup->addButton(m_ui->preview7Button, 7);
+    previewGroup->addButton(m_ui->preview8Button, 8);
+
+    connect(previewGroup, SIGNAL(buttonClicked(int)),
+            this, SLOT(changePreviewInput(int)));
+
+    connect(m_ui->autoButton, SIGNAL(clicked()),
+            m_atemConnection, SLOT(doAuto()));
+    connect(m_ui->cutButton, SIGNAL(clicked()),
+            m_atemConnection, SLOT(doCut()));
+
+    connectToAtem();
+}
+
+MainWindow::~MainWindow()
+{
+    delete m_ui;
+}
+
+void MainWindow::connectToAtem()
+{
+    QString address = QInputDialog::getText(this, tr("Connect To ATEM"), tr("Address:"));
+
+    if(!address.isEmpty())
+    {
+        m_atemConnection->connectToSwitcher(QHostAddress(address));
+    }
+}
+
+void MainWindow::onAtemConnected()
+{
+    quint8 count = 0;
+
+    foreach(const QAtemConnection::InputInfo &info, m_atemConnection->inputInfos())
+    {
+        if(info.type != 0 /*Internal source*/)
+        {
+            ++count;
+        }
+    }
+
+    m_ui->program7Button->setEnabled(count >= 7);
+    m_ui->program8Button->setEnabled(count >= 8);
+    m_ui->preview7Button->setEnabled(count >= 7);
+    m_ui->preview8Button->setEnabled(count >= 8);
+}
+
+void MainWindow::changeProgramInput(int input)
+{
+    m_atemConnection->changeProgramInput(input);
+}
+
+void MainWindow::changePreviewInput(int input)
+{
+    m_atemConnection->changePreviewInput(input);
+}
