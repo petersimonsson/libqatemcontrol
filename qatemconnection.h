@@ -71,7 +71,7 @@ public:
 
     struct InputInfo
     {
-        quint8 index;
+        quint16 index;
         quint8 type;
         QString longText;
         QString shortText;
@@ -95,13 +95,11 @@ public:
 
     struct AudioInput
     {
-        quint8 index;
+        quint16 index;
         quint8 type; // 0 = Video input, 1 = Media player, 2 = External
-        quint8 source;
         quint8 state; // 0 = Off, 1 = On, 2 = AFV
         float balance;
-        float gainLeft; // dB
-        float gainRight; // dB
+        float gain; // dB
     };
 
     struct AudioLevel
@@ -159,11 +157,11 @@ public:
     /// @returns duration in number of frames for key transition of dsk @p keyer
     quint8 downstreamKeyFrames(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_frames; }
     /// @returns the input selected as fill source for downstream key @p keyer
-    quint8 downstreamKeyFillSource(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_fillSource; }
+    quint16 downstreamKeyFillSource(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_fillSource; }
     /// @returns the input selected as key source for downstream key @p keyer
-    quint8 downstreamKeyKeySource(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_keySource; }
+    quint16 downstreamKeyKeySource(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_keySource; }
     /// @returns true if the should be inverted for downstream key @p keyer
-    bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_keySource; }
+    bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_invertKey; }
     /// @returns true if the key is pre multiplied for downstream key @p keyer
     bool donwstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_preMultiplied; }
     /// @returns the clip set for downstream key @p keyer
@@ -186,9 +184,9 @@ public:
     /// @returns the key type for upstream key @p keyer, 0 = luma, 1 = chroma, 2 = pattern, 3 = DVE
     quint8 upstreamKeyType(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_type; }
     /// @returns the source used as fill for upstream key @p keyer
-    quint8 upstreamKeyFillSource(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_fillSource; }
+    quint16 upstreamKeyFillSource(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_fillSource; }
     /// @returns the source used as key for upstream key @p keyer
-    quint8 upstreamKeyKeySource(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_keySource; }
+    quint16 upstreamKeyKeySource(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_keySource; }
     /// @returns true if the mask is enabled for upstream key @p keyer
     bool upstreamKeyEnableMask(quint8 keyer) const { return m_upstreamKeys.value(keyer).m_enableMask; }
     /// @returns top mask for upstream key @p keyer
@@ -284,15 +282,15 @@ public:
     /// @returns the current state of the media player @p player
     MediaPlayerState mediaPlayerState(quint8 player) const { return m_mediaPlayerStates.value(player); }
 
-    quint8 auxSource(quint8 aux) const;
+    quint16 auxSource(quint8 aux) const;
 
     QString productInformation() const { return m_productInformation; }
     quint16 majorVersion() const { return m_majorversion; }
     quint16 minorVersion() const { return m_minorversion; }
 
     /// @returns Info about the input @p index
-    InputInfo inputInfo(quint8 index) const { return m_inputInfos.value(index); }
-    QHash<quint8, InputInfo> inputInfos () const { return m_inputInfos; }
+    InputInfo inputInfo(quint16 index) const { return m_inputInfos.value(index); }
+    QHash<quint16, InputInfo> inputInfos () const { return m_inputInfos; }
 
     MediaInfo mediaInfo(quint8 index) const { return m_mediaInfos.value(index); }
 
@@ -318,12 +316,12 @@ public:
     /// @returns duration in number of frames for dip transition
     quint8 dipFrames() const { return m_dipFrames; }
     /// @returns the source used for a dip transition
-    quint8 dipSource() const { return m_dipSource; }
+    quint16 dipSource() const { return m_dipSource; }
 
     /// @returns duration in number of frames for wipe transition
     quint8 wipeFrames() const { return m_wipeFrames; }
     /// @returns the border source index, used for wipe transition
-    quint8 wipeBorderSource() const { return m_wipeBorderSource; }
+    quint16 wipeBorderSource() const { return m_wipeBorderSource; }
     /// @returns border width for wipe transition
     quint16 wipeBorderWidth() const { return m_wipeBorderWidth; }
     /// @returns border softness for wipe transition
@@ -392,8 +390,8 @@ public:
      * 34 = Logo wipe
      */
     quint8 dveEffect() const { return m_dveEffect; }
-    quint8 dveFillSource() const { return m_dveFillSource; }
-    quint8 dveKeySource() const { return m_dveKeySource; }
+    quint16 dveFillSource() const { return m_dveFillSource; }
+    quint16 dveKeySource() const { return m_dveKeySource; }
     bool dveKeyEnabled() const { return m_dveEnableKey; }
     bool dvePreMultipliedKeyEnabled() const { return m_dveEnablePreMultipliedKey; }
     /// @returns the clip of the key in per cent for the DVE transition
@@ -423,14 +421,12 @@ public:
 
     /// @returns true if the monitor function is enabled on the audio breakout cable.
     bool audioMonitorEnabled() const { return m_audioMonitorEnabled; }
-    float audioMonitorGainLeft() const { return m_audioMonitorGainLeft; }
-    float audioMonitorGainRight() const { return m_audioMonitorGainRight; }
+    float audioMonitorGain() const { return m_audioMonitorGain; }
     bool audioMonitorMuted() const { return m_audioMonitorMuted; }
     bool audioMonitorDimmed() const { return m_audioMonitorDimmed; }
     /// @returns the audio channel that is solo on monitor out. -1 = None.
     qint8 audioMonitorSolo() const { return m_audioMonitorSolo; }
-    float audioMasterOutputGainLeft() const { return m_audioMasterOutputGainLeft; }
-    float audioMasterOutputGainRight() const { return m_audioMasterOutputGainRight; }
+    float audioMasterOutputGain() const { return m_audioMasterOutputGain; }
 
     AudioLevel audioLevel(quint8 index) const { return m_audioLevels.value(index); }
     float audioMasterOutputLevelLeft() const { return m_audioMasterOutputLevelLeft;}
@@ -457,8 +453,8 @@ public:
     int remainingTransferDataSize() const { return m_transferData.size(); }
 
 public slots:
-    void changeProgramInput(quint8 index);
-    void changePreviewInput(quint8 index);
+    void changeProgramInput(quint16 index);
+    void changePreviewInput(quint16 index);
 
     void doCut();
     void doAuto();
@@ -473,8 +469,8 @@ public slots:
     void setUpstreamKeyOnNextTransition(quint8 keyer, bool state);
     void setBackgroundOnNextTransition(bool state);
     void setUpstreamKeyType(quint8 keyer, quint8 type);
-    void setUpstreamKeyFillSource(quint8 keyer, quint8 source);
-    void setUpstreamKeyKeySource(quint8 keyer, quint8 source);
+    void setUpstreamKeyFillSource(quint8 keyer, quint16 source);
+    void setUpstreamKeyKeySource(quint8 keyer, quint16 source);
     void setUpstreamKeyEnableMask(quint8 keyer, bool enable);
     void setUpstreamKeyMask(quint8 keyer, float top, float bottom, float left, float right);
     void setUpstreamKeyLumaPreMultipliedKey(quint8 keyer, bool preMultiplied);
@@ -535,8 +531,8 @@ public slots:
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
     void doDownstreamKeyAuto(quint8 keyer);
-    void setDownstreamKeyFillSource(quint8 keyer, quint8 source);
-    void setDownstreamKeyKeySource(quint8 keyer, quint8 source);
+    void setDownstreamKeyFillSource(quint8 keyer, quint16 source);
+    void setDownstreamKeyKeySource(quint8 keyer, quint16 source);
     void setDownstreamKeyFrameRate(quint8 keyer, quint8 frames);
     void setDownstreamKeyInvertKey(quint8 keyer, bool invert);
     void setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultiplied);
@@ -560,9 +556,9 @@ public slots:
     void setMixFrames(quint8 frames);
 
     void setDipFrames(quint8 frames);
-    void setDipSource(quint8 source);
+    void setDipSource(quint16 source);
 
-    void setWipeBorderSource(quint8 index);
+    void setWipeBorderSource(quint16 source);
     void setWipeFrames(quint8 frames);
     void setWipeBorderWidth(quint16 width);
     void setWipeBorderSoftness(quint16 softness);
@@ -623,8 +619,8 @@ public slots:
      * 34 = Logo wipe
      */
     void setDVEEffect(quint8 effect);
-    void setDVEFillSource(quint8 source);
-    void setDVEKeySource(quint8 source);
+    void setDVEFillSource(quint16 source);
+    void setDVEKeySource(quint16 source);
     void setDVEKeyEnabled(bool enabled);
     void setDVEPreMultipliedKeyEnabled(bool enabled);
     /// Set clip of key for DVE transition to @p percent
@@ -649,16 +645,16 @@ public slots:
     void setStingerTriggerPoint(quint16 frames);
     void setStingerMixRate(quint16 frames);
 
-    void setAuxSource(quint8 aux, quint8 source);
+    void setAuxSource(quint8 aux, quint16 source);
 
     /**
      * Set the type of input to use. 1 = SDI, 2 = HMDI, 4 = Component.
      * On TVS input 3 and 4 are selectable between HDMI and SDI.
      * On 1 M/E input 1 is selectable between HDMI and component.
      */
-    void setInputType(quint8 input, quint8 type);
-    void setInputLongName(quint8 input, const QString& name);
-    void setInputShortName(quint8 input, const QString& name);
+    void setInputType(quint16 input, quint8 type);
+    void setInputLongName(quint16 input, const QString& name);
+    void setInputShortName(quint16 input, const QString& name);
 
     void setVideoFormat(quint8 format);
     /// Set type of video down coversion to @p type. 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
@@ -672,17 +668,17 @@ public slots:
     /// Set to true if you want audio data from the mixer
     void setAudioLevelsEnabled(bool enabled);
     /// Set the state of the audio input. 0 = Off, 1 = On, 2 = AFV
-    void setAudioInputState(quint8 index, quint8 state);
+    void setAudioInputState(quint16 index, quint8 state);
     /// Set the balance of the audio input. @p balance is a value between -1.0 and +1.0.
     void setAudioInputBalance(quint8 index, float balance);
     /// Set the gain of the audio input @p index. @p left and @p right is between +6dB and -60dB (-infdB)
-    void setAudioInputGain(quint8 index, float left, float right);
+    void setAudioInputGain(quint8 index, float gain);
     /// Set the gain of the audio master output. @p left and @p right is between +6dB and -60dB (-infdB)
-    void setAudioMasterOutputGain(float left, float right);
+    void setAudioMasterOutputGain(float gain);
     /// Enables audio monitoring using the breakout cable.
     void setAudioMonitorEnabled(bool enabled);
-    /// Set the gain of the audio monitor output. @p left and @p right is between +6dB and -60dB (-infdB)
-    void setAudioMonitorGain(float left, float right);
+    /// Set the gain of the audio monitor output. @p gain is between +6dB and -60dB (-infdB)
+    void setAudioMonitorGain(float gain);
     void setAudioMonitorMuted(bool muted);
     void setAudioMonitorDimmed(bool dimmed);
     void setAudioMonitorSolo(qint8 solo);
@@ -773,8 +769,8 @@ private:
 
     bool m_debugEnabled;
 
-    quint8 m_programInput;
-    quint8 m_previewInput;
+    quint16 m_programInput;
+    quint16 m_previewInput;
     quint8 m_tallyStateCount;
     QHash<quint8, quint8> m_tallyStates;
 
@@ -800,13 +796,13 @@ private:
     QHash<quint8, quint8> m_mediaPlayerSelectedClip;
     QHash<quint8, MediaPlayerState> m_mediaPlayerStates;
 
-    QHash<quint8, quint8> m_auxSource;
+    QHash<quint8, quint16> m_auxSource;
 
     QString m_productInformation;
     quint16 m_majorversion;
     quint16 m_minorversion;
 
-    QHash<quint8, InputInfo> m_inputInfos;
+    QHash<quint16, InputInfo> m_inputInfos;
 
     QHash<quint8, MediaInfo> m_mediaInfos;
 
@@ -823,10 +819,10 @@ private:
     quint8 m_mixFrames;
 
     quint8 m_dipFrames;
-    quint8 m_dipSource;
+    quint16 m_dipSource;
 
     quint8 m_wipeFrames;
-    quint8 m_wipeBorderSource;
+    quint16 m_wipeBorderSource;
     quint16 m_wipeBorderWidth;
     quint16 m_wipeBorderSoftness;
     quint8 m_wipeType;
@@ -838,8 +834,8 @@ private:
 
     quint16 m_dveRate;
     quint8 m_dveEffect;
-    quint8 m_dveFillSource;
-    quint8 m_dveKeySource;
+    quint16 m_dveFillSource;
+    quint16 m_dveKeySource;
     bool m_dveEnableKey;
     bool m_dveEnablePreMultipliedKey;
     float m_dveKeyClip;
@@ -863,16 +859,14 @@ private:
     QHash<quint8, AudioLevel> m_audioLevels;
 
     bool m_audioMonitorEnabled;
-    float m_audioMonitorGainLeft;
-    float m_audioMonitorGainRight;
+    float m_audioMonitorGain;
     bool m_audioMonitorDimmed;
     bool m_audioMonitorMuted;
     qint8 m_audioMonitorSolo;
 
     float m_audioMasterOutputLevelLeft;
     float m_audioMasterOutputLevelRight;
-    float m_audioMasterOutputGainLeft;
-    float m_audioMasterOutputGainRight;
+    float m_audioMasterOutputGain;
 
     QHash<quint8, bool> m_mediaLocks;
 
@@ -889,8 +883,8 @@ signals:
     void disconnected();
     void socketError(const QString& errorString);
 
-    void programInputChanged(quint8 oldIndex, quint8 newIndex);
-    void previewInputChanged(quint8 oldIndex, quint8 newIndex);
+    void programInputChanged(quint16 oldIndex, quint16 newIndex);
+    void previewInputChanged(quint16 oldIndex, quint16 newIndex);
 
     void tallyStatesChanged();
 
@@ -910,7 +904,7 @@ signals:
     void downstreamKeyTieChanged(quint8 keyer, bool state);
     void downstreamKeyFrameCountChanged(quint8 keyer, quint8 count);
     void downstreamKeyFramesChanged(quint8 keyer, quint8 frames);
-    void downstreamKeySourcesChanged(quint8 keyer, quint8 fill, quint8 key);
+    void downstreamKeySourcesChanged(quint8 keyer, quint16 fill, quint16 key);
     void downstreamKeyInvertKeyChanged(quint8 keyer, bool invert);
     void downstreamKeyPreMultipliedChanged(quint8 keyer, bool preMultiplied);
     void downstreamKeyClipChanged(quint8 keyer, float clip);
@@ -923,8 +917,8 @@ signals:
 
     void upstreamKeyOnChanged(quint8 keyer, bool state);
     void upstreamKeyTypeChanged(quint8 keyer, quint8 type);
-    void upstreamKeyFillSourceChanged(quint8 keyer, quint8 source);
-    void upstreamKeyKeySourceChanged(quint8 keyer, quint8 source);
+    void upstreamKeyFillSourceChanged(quint8 keyer, quint16 source);
+    void upstreamKeyKeySourceChanged(quint8 keyer, quint16 source);
     void upstreamKeyEnableMaskChanged(quint8 keyer, bool enable);
     void upstreamKeyTopMaskChanged(quint8 keyer, float value);
     void upstreamKeyBottomMaskChanged(quint8 keyer, float value);
@@ -972,7 +966,7 @@ signals:
     void mediaPlayerChanged(quint8 player, quint8 type, quint8 still, quint8 clip);
     void mediaPlayerStateChanged(quint8 player, const MediaPlayerState& state);
 
-    void auxSourceChanged(quint8 aux, quint8 source);
+    void auxSourceChanged(quint8 aux, quint16 source);
 
     void inputInfoChanged(const QAtemConnection::InputInfo& info);
 
@@ -986,7 +980,7 @@ signals:
     void mixFramesChanged(quint8 frames);
 
     void dipFramesChanged(quint8 frames);
-    void dipSourceChanged(quint8 source);
+    void dipSourceChanged(quint16 source);
 
     void wipeFramesChanged(quint8 frames);
     void wipeBorderWidthChanged(quint16 width);
@@ -1000,8 +994,8 @@ signals:
 
     void dveRateChanged(quint16 frames);
     void dveEffectChanged(quint8 effect);
-    void dveFillSourceChanged(quint8 source);
-    void dveKeySourceChanged(quint8 source);
+    void dveFillSourceChanged(quint16 source);
+    void dveKeySourceChanged(quint16 source);
     void dveEnableKeyChanged(bool enabled);
     void dveEnablePreMultipliedKeyChanged(bool enabled);
     void dveKeyClipChanged(float clip);
@@ -1010,7 +1004,7 @@ signals:
     void dveReverseDirectionChanged(bool reverse);
     void dveFlipFlopDirectionChanged(bool flipFlop);
 
-    void stingerSourceChanged(quint8 frames);
+    void stingerSourceChanged(quint8 source);
     void stingerEnablePreMultipliedKeyChanged(bool enabled);
     void stingerClipChanged(float percent);
     void stingerGainChanged(float percent);
@@ -1020,7 +1014,7 @@ signals:
     void stingerTriggerPointChanged(quint16 frames);
     void stingerMixRateChanged(quint16 frames);
 
-    void wipeBorderSourceChanged(quint8 index);
+    void wipeBorderSourceChanged(quint16 index);
 
     void videoFormatChanged(quint8 format);
     void videoDownConvertTypeChanged(quint8 type);
@@ -1030,11 +1024,11 @@ signals:
 
     void audioInputChanged(quint8 index, const AudioInput& input);
     void audioMonitorEnabledChanged(bool enabled);
-    void audioMonitorGainChanged(float left, float right);
+    void audioMonitorGainChanged(float gain);
     void audioMonitorMutedChanged(bool muted);
     void audioMonitorDimmedChanged(bool dimmed);
     void audioMonitorSoloChanged(qint8 solo);
-    void audioMasterOutputGainChanged(float left, float right);
+    void audioMasterOutputGainChanged(float gain);
     void audioLevelsChanged();
 
     void mediaLockStateChanged(quint8 id, bool state);

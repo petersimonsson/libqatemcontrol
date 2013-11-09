@@ -74,8 +74,8 @@ struct QUpstreamKeySettings
 
     bool m_onAir;
     quint8 m_type;
-    quint8 m_fillSource;
-    quint8 m_keySource;
+    quint16 m_fillSource;
+    quint16 m_keySource;
     bool m_enableMask;
     float m_topMask;
     float m_bottomMask;

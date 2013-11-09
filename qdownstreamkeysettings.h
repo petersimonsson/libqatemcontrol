@@ -45,8 +45,8 @@ struct QDownstreamKeySettings
     bool m_tie;
     quint8 m_frames;
     quint8 m_frameCount;
-    quint8 m_fillSource;
-    quint8 m_keySource;
+    quint16 m_fillSource;
+    quint16 m_keySource;
     bool m_invertKey;
     bool m_preMultiplied;
     float m_clip;

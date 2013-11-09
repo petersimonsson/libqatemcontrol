@@ -112,16 +112,14 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_minorversion = 0;
 
     m_audioMonitorEnabled = false;
-    m_audioMonitorGainLeft = 0;
-    m_audioMonitorGainRight = 0;
+    m_audioMonitorGain = 0;
     m_audioMonitorDimmed = false;
     m_audioMonitorMuted = false;
     m_audioMonitorSolo = -1;
 
     m_audioMasterOutputLevelLeft = 0;
     m_audioMasterOutputLevelRight = 0;
-    m_audioMasterOutputGainLeft = 0;
-    m_audioMasterOutputGainRight = 0;
+    m_audioMasterOutputGain = 0;
 
     m_transferActive = false;
     m_transferStoreId = 0;
@@ -342,7 +340,7 @@ void QAtemConnection::handleConnectionTimeout()
     emit disconnected();
 }
 
-void QAtemConnection::changeProgramInput(quint8 index)
+void QAtemConnection::changeProgramInput(quint16 index)
 {
     if(index == m_programInput)
     {
@@ -351,13 +349,16 @@ void QAtemConnection::changeProgramInput(quint8 index)
 
     QByteArray cmd("CPgI");
     QByteArray payload(4, (char)0x0);
+    U16_U8 val;
 
-    payload[1] = (char)index;
+    val.u16 = index;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::changePreviewInput(quint8 index)
+void QAtemConnection::changePreviewInput(quint16 index)
 {
     if(index == m_previewInput)
     {
@@ -366,8 +367,11 @@ void QAtemConnection::changePreviewInput(quint8 index)
 
     QByteArray cmd("CPvI");
     QByteArray payload(4, (char)0x0);
+    U16_U8 val;
 
-    payload[1] = (char)index;
+    val.u16 = index;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -570,7 +574,7 @@ void QAtemConnection::doDownstreamKeyAuto(quint8 keyer)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setDownstreamKeyFillSource(quint8 keyer, quint8 source)
+void QAtemConnection::setDownstreamKeyFillSource(quint8 keyer, quint16 source)
 {
     if(source == m_downstreamKeys.value(keyer).m_fillSource)
     {
@@ -579,14 +583,17 @@ void QAtemConnection::setDownstreamKeyFillSource(quint8 keyer, quint8 source)
 
     QByteArray cmd("CDsF");
     QByteArray payload(4, (char)0x0);
+    U16_U8 val;
 
     payload[0] = (char)keyer;
-    payload[1] = (char)source;
+    val.u16 = source;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setDownstreamKeyKeySource(quint8 keyer, quint8 source)
+void QAtemConnection::setDownstreamKeyKeySource(quint8 keyer, quint16 source)
 {
     if(source == m_downstreamKeys.value(keyer).m_keySource)
     {
@@ -595,9 +602,12 @@ void QAtemConnection::setDownstreamKeyKeySource(quint8 keyer, quint8 source)
 
     QByteArray cmd("CDsC");
     QByteArray payload(4, (char)0x0);
+    U16_U8 val;
 
     payload[0] = (char)keyer;
-    payload[1] = (char)source;
+    val.u16 = source;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -916,7 +926,7 @@ quint8 QAtemConnection::mediaPlayerSelectedClip(quint8 player) const
     return m_mediaPlayerSelectedClip.value(player);
 }
 
-quint8 QAtemConnection::auxSource(quint8 aux) const
+quint16 QAtemConnection::auxSource(quint8 aux) const
 {
     return m_auxSource.value(aux);
 }
@@ -934,7 +944,7 @@ void QAtemConnection::setMixFrames(quint8 frames)
 void QAtemConnection::setDipFrames(quint8 frames)
 {
     QByteArray cmd("CTDp");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(8, (char)0x0);
 
     payload[0] = (char)0x01;
     payload[2] = (char)frames;
@@ -942,24 +952,30 @@ void QAtemConnection::setDipFrames(quint8 frames)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setDipSource(quint8 source)
+void QAtemConnection::setDipSource(quint16 source)
 {
     QByteArray cmd("CTDp");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(8, (char)0x0);
+    U16_U8 val;
 
     payload[0] = (char)0x02;
-    payload[3] = (char)source;
+    val.u16 = source;
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setWipeBorderSource(quint8 index)
+void QAtemConnection::setWipeBorderSource(quint16 source)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
+    U16_U8 val;
 
     payload[1] = (char)0x08;
-    payload[8] = (char)index;
+    val.u16 = source;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1103,24 +1119,30 @@ void QAtemConnection::setDVEEffect(quint8 effect)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setDVEFillSource(quint8 source)
+void QAtemConnection::setDVEFillSource(quint16 source)
 {
     QByteArray cmd("CTDv");
     QByteArray payload(20, (char)0x0);
+    U16_U8 val;
 
     payload[1] = (char)0x08;
-    payload[6] = (char)source;
+    val.u16 = source;
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setDVEKeySource(quint8 source)
+void QAtemConnection::setDVEKeySource(quint16 source)
 {
     QByteArray cmd("CTDv");
     QByteArray payload(20, (char)0x0);
+    U16_U8 val;
 
     payload[1] = (char)0x10;
-    payload[7] = (char)source;
+    val.u16 = source;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1131,7 +1153,7 @@ void QAtemConnection::setDVEKeyEnabled(bool enabled)
     QByteArray payload(20, (char)0x0);
 
     payload[1] = (char)0x20;
-    payload[8] = (char)enabled;
+    payload[10] = (char)enabled;
 
     sendCommand(cmd, payload);
 }
@@ -1142,7 +1164,7 @@ void QAtemConnection::setDVEPreMultipliedKeyEnabled(bool enabled)
     QByteArray payload(20, (char)0x0);
 
     payload[1] = (char)0x40;
-    payload[9] = (char)enabled;
+    payload[11] = (char)enabled;
 
     sendCommand(cmd, payload);
 }
@@ -1155,8 +1177,8 @@ void QAtemConnection::setDVEKeyClip(float percent)
     val.u16 = percent * 10;
 
     payload[1] = (char)0x80;
-    payload[10] = (char)val.u8[1];
-    payload[11] = (char)val.u8[0];
+    payload[12] = (char)val.u8[1];
+    payload[13] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1169,8 +1191,8 @@ void QAtemConnection::setDVEKeyGain(float percent)
     val.u16 = percent * 10;
 
     payload[0] = (char)0x01;
-    payload[12] = (char)val.u8[1];
-    payload[13] = (char)val.u8[0];
+    payload[14] = (char)val.u8[1];
+    payload[15] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1181,7 +1203,7 @@ void QAtemConnection::setDVEInvertKeyEnabled(bool enabled)
     QByteArray payload(20, (char)0x0);
 
     payload[0] = (char)0x02;
-    payload[14] = (char)enabled;
+    payload[16] = (char)enabled;
 
     sendCommand(cmd, payload);
 }
@@ -1192,7 +1214,7 @@ void QAtemConnection::setDVEReverseDirection(bool reverse)
     QByteArray payload(20, (char)0x0);
 
     payload[0] = (char)0x04;
-    payload[15] = (char)reverse;
+    payload[17] = (char)reverse;
 
     sendCommand(cmd, payload);
 }
@@ -1203,7 +1225,7 @@ void QAtemConnection::setDVEFlipFlopDirection(bool flipFlop)
     QByteArray payload(20, (char)0x0);
 
     payload[0] = (char)0x08;
-    payload[16] = (char)flipFlop;
+    payload[18] = (char)flipFlop;
 
     sendCommand(cmd, payload);
 }
@@ -1342,7 +1364,7 @@ void QAtemConnection::setUpstreamKeyType(quint8 keyer, quint8 type)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setUpstreamKeyFillSource(quint8 keyer, quint8 source)
+void QAtemConnection::setUpstreamKeyFillSource(quint8 keyer, quint16 source)
 {
     if(source == m_upstreamKeys.value(keyer).m_fillSource)
     {
@@ -1351,14 +1373,17 @@ void QAtemConnection::setUpstreamKeyFillSource(quint8 keyer, quint8 source)
 
     QByteArray cmd("CKeF");
     QByteArray payload(4, (char)0x0);
+    U16_U8 val;
 
     payload[1] = (char)keyer;
-    payload[2] = (char)source;
+    val.u16 = source;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setUpstreamKeyKeySource(quint8 keyer, quint8 source)
+void QAtemConnection::setUpstreamKeyKeySource(quint8 keyer, quint16 source)
 {
     if(source == m_upstreamKeys.value(keyer).m_keySource)
     {
@@ -1367,9 +1392,12 @@ void QAtemConnection::setUpstreamKeyKeySource(quint8 keyer, quint8 source)
 
     QByteArray cmd("CKeC");
     QByteArray payload(4, (char)0x0);
+    U16_U8 val;
 
     payload[1] = (char)keyer;
-    payload[2] = (char)source;
+    val.u16 = source;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1995,7 +2023,7 @@ void QAtemConnection::setUpstreamKeyFlyEnabled(quint8 keyer, bool enable)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
+void QAtemConnection::setAuxSource(quint8 aux, quint16 source)
 {
     if(source == m_auxSource.value(aux))
     {
@@ -2003,15 +2031,19 @@ void QAtemConnection::setAuxSource(quint8 aux, quint8 source)
     }
 
     QByteArray cmd("CAuS");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(8, (char)0x0);
+    U16_U8 val;
 
-    payload[0] = (char)aux;
-    payload[1] = (char)source;
+    payload[0] = 0x01;
+    payload[1] = (char)aux;
+    val.u16 = source;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setInputType(quint8 input, quint8 type)
+void QAtemConnection::setInputType(quint16 input, quint8 type)
 {
     if(type == m_inputInfos.value(input).type)
     {
@@ -2019,16 +2051,19 @@ void QAtemConnection::setInputType(quint8 input, quint8 type)
     }
 
     QByteArray cmd("CInL");
-    QByteArray payload(28, (char)0x0);
+    QByteArray payload(32, (char)0x0);
+    U16_U8 val;
 
     payload[0] = (char)0x04;
-    payload[1] = (char)input;
-    payload[26] = (char)type;
+    val.u16 = input;
+    payload[1] = (char)val.u8[1];
+    payload[2] = (char)val.u8[0];
+    payload[29] = (char)type;
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setInputLongName(quint8 input, const QString &name)
+void QAtemConnection::setInputLongName(quint16 input, const QString &name)
 {
     if(name == m_inputInfos.value(input).longText)
     {
@@ -2036,19 +2071,22 @@ void QAtemConnection::setInputLongName(quint8 input, const QString &name)
     }
 
     QByteArray cmd("CInL");
-    QByteArray payload(28, (char)0x0);
+    QByteArray payload(32, (char)0x0);
     QByteArray namearray = name.toLatin1();
     namearray.resize(20);
+    U16_U8 val;
 
     payload[0] = (char)0x01;
-    payload[1] = (char)input;
-    payload.replace(2, 20, namearray);
-    payload[27] = (char)0xff;
+    val.u16 = input;
+    payload[1] = (char)val.u8[1];
+    payload[2] = (char)val.u8[0];
+    payload.replace(3, 21, namearray);
+    payload[28] = (char)0xff;
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setInputShortName(quint8 input, const QString &name)
+void QAtemConnection::setInputShortName(quint16 input, const QString &name)
 {
     if(name == m_inputInfos.value(input).shortText)
     {
@@ -2056,13 +2094,16 @@ void QAtemConnection::setInputShortName(quint8 input, const QString &name)
     }
 
     QByteArray cmd("CInL");
-    QByteArray payload(28, (char)0x0);
+    QByteArray payload(32, (char)0x0);
     QByteArray namearray = name.toLatin1();
     namearray.resize(4);
+    U16_U8 val;
 
     payload[0] = (char)0x02;
-    payload[1] = (char)input;
-    payload.replace(22, 4, namearray);
+    val.u16 = input;
+    payload[1] = (char)val.u8[1];
+    payload[2] = (char)val.u8[0];
+    payload.replace(24, 4, namearray);
 
     sendCommand(cmd, payload);
 }
@@ -2125,15 +2166,21 @@ void QAtemConnection::setMultiViewLayout(quint8 layout)
 
 void QAtemConnection::onPrgI(const QByteArray& payload)
 {
-    quint8 old = m_programInput;
-    m_programInput = (quint8)payload.at(7);
+    quint16 old = m_programInput;
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_programInput = val.u16;
     emit programInputChanged(old, m_programInput);
 }
 
 void QAtemConnection::onPrvI(const QByteArray& payload)
 {
-    quint8 old = m_previewInput;
-    m_previewInput = (quint8)payload.at(7);
+    quint16 old = m_previewInput;
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_previewInput = val.u16;
     emit previewInputChanged(old, m_previewInput);
 }
 
@@ -2247,9 +2294,14 @@ void QAtemConnection::onDskP(const QByteArray& payload)
 
 void QAtemConnection::onDskB(const QByteArray& payload)
 {
+    U16_U8 val;
     quint8 index = (quint8)payload.at(6);
-    m_downstreamKeys[index].m_fillSource = (quint8)payload.at(7);
-    m_downstreamKeys[index].m_keySource = (quint8)payload.at(8);
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_downstreamKeys[index].m_fillSource = val.u16;
+    val.u8[1] = (quint8)payload.at(10);
+    val.u8[0] = (quint8)payload.at(11);
+    m_downstreamKeys[index].m_keySource = val.u16;
 
     emit downstreamKeySourcesChanged(index, m_downstreamKeys[index].m_fillSource, m_downstreamKeys[index].m_keySource);
 }
@@ -2296,9 +2348,12 @@ void QAtemConnection::onMPCE(const QByteArray& payload)
 
 void QAtemConnection::onAuxS(const QByteArray& payload)
 {
+    U16_U8 val;
     quint8 index = (quint8)payload.at(6);
 
-    m_auxSource[index] = (quint8)payload.at(7);
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_auxSource[index] = val.u16;
 
     emit auxSourceChanged(index, m_auxSource[index]);
 }
@@ -2326,10 +2381,13 @@ void QAtemConnection::on_ver(const QByteArray& payload)
 void QAtemConnection::onInPr(const QByteArray& payload)
 {
     InputInfo info;
-    info.index = (quint8)payload.at(6);
-    info.longText = payload.mid(7, 20);
-    info.shortText = payload.mid(27, 4);
-    info.type = (quint8)payload.at(35); // 1 = SDI, 2 = HDMI, 4 = Component, 32 = Internal
+    U16_U8 index;
+    index.u8[1] = (quint8)payload.at(6);
+    index.u8[0] = (quint8)payload.at(7);
+    info.index = index.u16;
+    info.longText = payload.mid(8, 20);
+    info.shortText = payload.mid(28, 4);
+    info.type = (quint8)payload.at(36); // 1 = SDI, 2 = HDMI, 4 = Component, 0 = Internal
     m_inputInfos.insert(info.index, info);
 
     emit inputInfoChanged(info);
@@ -2413,8 +2471,11 @@ void QAtemConnection::onTMxP(const QByteArray& payload)
 
 void QAtemConnection::onTDpP(const QByteArray& payload)
 {
+    U16_U8 val;
     m_dipFrames = (quint8)payload.at(7);
-    m_dipSource = (quint8)payload.at(8);
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_dipSource = val.u16;
 
     emit dipFramesChanged(m_dipFrames);
     emit dipSourceChanged(m_dipSource);
@@ -2429,7 +2490,9 @@ void QAtemConnection::onTWpP(const QByteArray& payload)
     val.u8[1] = (quint8)payload.at(10);
     val.u8[0] = (quint8)payload.at(11);
     m_wipeBorderWidth = val.u16;
-    m_wipeBorderSource = (quint8)payload.at(12);
+    val.u8[1] = (quint8)payload.at(12);
+    val.u8[0] = (quint8)payload.at(13);
+    m_wipeBorderSource = val.u16;
     val.u8[1] = (quint8)payload.at(14);
     val.u8[0] = (quint8)payload.at(15);
     m_wipeSymmetry = val.u16;
@@ -2464,19 +2527,23 @@ void QAtemConnection::onTDvP(const QByteArray& payload)
     val.u8[0] = (quint8)payload.at(7);
     m_dveRate = val.u16;
     m_dveEffect = (quint8)payload.at(9);
-    m_dveFillSource = (quint8)payload.at(10);
-    m_dveKeySource = (quint8)payload.at(11);
-    m_dveEnableKey = (bool)payload.at(12);
-    m_dveEnablePreMultipliedKey = (bool)payload.at(13);
-    val.u8[1] = (quint8)payload.at(14);
-    val.u8[0] = (quint8)payload.at(15);
-    m_dveKeyClip = val.u16 / 10.0;
+    val.u8[1] = (quint8)payload.at(10);
+    val.u8[0] = (quint8)payload.at(11);
+    m_dveFillSource = val.u16;
+    val.u8[1] = (quint8)payload.at(12);
+    val.u8[0] = (quint8)payload.at(13);
+    m_dveKeySource = val.u16;
+    m_dveEnableKey = (bool)payload.at(14);
+    m_dveEnablePreMultipliedKey = (bool)payload.at(15);
     val.u8[1] = (quint8)payload.at(16);
     val.u8[0] = (quint8)payload.at(17);
+    m_dveKeyClip = val.u16 / 10.0;
+    val.u8[1] = (quint8)payload.at(18);
+    val.u8[0] = (quint8)payload.at(19);
     m_dveKeyGain = val.u16 / 10.0;
-    m_dveEnableInvertKey = (bool)payload.at(18);
-    m_dveReverseDirection = (bool)payload.at(19);
-    m_dveFlipFlopDirection = (bool)payload.at(20);
+    m_dveEnableInvertKey = (bool)payload.at(20);
+    m_dveReverseDirection = (bool)payload.at(21);
+    m_dveFlipFlopDirection = (bool)payload.at(22);
 
     emit dveRateChanged(m_dveRate);
     emit dveEffectChanged(m_dveEffect);
@@ -2529,24 +2596,28 @@ void QAtemConnection::onTStP(const QByteArray& payload)
 
 void QAtemConnection::onKeBP(const QByteArray& payload)
 {
+    U16_U8 val;
     quint8 index = (quint8)payload.at(7);
     m_upstreamKeys[index].m_type = (quint8)payload.at(8);
     m_upstreamKeys[index].m_enableFly = (bool)payload.at(11);
-    m_upstreamKeys[index].m_fillSource = (quint8)payload.at(12);
-    m_upstreamKeys[index].m_keySource = (quint8)payload.at(13);
-    m_upstreamKeys[index].m_enableMask = (quint8)payload.at(14);
-    U16_U8 val;
-    val.u8[1] = (quint8)payload.at(16);
-    val.u8[0] = (quint8)payload.at(17);
-    m_upstreamKeys[index].m_topMask = (qint16)val.u16 / 1000.0;
+    val.u8[1] = (quint8)payload[12];
+    val.u8[0] = (quint8)payload[13];
+    m_upstreamKeys[index].m_fillSource = val.u16;
+    val.u8[1] = (quint8)payload[14];
+    val.u8[0] = (quint8)payload[15];
+    m_upstreamKeys[index].m_keySource = val.u16;
+    m_upstreamKeys[index].m_enableMask = (quint8)payload.at(16);
     val.u8[1] = (quint8)payload.at(18);
     val.u8[0] = (quint8)payload.at(19);
-    m_upstreamKeys[index].m_bottomMask = (qint16)val.u16 / 1000.0;
+    m_upstreamKeys[index].m_topMask = (qint16)val.u16 / 1000.0;
     val.u8[1] = (quint8)payload.at(20);
     val.u8[0] = (quint8)payload.at(21);
-    m_upstreamKeys[index].m_leftMask = (qint16)val.u16 / 1000.0;
+    m_upstreamKeys[index].m_bottomMask = (qint16)val.u16 / 1000.0;
     val.u8[1] = (quint8)payload.at(22);
     val.u8[0] = (quint8)payload.at(23);
+    m_upstreamKeys[index].m_leftMask = (qint16)val.u16 / 1000.0;
+    val.u8[1] = (quint8)payload.at(24);
+    val.u8[0] = (quint8)payload.at(25);
     m_upstreamKeys[index].m_rightMask = (qint16)val.u16 / 1000.0;
 
     emit upstreamKeyTypeChanged(index, m_upstreamKeys[index].m_type);
@@ -2803,14 +2874,17 @@ void QAtemConnection::setAudioLevelsEnabled(bool enabled)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAudioInputState(quint8 index, quint8 state)
+void QAtemConnection::setAudioInputState(quint16 index, quint8 state)
 {
     QByteArray cmd("CAMI");
     QByteArray payload(12, (char)0x0);
+    U16_U8 val;
 
     payload[0] = (char)0x01;
-    payload[1] = (char)index;
-    payload[2] = (char)state;
+    val.u16 = index;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+    payload[4] = (char)state;
 
     sendCommand(cmd, payload);
 }
@@ -2823,44 +2897,42 @@ void QAtemConnection::setAudioInputBalance(quint8 index, float balance)
     val.u16 = balance * 10000;
 
     payload[0] = (char)0x08;
-    payload[1] = (char)index;
-    payload[8] = (char)val.u8[1];
-    payload[9] = (char)val.u8[0];
+    val.u16 = index;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+    payload[9] = (char)val.u8[1];
+    payload[10] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAudioInputGain(quint8 index, float left, float right)
+void QAtemConnection::setAudioInputGain(quint8 index, float gain)
 {
     QByteArray cmd("CAMI");
     QByteArray payload(12, (char)0x0);
     U16_U8 val;
 
     payload[0] = (char)0x06;
-    payload[1] = (char)index;
-    val.u16 = pow(10, left / 20.0) * 32768;
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
-    val.u16 = pow(10, right / 20.0) * 32768;
-    payload[6] = (char)val.u8[1];
-    payload[7] = (char)val.u8[0];
+    val.u16 = index;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+    val.u16 = pow(10, gain / 20.0) * 32768;
+    payload[5] = (char)val.u8[1];
+    payload[6] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAudioMasterOutputGain(float left, float right)
+void QAtemConnection::setAudioMasterOutputGain(float gain)
 {
     QByteArray cmd("CAMM");
     QByteArray payload(8, (char)0x0);
     U16_U8 val;
 
     payload[0] = (char)0x03;
-    val.u16 = pow(10, left / 20.0) * 32768;
+    val.u16 = pow(10, gain / 20.0) * 32768;
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
-    val.u16 = pow(10, right / 20.0) * 32768;
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -2944,20 +3016,18 @@ void QAtemConnection::onAMTl(const QByteArray& payload)
 void QAtemConnection::onAMIP(const QByteArray& payload)
 {
     // Audio mixer interface preferences
-    quint8 index = (quint8)payload.at(6);
-    m_audioInputs[index].index = index;
-    m_audioInputs[index].type = (quint8)payload.at(7);
-    m_audioInputs[index].source = (quint8)payload.at(8);
-    m_audioInputs[index].state = (quint8)payload.at(9);
     U16_U8 val;
-    val.u8[1] = (quint8)payload.at(10);
-    val.u8[0] = (quint8)payload.at(11);
-    m_audioInputs[index].gainLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
-    val.u8[1] = (quint8)payload.at(12);
-    val.u8[0] = (quint8)payload.at(13);
-    m_audioInputs[index].gainRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
-    val.u8[1] = (quint8)payload.at(14);
-    val.u8[0] = (quint8)payload.at(15);
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
+    quint16 index = val.u16;
+    m_audioInputs[index].index = index;
+    m_audioInputs[index].type = (quint8)payload.at(8);
+    m_audioInputs[index].state = (quint8)payload.at(14);
+    val.u8[1] = (quint8)payload.at(16);
+    val.u8[0] = (quint8)payload.at(17);
+    m_audioInputs[index].gain = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    val.u8[1] = (quint8)payload.at(18);
+    val.u8[0] = (quint8)payload.at(19);
     m_audioInputs[index].balance = (qint16)val.u16 / 10000.0;
 
     emit audioInputChanged(index, m_audioInputs[index]);
@@ -2969,10 +3039,7 @@ void QAtemConnection::onAMmO(const QByteArray& payload)
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(8);
     val.u8[0] = (quint8)payload.at(9);
-    m_audioMonitorGainLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
-    val.u8[1] = (quint8)payload.at(10);
-    val.u8[0] = (quint8)payload.at(11);
-    m_audioMonitorGainRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioMonitorGain = log10f((quint16)val.u16 / 32768.0) * 20.0;
     m_audioMonitorMuted = (bool)payload.at(12);
     bool solo = (bool)payload.at(13);
 
@@ -2988,7 +3055,7 @@ void QAtemConnection::onAMmO(const QByteArray& payload)
     m_audioMonitorDimmed = (bool)payload.at(15);
 
     emit audioMonitorEnabledChanged(m_audioMonitorEnabled);
-    emit audioMonitorGainChanged(m_audioMonitorGainLeft, m_audioMonitorGainRight);
+    emit audioMonitorGainChanged(m_audioMonitorGain);
     emit audioMonitorMutedChanged(m_audioMonitorMuted);
     emit audioMonitorDimmedChanged(m_audioMonitorDimmed);
     emit audioMonitorSoloChanged(m_audioMonitorSolo);
@@ -3010,19 +3077,16 @@ void QAtemConnection::setAudioMonitorEnabled(bool enabled)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAudioMonitorGain(float left, float right)
+void QAtemConnection::setAudioMonitorGain(float gain)
 {
     QByteArray cmd("CAMm");
     QByteArray payload(12, (char)0x0);
     U16_U8 val;
 
     payload[0] = (char)0x06;
-    val.u16 = pow(10, left / 20.0) * 32768;
+    val.u16 = pow(10, gain / 20.0) * 32768;
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
-    val.u16 = pow(10, right / 20.0) * 32768;
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -3070,12 +3134,9 @@ void QAtemConnection::onAMMO(const QByteArray& payload)
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(6);
     val.u8[0] = (quint8)payload.at(7);
-    m_audioMasterOutputGainLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
-    m_audioMasterOutputGainRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioMasterOutputGain = log10f((quint16)val.u16 / 32768.0) * 20.0;
 
-    emit audioMasterOutputGainChanged(m_audioMasterOutputGainLeft, m_audioMasterOutputGainRight);
+    emit audioMasterOutputGainChanged(m_audioMasterOutputGain);
 }
 
 bool QAtemConnection::aquireMediaLock(quint8 id)
