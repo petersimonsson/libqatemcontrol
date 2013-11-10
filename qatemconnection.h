@@ -290,7 +290,7 @@ public:
 
     /// @returns Info about the input @p index
     InputInfo inputInfo(quint16 index) const { return m_inputInfos.value(index); }
-    QHash<quint16, InputInfo> inputInfos () const { return m_inputInfos; }
+    QMap<quint16, InputInfo> inputInfos () const { return m_inputInfos; }
 
     MediaInfo mediaInfo(quint8 index) const { return m_mediaInfos.value(index); }
 
@@ -802,7 +802,7 @@ private:
     quint16 m_majorversion;
     quint16 m_minorversion;
 
-    QHash<quint16, InputInfo> m_inputInfos;
+    QMap<quint16, InputInfo> m_inputInfos;
 
     QHash<quint8, MediaInfo> m_mediaInfos;
 
