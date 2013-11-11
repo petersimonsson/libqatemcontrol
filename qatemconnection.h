@@ -163,7 +163,7 @@ public:
     /// @returns true if the should be inverted for downstream key @p keyer
     bool downstreamKeyInvertKey(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_invertKey; }
     /// @returns true if the key is pre multiplied for downstream key @p keyer
-    bool donwstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_preMultiplied; }
+    bool downstreamKeyPreMultiplied(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_preMultiplied; }
     /// @returns the clip set for downstream key @p keyer
     quint16 downstreamKeyClip(quint8 keyer) const { return m_downstreamKeys.value(keyer).m_clip; }
     /// @returns the gain set for downstream key @p keyer
