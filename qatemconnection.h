@@ -143,6 +143,8 @@ public:
 
     /// @returns true if fade to black is on.
     bool fadeToBlackEnabled() const { return m_fadeToBlackEnabled; }
+    /// @returns true if fade to black is fading to/from black
+    bool fadeToBlackFading() const { return m_fadeToBlackFading; }
     /// @returns number of frames left of fade to black transition.
     quint8 fadeToBlackFrameCount() const { return m_fadeToBlackFrameCount; }
     /// @returns duration in number of frames for the fade to black transition.
@@ -783,6 +785,7 @@ private:
     quint8 m_nextTransitionStyle;
 
     bool m_fadeToBlackEnabled;
+    bool m_fadeToBlackFading;
     quint8 m_fadeToBlackFrameCount;
     quint8 m_fadeToBlackFrames;
 
@@ -896,7 +899,8 @@ signals:
     void currentTransitionStyleChanged(quint8 style);
     void keyersOnCurrentTransitionChanged(quint8 keyers);
 
-    void fadeToBlackChanged(bool enabled);
+    ///@p fading is true while fading to/from black, @p enabled is true when program is faded to black
+    void fadeToBlackChanged(bool fading, bool enabled);
     void fadeToBlackFrameCountChanged(quint8 count);
     void fadeToBlackFramesChanged(quint8 frames);
 

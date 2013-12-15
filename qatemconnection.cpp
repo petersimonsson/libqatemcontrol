@@ -60,6 +60,7 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_nextTransitionStyle = 0;
 
     m_fadeToBlackEnabled = false;
+    m_fadeToBlackFading = false;
     m_fadeToBlackFrameCount = 0;
 
     m_mixFrames = 0;
@@ -2227,10 +2228,11 @@ void QAtemConnection::onTrSS(const QByteArray& payload)
 
 void QAtemConnection::onFtbS(const QByteArray& payload)
 {
-    m_fadeToBlackEnabled = (quint8)payload.at(8);
+    m_fadeToBlackEnabled = (bool)payload.at(7);
+    m_fadeToBlackFading = (bool)payload.at(8);
     m_fadeToBlackFrameCount = (quint8)payload.at(9);
 
-    emit fadeToBlackChanged(m_fadeToBlackEnabled);
+    emit fadeToBlackChanged(m_fadeToBlackFading, m_fadeToBlackEnabled);
     emit fadeToBlackFrameCountChanged(m_fadeToBlackFrameCount);
 }
 
