@@ -1659,7 +1659,7 @@ void QAtemConnection::setUpstreamKeyPatternSize(quint8 keyer, float size)
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
     U16_U8 val;
-    val.u16 = size * 10;
+    val.u16 = size * 100;
 
     payload[0] = (char)0x02;
     payload[2] = (char)keyer;
@@ -1679,7 +1679,7 @@ void QAtemConnection::setUpstreamKeyPatternSymmetry(quint8 keyer, float symmetry
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
     U16_U8 val;
-    val.u16 = symmetry * 10;
+    val.u16 = symmetry * 100;
 
     payload[0] = (char)0x04;
     payload[2] = (char)keyer;
@@ -1699,7 +1699,7 @@ void QAtemConnection::setUpstreamKeyPatternSoftness(quint8 keyer, float softness
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
     U16_U8 val;
-    val.u16 = softness * 10;
+    val.u16 = softness * 100;
 
     payload[0] = (char)0x08;
     payload[2] = (char)keyer;
@@ -2684,13 +2684,13 @@ void QAtemConnection::onKePt(const QByteArray& payload)
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(10);
     val.u8[0] = (quint8)payload.at(11);
-    m_upstreamKeys[index].m_patternSize = val.u16 / 10.0;
+    m_upstreamKeys[index].m_patternSize = val.u16 / 100.0;
     val.u8[1] = (quint8)payload.at(12);
     val.u8[0] = (quint8)payload.at(13);
-    m_upstreamKeys[index].m_patternSymmetry = val.u16 / 10.0;
+    m_upstreamKeys[index].m_patternSymmetry = val.u16 / 100.0;
     val.u8[1] = (quint8)payload.at(14);
     val.u8[0] = (quint8)payload.at(15);
-    m_upstreamKeys[index].m_patternSoftness = val.u16 / 10.0;
+    m_upstreamKeys[index].m_patternSoftness = val.u16 / 100.0;
     val.u8[1] = (quint8)payload.at(16);
     val.u8[0] = (quint8)payload.at(17);
     m_upstreamKeys[index].m_patternXPosition = val.u16 / 1000.0;
