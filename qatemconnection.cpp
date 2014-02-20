@@ -3141,18 +3141,19 @@ void QAtemConnection::onAMMO(const QByteArray& payload)
     emit audioMasterOutputGainChanged(m_audioMasterOutputGain);
 }
 
-bool QAtemConnection::aquireMediaLock(quint8 id)
+bool QAtemConnection::aquireMediaLock(quint8 id, quint8 index)
 {
     if(m_mediaLocks.value(id))
     {
         return false;
     }
 
-    QByteArray cmd("LOCK");
-    QByteArray payload(4, (char)0x0);
+    QByteArray cmd("PLCK");
+    QByteArray payload(8, (char)0x0);
 
     payload[1] = (char)id;
-    payload[2] = (char)0x01;
+    payload[3] = (char)index;
+    payload[5] = (char)0x01;
 
     sendCommand(cmd, payload);
     return true;
@@ -3210,7 +3211,6 @@ void QAtemConnection::initDownloadToSwitcher()
     payload[0] = (char)id.u8[1];
     payload[1] = (char)id.u8[0];
     payload[2] = (char)m_transferStoreId;
-    payload[3] = (char)0xb0;
     payload[7] = (char)m_transferIndex;
     U32_U8 val;
     val.u32 = m_transferData.size();
@@ -3218,7 +3218,7 @@ void QAtemConnection::initDownloadToSwitcher()
     payload[9] = val.u8[2];
     payload[10] = val.u8[1];
     payload[11] = val.u8[0];
-    payload[12] = (char)0x01; // 0x01 == write, 0x02 == Clear
+    payload[13] = (char)0x01; // 0x01 == write, 0x02 == Clear
 
     sendCommand(cmd, payload);
 }

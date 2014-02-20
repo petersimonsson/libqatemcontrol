@@ -435,7 +435,7 @@ public:
     float audioMasterOutputLevelRight() const { return m_audioMasterOutputLevelRight;}
 
     /// Aquire the media pool lock with ID @p id. @returns false if the lock is already locked.
-    bool aquireMediaLock(quint8 id);
+    bool aquireMediaLock(quint8 id, quint8 index);
     /// Unlock the media pool lock with ID @p id.
     void unlockMediaLock(quint8 id);
     /// @returns the state of the media pool lock with ID @p id.
