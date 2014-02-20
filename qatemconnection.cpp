@@ -20,6 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 #include <QTimer>
 #include <QHostAddress>
+#include <QImage>
+#include <QPainter>
 
 #include <math.h>
 
@@ -3300,4 +3302,61 @@ void QAtemConnection::onFTDC(const QByteArray& payload)
     }
 
     emit dataTransferFinished(id.u16);
+}
+
+QByteArray QAtemConnection::prepImageForSwitcher(QImage &image, const int width, const int height)
+{
+    // Size the image
+    image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+
+    if(image.width() > width) {
+        image = image.copy((image.width()-width) / 2, 0, width, image.height());
+    }
+    if(image.height() > height) {
+        image = image.copy(0, (image.height()-height) / 2, image.width(), height);
+    }
+    if(image.width() < width || image.height() < height) {
+        QImage blank(width, height, QImage::Format_ARGB32_Premultiplied);
+        blank.fill(QColor(0,0,0,0));
+        QPainter p(&blank);
+        p.drawImage(QPoint((width-image.width()) / 2, (height-image.height()) / 2), image);
+        image = blank;
+    }
+
+    // Convert pixels in pairs for 4:2:2 compression
+    QByteArray data(width*height*4, 0x00);
+
+    const QRgb *pixel = reinterpret_cast<const QRgb*>(image.constBits());
+    for(int i = 0; i < width * height; i+=2) {
+
+        unsigned char r1 =   qRed(pixel[i+0]);
+        unsigned char g1 = qGreen(pixel[i+0]);
+        unsigned char b1 =  qBlue(pixel[i+0]);
+
+        unsigned char r2 =   qRed(pixel[i+1]);
+        unsigned char g2 = qGreen(pixel[i+1]);
+        unsigned char b2 =  qBlue(pixel[i+1]);
+
+        quint16 a1 = qAlpha(pixel[i+0]) * 3.7;
+        quint16 a2 = qAlpha(pixel[i+1]) * 3.7;
+
+        quint16 y1 = (((66  * r1 + 129 * g1 +  25 * b1 + 128) >> 8) + 16 ) * 4 - 1;
+        quint16 u1 = (((-38 * r1 -  74 * g1 + 112 * b1 + 128) >> 8) + 128) * 4 - 1;
+        quint16 y2 = (((66  * r2 + 129 * g2 +  25 * b2 + 128) >> 8) + 16 ) * 4 - 1;
+        quint16 v2 = (((112 * r2 -  94 * g2 -  18 * b2 + 128) >> 8) + 128) * 4 - 1;
+
+        int j = i * 4;
+
+        data[j+0] = a1 >> 4;
+        data[j+1] = ((a1 & 0x0f) << 4) | (u1 >> 6);
+        data[j+2] = ((u1 & 0x3f) << 2) | (y1 >> 8);
+        data[j+3] = y1 & 0xff;
+
+        data[j+4] = a2 >> 4;
+        data[j+5] = ((a2 & 0x0f) << 4) | (v2 >> 6);
+        data[j+6] = ((v2 & 0x3f) << 2) | (y2 >> 8);
+        data[j+7] = y2 & 0xff;
+    }
+
+    return data;
 }

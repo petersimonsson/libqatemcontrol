@@ -454,6 +454,14 @@ public:
     quint16 transferId () const { return m_transferId; }
     int remainingTransferDataSize() const { return m_transferData.size(); }
 
+    /**
+     * Convert @p image to a QByteArray suitable for sending to the switcher.
+     * @param image The image to convert
+     * @param width Width of the frame the image will be converted to
+     * @param height Height of the frame the image will be converted to
+     */
+    static QByteArray prepImageForSwitcher(QImage &image, const int width, const int height);
+
 public slots:
     void changeProgramInput(quint16 index);
     void changePreviewInput(quint16 index);
