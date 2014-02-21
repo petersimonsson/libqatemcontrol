@@ -3167,11 +3167,6 @@ void QAtemConnection::onLKST(const QByteArray& payload)
     m_mediaLocks[id] = payload.at(8);
 
     emit mediaLockStateChanged(id, m_mediaLocks.value(id));
-
-    if(m_transferStoreId == id && !m_transferData.isEmpty())
-    {
-        initDownloadToSwitcher();
-    }
 }
 
 void QAtemConnection::unlockMediaLock(quint8 id)
@@ -3295,11 +3290,6 @@ void QAtemConnection::onFTDC(const QByteArray& payload)
     U16_U8 id;
     id.u8[1] = (quint8)payload.at(6);
     id.u8[0] = (quint8)payload.at(7);
-
-    if(m_transferId == id.u16)
-    {
-        unlockMediaLock(m_transferStoreId);
-    }
 
     emit dataTransferFinished(id.u16);
 }
