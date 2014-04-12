@@ -2408,7 +2408,42 @@ void QAtemConnection::onMPSE(const QByteArray& payload)
         info.name = payload.mid(8);
     }
 
-    m_mediaInfos.insert(info.index, info);
+    m_stillMediaInfos.insert(info.index, info);
+
+    emit mediaInfoChanged(info);
+}
+
+void QAtemConnection::onMPfe(const QByteArray& payload)
+{
+    MediaInfo info;
+    info.type = StillMedia;
+    info.index = (quint8)payload.at(9);
+    info.used = (quint8)payload.at(10);
+    quint8 length = (quint8)payload.at(29);
+
+    if(info.used)
+    {
+        info.name = payload.mid(30, length);
+    }
+
+    m_stillMediaInfos.insert(info.index, info);
+
+    emit mediaInfoChanged(info);
+}
+
+void QAtemConnection::onMPCS(const QByteArray& payload)
+{
+    MediaInfo info;
+    info.type = ClipMedia;
+    info.index = (quint8)payload.at(6);
+    info.used = (quint8)payload.at(7);
+
+    if(info.used)
+    {
+        info.name = payload.mid(8);
+    }
+
+    m_clipMediaInfos.insert(info.index, info);
 
     emit mediaInfoChanged(info);
 }
@@ -2840,6 +2875,8 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("_ver", "on_ver");
     m_commandSlotHash.insert("InPr", "onInPr");
     m_commandSlotHash.insert("MPSE", "onMPSE");
+    m_commandSlotHash.insert("MPfe", "onMPfe");
+    m_commandSlotHash.insert("MPCS", "onMPCS");
     m_commandSlotHash.insert("MvIn", "onMvIn");
     m_commandSlotHash.insert("MvPr", "onMvPr");
     m_commandSlotHash.insert("VidM", "onVidM");

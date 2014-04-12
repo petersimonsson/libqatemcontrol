@@ -77,11 +77,18 @@ public:
         QString shortText;
     };
 
+    enum MediaType
+    {
+        StillMedia = 1,
+        ClipMedia = 2
+    };
+
     struct MediaInfo
     {
         quint8 index;
         bool used;
         QString name;
+        MediaType type;
     };
 
     struct MediaPlayerState
@@ -294,7 +301,8 @@ public:
     InputInfo inputInfo(quint16 index) const { return m_inputInfos.value(index); }
     QMap<quint16, InputInfo> inputInfos () const { return m_inputInfos; }
 
-    MediaInfo mediaInfo(quint8 index) const { return m_mediaInfos.value(index); }
+    MediaInfo stillMediaInfo(quint8 index) const { return m_stillMediaInfos.value(index); }
+    MediaInfo clipMediaInfo(quint8 index) const { return m_clipMediaInfos.value(index); }
 
     /// @returns index of the multi view layout, 0 = prg/prv on top, 1 = prg/prv on bottom, 2 = prg/prv on left, 3 = prg/prv on right
     quint8 multiViewLayout() const { return m_multiViewLayout; }
@@ -718,6 +726,8 @@ protected slots:
     void on_ver(const QByteArray& payload);
     void onInPr(const QByteArray& payload);
     void onMPSE(const QByteArray& payload);
+    void onMPfe(const QByteArray& payload);
+    void onMPCS(const QByteArray& payload);
     void onMvIn(const QByteArray& payload);
     void onMvPr(const QByteArray& payload);
     void onVidM(const QByteArray& payload);
@@ -815,7 +825,8 @@ private:
 
     QMap<quint16, InputInfo> m_inputInfos;
 
-    QHash<quint8, MediaInfo> m_mediaInfos;
+    QHash<quint8, MediaInfo> m_stillMediaInfos;
+    QHash<quint8, MediaInfo> m_clipMediaInfos;
 
     QHash<quint8, quint8> m_multiViewInputs;
     quint8 m_multiViewLayout;
