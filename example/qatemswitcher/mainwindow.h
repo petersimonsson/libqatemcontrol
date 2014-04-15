@@ -25,6 +25,15 @@ protected slots:
     void changeProgramInput(int input);
     void changePreviewInput(int input);
 
+    void toogleDsk1Tie();
+    void toogleDsk1OnAir();
+    void doDsk1Auto();
+    void toogleDsk2Tie();
+    void toogleDsk2OnAir();
+    void doDsk2Auto();
+    void updateDskTie(quint8 key, bool tie);
+    void updateDskOn(quint8 key, bool on);
+
 private:
     Ui::MainWindow *m_ui;
     QAtemConnection *m_atemConnection;

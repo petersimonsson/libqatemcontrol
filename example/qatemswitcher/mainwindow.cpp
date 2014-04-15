@@ -50,6 +50,25 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->cutButton, SIGNAL(clicked()),
             m_atemConnection, SLOT(doCut()));
 
+    connect(m_ui->dsk1TieButton, SIGNAL(clicked()),
+            this, SLOT(toogleDsk1Tie()));
+    connect(m_ui->dsk1OnAirButton, SIGNAL(clicked()),
+            this, SLOT(toogleDsk1OnAir()));
+    connect(m_ui->dsk1AutoButton, SIGNAL(clicked()),
+            this, SLOT(doDsk1Auto()));
+
+    connect(m_ui->dsk2TieButton, SIGNAL(clicked()),
+            this, SLOT(toogleDsk2Tie()));
+    connect(m_ui->dsk2OnAirButton, SIGNAL(clicked()),
+            this, SLOT(toogleDsk2OnAir()));
+    connect(m_ui->dsk2AutoButton, SIGNAL(clicked()),
+            this, SLOT(doDsk2Auto()));
+
+    connect(m_atemConnection, SIGNAL(downstreamKeyTieChanged(quint8,bool)),
+            this, SLOT(updateDskTie(quint8,bool)));
+    connect(m_atemConnection, SIGNAL(downstreamKeyOnChanged(quint8,bool)),
+            this, SLOT(updateDskOn(quint8,bool)));
+
     connectToAtem();
 }
 
@@ -94,4 +113,58 @@ void MainWindow::changeProgramInput(int input)
 void MainWindow::changePreviewInput(int input)
 {
     m_atemConnection->changePreviewInput(input);
+}
+
+void MainWindow::toogleDsk1Tie()
+{
+    m_atemConnection->setDownstreamKeyTie(0, !m_atemConnection->downstreamKeyTie(0));
+}
+
+void MainWindow::toogleDsk1OnAir()
+{
+    m_atemConnection->setDownstreamKeyOn(0, !m_atemConnection->downstreamKeyOn(0));
+}
+
+void MainWindow::doDsk1Auto()
+{
+    m_atemConnection->doDownstreamKeyAuto(0);
+}
+
+void MainWindow::toogleDsk2Tie()
+{
+    m_atemConnection->setDownstreamKeyTie(1, !m_atemConnection->downstreamKeyTie(0));
+}
+
+void MainWindow::toogleDsk2OnAir()
+{
+    m_atemConnection->setDownstreamKeyOn(1, !m_atemConnection->downstreamKeyOn(0));
+}
+
+void MainWindow::doDsk2Auto()
+{
+    m_atemConnection->doDownstreamKeyAuto(1);
+}
+
+void MainWindow::updateDskTie(quint8 key, bool tie)
+{
+    if (key == 0)
+    {
+        m_ui->dsk1TieButton->setChecked(tie);
+    }
+    else if (key == 1)
+    {
+        m_ui->dsk2TieButton->setChecked(tie);
+    }
+}
+
+void MainWindow::updateDskOn(quint8 key, bool on)
+{
+    if (key == 0)
+    {
+        m_ui->dsk1OnAirButton->setChecked(on);
+    }
+    else if (key == 1)
+    {
+        m_ui->dsk2OnAirButton->setChecked(on);
+    }
 }
