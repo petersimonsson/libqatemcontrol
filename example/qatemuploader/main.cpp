@@ -17,6 +17,9 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("position", QCoreApplication::translate("main", "Position in the still store"));
     parser.addPositionalArgument("source", QCoreApplication::translate("main", "Image file to upload"));
 
+    QCommandLineOption copyToMediaPlayer (QStringList() << "mp" << "mediaplayer", QCoreApplication::translate("main", "Copy to media player <id> when done"), "id");
+    parser.addOption(copyToMediaPlayer);
+
     parser.process(a);
 
     QStringList arguments = parser.positionalArguments();
@@ -26,8 +29,11 @@ int main(int argc, char *argv[])
         parser.showHelp(-1);
     }
 
+    qint8 mediaplayer = parser.value(copyToMediaPlayer).toInt() - 1;
+
     QAtemUploader uploader;
-    uploader.upload(arguments[2], arguments[0], arguments[1].toInt());
+    uploader.setMediaPlayer(mediaplayer);
+    uploader.upload(arguments[2], arguments[0], arguments[1].toInt() - 1);
 
     return a.exec();
 }

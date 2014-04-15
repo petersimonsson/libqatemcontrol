@@ -18,6 +18,7 @@ public:
 
     explicit QAtemUploader(QObject *parent = 0);
 
+    void setMediaPlayer(qint8 id) { m_mediaplayer = id; }
     void upload(const QString &filename, const QString &address, quint8 position);
 
 protected slots:
@@ -34,6 +35,7 @@ private:
     QString m_filename;
     quint8 m_position;
     State m_state;
+    qint8 m_mediaplayer;
 };
 
 #endif // QATEMUPLOADER_H

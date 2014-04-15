@@ -9,7 +9,7 @@
 #include <QFileInfo>
 
 QAtemUploader::QAtemUploader(QObject *parent) :
-    QObject(parent), m_state(NotConnected)
+    QObject(parent), m_state(NotConnected), m_mediaplayer (-1)
 {
     m_connection = new QAtemConnection(this);
     connect(m_connection, SIGNAL(socketError(QString)),
@@ -128,5 +128,10 @@ void QAtemUploader::handleDataTransferFinished(quint16 transferId)
     if(transferId == 1)
     {
         m_connection->unlockMediaLock(0);
+
+        if(m_mediaplayer == 0 || m_mediaplayer == 1)
+        {
+            m_connection->setMediaPlayerSource(m_mediaplayer, false, m_position);
+        }
     }
 }
