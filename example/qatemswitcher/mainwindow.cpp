@@ -132,12 +132,12 @@ void MainWindow::doDsk1Auto()
 
 void MainWindow::toogleDsk2Tie()
 {
-    m_atemConnection->setDownstreamKeyTie(1, !m_atemConnection->downstreamKeyTie(0));
+    m_atemConnection->setDownstreamKeyTie(1, !m_atemConnection->downstreamKeyTie(1));
 }
 
 void MainWindow::toogleDsk2OnAir()
 {
-    m_atemConnection->setDownstreamKeyOn(1, !m_atemConnection->downstreamKeyOn(0));
+    m_atemConnection->setDownstreamKeyOn(1, !m_atemConnection->downstreamKeyOn(1));
 }
 
 void MainWindow::doDsk2Auto()
