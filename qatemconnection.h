@@ -690,7 +690,7 @@ public slots:
     /// Set the balance of the audio input. @p balance is a value between -1.0 and +1.0.
     void setAudioInputBalance(quint8 index, float balance);
     /// Set the gain of the audio input @p index. @p left and @p right is between +6dB and -60dB (-infdB)
-    void setAudioInputGain(quint8 index, float gain);
+    void setAudioInputGain(quint16 index, float gain);
     /// Set the gain of the audio master output. @p left and @p right is between +6dB and -60dB (-infdB)
     void setAudioMasterOutputGain(float gain);
     /// Enables audio monitoring using the breakout cable.
@@ -1045,7 +1045,7 @@ signals:
     void mediaPoolClip1SizeChanged(quint8 size);
     void mediaPoolClip2SizeChanged(quint8 size);
 
-    void audioInputChanged(quint8 index, const AudioInput& input);
+    void audioInputChanged(quint8 index, const QAtemConnection::AudioInput& input);
     void audioMonitorEnabledChanged(bool enabled);
     void audioMonitorGainChanged(float gain);
     void audioMonitorMutedChanged(bool muted);

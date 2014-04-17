@@ -2947,7 +2947,7 @@ void QAtemConnection::setAudioInputBalance(quint8 index, float balance)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAudioInputGain(quint8 index, float gain)
+void QAtemConnection::setAudioInputGain(quint16 index, float gain)
 {
     QByteArray cmd("CAMI");
     QByteArray payload(12, (char)0x0);
@@ -2958,8 +2958,8 @@ void QAtemConnection::setAudioInputGain(quint8 index, float gain)
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
     val.u16 = pow(10, gain / 20.0) * 32768;
-    payload[5] = (char)val.u8[1];
-    payload[6] = (char)val.u8[0];
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -2970,7 +2970,7 @@ void QAtemConnection::setAudioMasterOutputGain(float gain)
     QByteArray payload(8, (char)0x0);
     U16_U8 val;
 
-    payload[0] = (char)0x03;
+    payload[0] = (char)0x01;
     val.u16 = pow(10, gain / 20.0) * 32768;
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
