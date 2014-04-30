@@ -2930,19 +2930,19 @@ void QAtemConnection::setAudioInputState(quint16 index, quint8 state)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setAudioInputBalance(quint8 index, float balance)
+void QAtemConnection::setAudioInputBalance(quint16 index, float balance)
 {
     QByteArray cmd("CAMI");
     QByteArray payload(12, (char)0x0);
     U16_U8 val;
-    val.u16 = balance * 10000;
 
-    payload[0] = (char)0x08;
+    payload[0] = (char)0x04;
     val.u16 = index;
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
-    payload[9] = (char)val.u8[1];
-    payload[10] = (char)val.u8[0];
+    val.u16 = balance * 10000;
+    payload[8] = (char)val.u8[1];
+    payload[9] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
