@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QHostAddress>
 #include <QImage>
 #include <QPainter>
+#include <QThread>
 
 #include <math.h>
 
@@ -31,6 +32,7 @@ QAtemConnection::QAtemConnection(QObject* parent)
     : QObject(parent)
 {
     m_socket = new QUdpSocket(this);
+    m_socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
 
     connect(m_socket, SIGNAL(readyRead()),
             this, SLOT(handleSocketData()));
@@ -186,9 +188,10 @@ void QAtemConnection::handleSocketData()
         {
             QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packageId);
             sendDatagram(ackDatagram);
+            m_socket->flush();
         }
 
-        if(datagram.size() > (SIZE_OF_HEADER + 2) && !(header.bitmask & Cmd_HelloPacket))
+        if(datagram.size() > (SIZE_OF_HEADER + 2) && !(header.bitmask & (Cmd_HelloPacket | Cmd_Resend)))
         {
             parsePayLoad(datagram);
         }
@@ -263,11 +266,11 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
         if(cmd == "InCm")
         {
             m_isInitialized = true;
-            emit connected();
+            QMetaObject::invokeMethod(this, "emitConnectedSignal", Qt::QueuedConnection);
         }
         else if(m_commandSlotHash.contains(cmd))
         {
-            QMetaObject::invokeMethod(this, m_commandSlotHash.value(cmd), Q_ARG(QByteArray, payload));
+            QMetaObject::invokeMethod(this, m_commandSlotHash.value(cmd), Qt::QueuedConnection, Q_ARG(QByteArray, payload));
         }
         else if(m_debugEnabled)
         {
@@ -300,14 +303,19 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
     }
 }
 
-void QAtemConnection::sendDatagram(const QByteArray& datagram)
+void QAtemConnection::emitConnectedSignal()
 {
-    m_socket->writeDatagram(datagram, m_address, m_port);
-
-//    qDebug() << "Data sent:" << datagram.toHex();
+    emit connected();
 }
 
-void QAtemConnection::sendCommand(const QByteArray& cmd, const QByteArray& payload)
+bool QAtemConnection::sendDatagram(const QByteArray& datagram)
+{
+    qint64 sent = m_socket->writeDatagram(datagram, m_address, m_port);
+
+    return sent != -1;
+}
+
+bool QAtemConnection::sendCommand(const QByteArray& cmd, const QByteArray& payload)
 {
     U16_U8 size;
 
@@ -324,7 +332,7 @@ void QAtemConnection::sendCommand(const QByteArray& cmd, const QByteArray& paylo
     datagram.append(cmd);
     datagram.append(payload);
 
-    sendDatagram(datagram);
+    return sendDatagram(datagram);
 }
 
 void QAtemConnection::handleError(QAbstractSocket::SocketError)
@@ -3239,45 +3247,46 @@ void QAtemConnection::onFTCD(const QByteArray& payload)
     U16_U8 id;
     id.u8[1] = (quint8)payload.at(6);
     id.u8[0] = (quint8)payload.at(7);
+    quint8 count = (quint8)payload.at(14);
 
-    if(id.u16 == m_transferId && !m_transferActive)
+    if(id.u16 == m_transferId)
     {
-        flushTransferBuffer();
-        sendFileDescription(id.u16, m_transferName);
+        flushTransferBuffer(count);
     }
 }
 
-void QAtemConnection::flushTransferBuffer()
+void QAtemConnection::flushTransferBuffer(quint8 count)
 {
     int i = 0;
 
-    while (!m_transferData.isEmpty() && i < 25)
+    while(!m_transferData.isEmpty() && i < count)
     {
         QByteArray data = m_transferData.left(1392);
-        sendData(m_transferId, data);
         m_transferData = m_transferData.remove(0, data.size());
+        sendData(m_transferId, data);
+        m_socket->flush();
+        QThread::usleep(50);
         ++i;
     }
 
-    m_transferActive = !m_transferData.isEmpty();
-    m_socket->flush();
-
-    if(m_transferActive)
+    if(!m_transferActive)
     {
-        QTimer::singleShot(10, this, SLOT(flushTransferBuffer()));
+        sendFileDescription();
     }
+
+    m_transferActive = !m_transferData.isEmpty();
 }
 
 void QAtemConnection::sendData(quint16 id, const QByteArray &data)
 {
     QByteArray cmd("FTDa");
-    QByteArray payload(1400, (char)0x0);
+    QByteArray payload(data.size() + 8, (char)0x0);
 
     U16_U8 val;
     val.u16 = id;
     payload[0] = val.u8[1];
     payload[1] = val.u8[0];
-    val.u16 = qMin(1392, data.size());
+    val.u16 = data.size();
     payload[2] = val.u8[1];
     payload[3] = val.u8[0];
     payload.replace(4, val.u16, data);
@@ -3285,16 +3294,16 @@ void QAtemConnection::sendData(quint16 id, const QByteArray &data)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::sendFileDescription(quint16 id, const QByteArray &name)
+void QAtemConnection::sendFileDescription()
 {
     QByteArray cmd("FTFD");
     QByteArray payload(84, (char)0x0);
 
     U16_U8 val;
-    val.u16 = id;
+    val.u16 = m_transferId;
     payload[0] = val.u8[1];
     payload[1] = val.u8[0];
-    payload.replace(2, qMin(82, name.size()), name);
+    payload.replace(2, qMin(82, m_transferName.size()), m_transferName);
 
     sendCommand(cmd, payload);
 }

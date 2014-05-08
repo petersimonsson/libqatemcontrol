@@ -707,6 +707,7 @@ protected slots:
 
     void handleError(QAbstractSocket::SocketError);
     void handleConnectionTimeout();
+    void emitConnectedSignal();
 
     void onPrgI(const QByteArray& payload);
     void onPrvI(const QByteArray& payload);
@@ -757,7 +758,7 @@ protected slots:
     void onFTDC(const QByteArray& payload);
 
     void initDownloadToSwitcher();
-    void flushTransferBuffer();
+    void flushTransferBuffer(quint8 count);
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId);
@@ -765,15 +766,15 @@ protected:
     QAtemConnection::CommandHeader parseCommandHeader(const QByteArray& datagram) const;
     void parsePayLoad(const QByteArray& datagram);
 
-    void sendDatagram(const QByteArray& datagram);
-    void sendCommand(const QByteArray& cmd, const QByteArray &payload);
+    bool sendDatagram(const QByteArray& datagram);
+    bool sendCommand(const QByteArray& cmd, const QByteArray &payload);
 
     void initCommandSlotHash();
 
     void setKeyOnNextTransition (int index, bool state);
 
     void sendData(quint16 id, const QByteArray &data);
-    void sendFileDescription(quint16 id, const QByteArray &name);
+    void sendFileDescription();
 
 private:
     QUdpSocket* m_socket;
