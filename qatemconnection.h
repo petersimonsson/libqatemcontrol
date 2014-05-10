@@ -89,6 +89,7 @@ public:
         bool used;
         QString name;
         MediaType type;
+        QByteArray hash;
     };
 
     struct MediaPlayerState
@@ -901,6 +902,7 @@ private:
     QByteArray m_transferName;
     quint16 m_transferId;
     quint16 m_lastTransferId;
+    QByteArray m_transferHash;
 
 signals:
     void connected();

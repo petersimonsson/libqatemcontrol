@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QImage>
 #include <QPainter>
 #include <QThread>
+#include <QCryptographicHash>
 
 #include <math.h>
 
@@ -2427,6 +2428,7 @@ void QAtemConnection::onMPfe(const QByteArray& payload)
     info.type = StillMedia;
     info.index = (quint8)payload.at(9);
     info.used = (quint8)payload.at(10);
+    info.hash = payload.mid(11, 16);
     quint8 length = (quint8)payload.at(29);
 
     if(info.used)
@@ -3214,6 +3216,7 @@ quint16 QAtemConnection::sendDataToSwitcher(quint8 storeId, quint8 index, const 
     m_transferData = data;
     m_lastTransferId++;
     m_transferId = m_lastTransferId;
+    m_transferHash = QCryptographicHash::hash(data, QCryptographicHash::Md5);
 
     initDownloadToSwitcher();
 
@@ -3303,7 +3306,8 @@ void QAtemConnection::sendFileDescription()
     val.u16 = m_transferId;
     payload[0] = val.u8[1];
     payload[1] = val.u8[0];
-    payload.replace(2, qMin(82, m_transferName.size()), m_transferName);
+    payload.replace(2, qMin(64, m_transferName.size()), m_transferName);
+    payload.replace(66, 16, m_transferHash);
 
     sendCommand(cmd, payload);
 }
