@@ -119,6 +119,10 @@ public:
 
     explicit QAtemConnection(QObject* parent = NULL);
 
+    QHostAddress address() const { return m_address; }
+
+    bool isConnected() const;
+
     /// Connect to ATEM switcher at @p address
     void connectToSwitcher(const QHostAddress& address);
     void disconnectFromSwitcher();

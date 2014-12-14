@@ -136,6 +136,11 @@ QAtemConnection::QAtemConnection(QObject* parent)
     initCommandSlotHash();
 }
 
+bool QAtemConnection::isConnected() const
+{
+    return m_socket && m_socket->isOpen() && m_isInitialized;
+}
+
 void QAtemConnection::connectToSwitcher(const QHostAddress &address)
 {
     m_address = address;
@@ -143,6 +148,11 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address)
     if(m_address.isNull())
     {
         return;
+    }
+
+    if (m_socket->isOpen())
+    {
+        m_socket->close();
     }
 
     m_socket->bind();
