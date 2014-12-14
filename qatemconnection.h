@@ -137,9 +137,9 @@ public:
     bool debugEnabled() const { return m_debugEnabled; }
 
     /// @returns the index of the input that is on program
-    quint16 programInput() const { return m_programInput; }
+    quint16 programInput(quint8 me) const;
     /// @returns the index of the input that is on preview
-    quint16 previewInput() const { return m_previewInput; }
+    quint16 previewInput(quint8 me) const;
 
     /// @returns the tally state of the input @p id. 1 = program, 2 = preview and 3 = both
     quint8 tallyState(quint8 id) const;
@@ -485,8 +485,8 @@ public:
     QAtem::Topology topology() const { return m_topology; }
 
 public slots:
-    void changeProgramInput(quint16 index);
-    void changePreviewInput(quint16 index);
+    void changeProgramInput(quint8 me, quint16 index);
+    void changePreviewInput(quint8 me, quint16 index);
 
     void doCut();
     void doAuto();
@@ -805,8 +805,8 @@ private:
 
     bool m_debugEnabled;
 
-    quint16 m_programInput;
-    quint16 m_previewInput;
+    quint16 m_programInput[2];
+    quint16 m_previewInput[2];
     quint8 m_tallyStateCount;
     QHash<quint8, quint8> m_tallyStates;
 
@@ -924,8 +924,8 @@ signals:
     void disconnected();
     void socketError(const QString& errorString);
 
-    void programInputChanged(quint16 oldIndex, quint16 newIndex);
-    void previewInputChanged(quint16 oldIndex, quint16 newIndex);
+    void programInputChanged(quint8 me, quint16 oldIndex, quint16 newIndex);
+    void previewInputChanged(quint8 me, quint16 oldIndex, quint16 newIndex);
 
     void tallyStatesChanged();
 

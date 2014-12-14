@@ -52,8 +52,10 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_debugEnabled = false;
 
-    m_programInput = 0;
-    m_previewInput = 0;
+    m_programInput[0] = 0;
+    m_programInput[1] = 0;
+    m_previewInput[0] = 0;
+    m_previewInput[1] = 0;
     m_tallyStateCount = 0;
 
     m_transitionPreviewEnabled = false;
@@ -364,9 +366,9 @@ void QAtemConnection::handleConnectionTimeout()
     emit disconnected();
 }
 
-void QAtemConnection::changeProgramInput(quint16 index)
+void QAtemConnection::changeProgramInput(quint8 me, quint16 index)
 {
-    if(index == m_programInput)
+    if(me > 1 || index == m_programInput[me])
     {
         return;
     }
@@ -375,6 +377,7 @@ void QAtemConnection::changeProgramInput(quint16 index)
     QByteArray payload(4, (char)0x0);
     U16_U8 val;
 
+    payload[0] = (char)me;
     val.u16 = index;
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
@@ -382,9 +385,9 @@ void QAtemConnection::changeProgramInput(quint16 index)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::changePreviewInput(quint16 index)
+void QAtemConnection::changePreviewInput(quint8 me, quint16 index)
 {
-    if(index == m_previewInput)
+    if(me > 1 || index == m_previewInput[me])
     {
         return;
     }
@@ -393,11 +396,36 @@ void QAtemConnection::changePreviewInput(quint16 index)
     QByteArray payload(4, (char)0x0);
     U16_U8 val;
 
+    payload[0] = (char)me;
     val.u16 = index;
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
+}
+
+quint16 QAtemConnection::programInput(quint8 me) const
+{
+    if(me < 2)
+    {
+        return m_programInput[me];
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+quint16 QAtemConnection::previewInput(quint8 me) const
+{
+    if(me < 2)
+    {
+        return m_previewInput[me];
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void QAtemConnection::doCut()
@@ -2190,22 +2218,32 @@ void QAtemConnection::setMultiViewLayout(quint8 layout)
 
 void QAtemConnection::onPrgI(const QByteArray& payload)
 {
-    quint16 old = m_programInput;
-    U16_U8 val;
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
-    m_programInput = val.u16;
-    emit programInputChanged(old, m_programInput);
+    quint8 me = (quint8)payload.at(6);
+
+    if (me < 2)
+    {
+        quint16 old = m_programInput[me];
+        U16_U8 val;
+        val.u8[1] = (quint8)payload.at(8);
+        val.u8[0] = (quint8)payload.at(9);
+        m_programInput[me] = val.u16;
+        emit programInputChanged(me, old, m_programInput[me]);
+    }
 }
 
 void QAtemConnection::onPrvI(const QByteArray& payload)
 {
-    quint16 old = m_previewInput;
-    U16_U8 val;
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
-    m_previewInput = val.u16;
-    emit previewInputChanged(old, m_previewInput);
+    quint8 me = (quint8)payload.at(6);
+
+    if (me < 2)
+    {
+        quint16 old = m_previewInput[me];
+        U16_U8 val;
+        val.u8[1] = (quint8)payload.at(8);
+        val.u8[0] = (quint8)payload.at(9);
+        m_previewInput[me] = val.u16;
+        emit previewInputChanged(me, old, m_previewInput[me]);
+    }
 }
 
 void QAtemConnection::onTlIn(const QByteArray& payload)
