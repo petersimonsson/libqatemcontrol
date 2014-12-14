@@ -74,7 +74,11 @@ public:
     struct InputInfo
     {
         quint16 index;
-        quint8 type;
+        quint8 externalType; // 0 = Internal, 1 = SDI, 2 = HDMI, 3 = Composite, 4 = Component, 5 = SVideo
+        quint8 internalType; // 0 = External, 1 = Black, 2 = Color Bars, 3 = Color Generator, 4 = Media Player Fill, 5 = Media Player Key, 6 = SuperSource, 128 = ME Output, 129 = Auxiliary, 130 = Mask
+        quint8 availableExternalTypes; // Bit 0: SDI, 1: HDMI, 2: Component, 3: Composite, 4: SVideo
+        quint8 availability; // Bit 0: Auxiliary, 1: Multiviewer, 2: SuperSource Art, 3: SuperSource Box, 4: Key Sources
+        quint8 meAvailability; // Bit 0: ME1 + Fill Sources, 1: ME2 + Fill Sources
         QString longText;
         QString shortText;
     };
