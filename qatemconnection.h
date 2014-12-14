@@ -17,8 +17,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef QATEMCONNECTION_H
 #define QATEMCONNECTION_H
+
 #include "qdownstreamkeysettings.h"
 #include "qupstreamkeysettings.h"
+#include "topology.h"
 
 #include <QObject>
 #include <QUdpSocket>
@@ -476,6 +478,8 @@ public:
      */
     static QByteArray prepImageForSwitcher(QImage &image, const int width, const int height);
 
+    QAtem::Topology topology() const { return m_topology; }
+
 public slots:
     void changeProgramInput(quint16 index);
     void changePreviewInput(quint16 index);
@@ -761,6 +765,7 @@ protected slots:
     void onLKST(const QByteArray& payload);
     void onFTCD(const QByteArray& payload);
     void onFTDC(const QByteArray& payload);
+    void on_top(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -907,6 +912,8 @@ private:
     quint16 m_transferId;
     quint16 m_lastTransferId;
     QByteArray m_transferHash;
+
+    QAtem::Topology m_topology;
 
 signals:
     void connected();
@@ -1065,6 +1072,8 @@ signals:
     void mediaLockStateChanged(quint8 id, bool state);
 
     void dataTransferFinished(quint16 transferId);
+
+    void topologyChanged(const QAtem::Topology &topology);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

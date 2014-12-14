@@ -2925,6 +2925,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("LKST", "onLKST");
     m_commandSlotHash.insert("FTCD", "onFTCD");
     m_commandSlotHash.insert("FTDC", "onFTDC");
+    m_commandSlotHash.insert("_top", "on_top");
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -3388,4 +3389,19 @@ QByteArray QAtemConnection::prepImageForSwitcher(QImage &image, const int width,
     }
 
     return data;
+}
+
+void QAtemConnection::on_top(const QByteArray& payload)
+{
+    m_topology.MEs = (quint8)payload.at(6);
+    m_topology.sources = (quint8)payload.at(7);
+    m_topology.colorGenerators = (quint8)payload.at(8);
+    m_topology.auxBusses = (quint8)payload.at(9);
+    m_topology.downstreamKeyers = (quint8)payload.at(10);
+    m_topology.stingers = (quint8)payload.at(11);
+    m_topology.DVEs = (quint8)payload.at(12);
+    m_topology.supersources = (quint8)payload.at(13);
+    m_topology.hasSD = (bool)payload.at(15);
+
+    emit topologyChanged(m_topology);
 }
