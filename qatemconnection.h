@@ -124,7 +124,7 @@ public:
     bool isConnected() const;
 
     /// Connect to ATEM switcher at @p address
-    void connectToSwitcher(const QHostAddress& address);
+    void connectToSwitcher(const QHostAddress& address, int connectionTimeout = 1000);
     void disconnectFromSwitcher();
 
     void setDebugEnabled(bool enabled) { m_debugEnabled = enabled; }

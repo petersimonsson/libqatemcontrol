@@ -141,7 +141,7 @@ bool QAtemConnection::isConnected() const
     return m_socket && m_socket->isOpen() && m_isInitialized;
 }
 
-void QAtemConnection::connectToSwitcher(const QHostAddress &address)
+void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connectionTimeout)
 {
     m_address = address;
 
@@ -152,6 +152,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address)
 
     if (m_socket->isOpen())
     {
+        m_connectionTimer->stop();
         m_socket->close();
     }
 
@@ -165,6 +166,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address)
     datagram.append(QByteArray::fromHex("0100000000000000")); // The Hello package needs this... no idea what it means
 
     sendDatagram(datagram);
+    m_connectionTimer->setInterval(connectionTimeout);
     m_connectionTimer->start();
 }
 
