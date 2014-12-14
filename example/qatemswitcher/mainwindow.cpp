@@ -93,7 +93,7 @@ void MainWindow::onAtemConnected()
 
     foreach(const QAtemConnection::InputInfo &info, m_atemConnection->inputInfos())
     {
-        if(info.type != 0 /*Internal source*/)
+        if(info.externalType != 0 /*Internal source*/)
         {
             ++count;
         }
@@ -107,12 +107,12 @@ void MainWindow::onAtemConnected()
 
 void MainWindow::changeProgramInput(int input)
 {
-    m_atemConnection->changeProgramInput(input);
+    m_atemConnection->changeProgramInput(1, input);
 }
 
 void MainWindow::changePreviewInput(int input)
 {
-    m_atemConnection->changePreviewInput(input);
+    m_atemConnection->changePreviewInput(1, input);
 }
 
 void MainWindow::toogleDsk1Tie()
