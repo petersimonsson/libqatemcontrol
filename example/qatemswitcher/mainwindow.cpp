@@ -107,12 +107,12 @@ void MainWindow::onAtemConnected()
 
 void MainWindow::changeProgramInput(int input)
 {
-    m_atemConnection->changeProgramInput(1, input);
+    m_atemConnection->changeProgramInput(0, input);
 }
 
 void MainWindow::changePreviewInput(int input)
 {
-    m_atemConnection->changePreviewInput(1, input);
+    m_atemConnection->changePreviewInput(0, input);
 }
 
 void MainWindow::toogleDsk1Tie()
