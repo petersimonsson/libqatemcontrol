@@ -265,6 +265,9 @@ public:
     void registerCommand(const QByteArray &command, QObject *object, const QByteArray &slot);
     void unregisterCommand(const QByteArray &command, QObject *object);
 
+    /// @returns the power status as a bitmask. Bit 0: Main power on/off, 1: Backup power on/off
+    quint8 powerStatus() const { return m_powerStatus; }
+
 public slots:
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -365,6 +368,7 @@ protected slots:
     void onFTCD(const QByteArray& payload);
     void onFTDC(const QByteArray& payload);
     void on_top(const QByteArray& payload);
+    void onPowr(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -473,6 +477,8 @@ private:
 
     QAtem::Topology m_topology;
 
+    quint8 m_powerStatus;
+
 signals:
     void connected();
     void disconnected();
@@ -531,6 +537,8 @@ signals:
     void dataTransferFinished(quint16 transferId);
 
     void topologyChanged(const QAtem::Topology &topology);
+
+    void powerStatusChanged(quint8 status);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

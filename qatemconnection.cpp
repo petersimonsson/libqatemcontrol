@@ -1199,6 +1199,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("FTCD", ObjectSlot(this, "onFTCD"));
     m_commandSlotHash.insert("FTDC", ObjectSlot(this, "onFTDC"));
     m_commandSlotHash.insert("_top", ObjectSlot(this, "on_top"));
+    m_commandSlotHash.insert("Powr", ObjectSlot(this, "onPowr"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1705,4 +1706,11 @@ void QAtemConnection::unregisterCommand(const QByteArray &command, QObject *obje
             m_commandSlotHash.remove(command, objslot);
         }
     }
+}
+
+void QAtemConnection::onPowr(const QByteArray& payload)
+{
+    m_powerStatus = (quint8)payload.at(6); // Bit 0: Main power on/off 1: Backup power on/off
+
+    emit powerStatusChanged(m_powerStatus);
 }
