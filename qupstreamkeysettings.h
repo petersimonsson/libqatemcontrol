@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 struct QUpstreamKeySettings
 {
-    QUpstreamKeySettings ()
+    QUpstreamKeySettings(quint8 id) : m_id (id)
     {
         m_onAir = false;
         m_type = 0;
@@ -72,6 +72,7 @@ struct QUpstreamKeySettings
         m_enableFly = false;
     }
 
+    quint8 m_id;
     bool m_onAir;
     quint8 m_type;
     quint16 m_fillSource;

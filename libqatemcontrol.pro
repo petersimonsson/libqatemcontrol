@@ -5,13 +5,15 @@ TEMPLATE = lib
 
 DEFINES += LIBQATEMCONTROL_LIBRARY
 
-SOURCES += qatemconnection.cpp
+SOURCES += qatemconnection.cpp \
+    qatemmixeffect.cpp
 
 HEADERS += qatemconnection.h\
         libqatemcontrol_global.h \
     qdownstreamkeysettings.h \
     qupstreamkeysettings.h \
-    topology.h
+    topology.h \
+    qatemmixeffect.h
 
 unix {
     target.path = /usr/lib
