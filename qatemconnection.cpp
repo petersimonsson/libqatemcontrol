@@ -30,6 +30,19 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #define SIZE_OF_HEADER 0x0c
 
+// Wrapping the QThread library if compiling in a QT version less then version 5
+// and exposing the protected method usleep.
+ouif QT_VERSION <= 0x050000
+class Thread : public QThread
+{
+public:
+    static void usleep(unsigned long usecs)
+    {
+        QThread::usleep(usecs);
+    }
+};
+#endif
+
 QAtemConnection::QAtemConnection(QObject* parent)
     : QObject(parent)
 {
@@ -1555,7 +1568,11 @@ void QAtemConnection::flushTransferBuffer(quint8 count)
         m_transferData = m_transferData.remove(0, data.size());
         sendData(m_transferId, data);
         m_socket->flush();
-        QThread::usleep(50);
+        #if QT_VERSION >= 0x050000
+          QThread::usleep(50);
+        #else
+          Thread::usleep(50);
+        #endif
         ++i;
     }
 
