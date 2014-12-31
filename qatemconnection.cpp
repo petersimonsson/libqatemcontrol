@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 // Wrapping the QThread library if compiling in a QT version less then version 5
 // and exposing the protected method usleep.
-#if QT_VERSION <= 0x050000
+ouif QT_VERSION <= 0x050000
 class Thread : public QThread
 {
 public:
