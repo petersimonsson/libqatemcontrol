@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QCryptographicHash>
 
 #include <math.h>
+#include <unistd.h>
 
 #define SIZE_OF_HEADER 0x0c
 
@@ -1555,7 +1556,7 @@ void QAtemConnection::flushTransferBuffer(quint8 count)
         m_transferData = m_transferData.remove(0, data.size());
         sendData(m_transferId, data);
         m_socket->flush();
-        QThread::usleep(50);
+        usleep(50);
         ++i;
     }
 
