@@ -195,11 +195,8 @@ public:
     MediaInfo stillMediaInfo(quint8 index) const { return m_stillMediaInfos.value(index); }
     MediaInfo clipMediaInfo(quint8 index) const { return m_clipMediaInfos.value(index); }
 
-    quint8 multiViewCount() const { return m_multiViewCount; }
-    /// @returns index of the multi view layout, 0 = prg/prv on top, 1 = prg/prv on bottom, 2 = prg/prv on left, 3 = prg/prv on right
-    quint8 multiViewLayout() const { return m_multiViewLayout; }
-    /// @returns index of the input mapped to @p multiViewOutput
-    quint8 multiViewInput(quint8 multiViewOutput) const { return m_multiViewInputs.value(multiViewOutput); }
+    quint8 multiViewCount() const { return m_multiViews.count(); }
+    QAtem::MultiView *multiView(quint8 index) const;
 
     QList<QAtem::VideoMode> availableVideoModes() const { return m_availableVideoModes; }
     /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
@@ -314,7 +311,9 @@ public slots:
     /// Sets the size of media pool clip 1 to @p size, max is 180. Clip 2 size will be 180 - @p size.
     void setMediaPoolClipSplit(quint8 size);
 
-    void setMultiViewLayout(quint8 layout);
+    /// Sets the layout of multi viewer @p multiView to @p layout.
+    void setMultiViewLayout(quint8 multiView, quint8 layout);
+    void setMultiViewInput(quint8 multiView, quint8 windowIndex, quint16 source);
 
     /// Set to true if you want audio data from the mixer
     void setAudioLevelsEnabled(bool enabled);
@@ -372,7 +371,6 @@ protected slots:
     void on_top(const QByteArray& payload);
     void onPowr(const QByteArray& payload);
     void onVMC(const QByteArray& payload);
-    void on_MvC(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -444,8 +442,7 @@ private:
     QHash<quint8, MediaInfo> m_stillMediaInfos;
     QHash<quint8, MediaInfo> m_clipMediaInfos;
 
-    QHash<quint8, quint8> m_multiViewInputs;
-    quint8 m_multiViewLayout;
+    QVector<QAtem::MultiView*> m_multiViews;
 
     quint8 m_videoFormat;
     quint8 m_framesPerSecond;
@@ -484,7 +481,6 @@ private:
     quint8 m_powerStatus;
 
     QList<QAtem::VideoMode> m_availableVideoModes;
-    quint8 m_multiViewCount;
 
 signals:
     void connected();

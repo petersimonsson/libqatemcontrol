@@ -56,8 +56,6 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_tallyStateCount = 0;
 
-    m_multiViewLayout = 0;
-
     m_videoFormat = 0;
     m_videoDownConvertType = 0;
 
@@ -88,6 +86,7 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
 QAtemConnection::~QAtemConnection()
 {
+    qDeleteAll(m_multiViews);
     qDeleteAll(m_mixEffects);
 }
 
@@ -241,6 +240,17 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             quint8 me = (quint8)payload.at(6);
             quint8 keyCount = (quint8)payload.at(7);
             m_mixEffects[me]->createUpstreamKeyers(keyCount);
+        }
+        else if(cmd == "_MvC")
+        {
+            quint8 count = (quint8)payload.at(6);
+            qDeleteAll(m_multiViews);
+            m_multiViews.resize(count);
+
+            for(int i = 0; i < count; ++i)
+            {
+                m_multiViews[i] = new QAtem::MultiView(i);
+            }
         }
         else if(m_commandSlotHash.contains(cmd))
         {
@@ -860,18 +870,29 @@ void QAtemConnection::setMediaPoolClipSplit(quint8 size)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setMultiViewLayout(quint8 layout)
+void QAtemConnection::setMultiViewLayout(quint8 multiView, quint8 layout)
 {
-    if(layout == m_multiViewLayout)
-    {
-        return;
-    }
-
     QByteArray cmd("CMvP");
     QByteArray payload(4, (char)0x0);
 
     payload[0] = (char)0x01;
+    payload[1] = (char)multiView;
     payload[2] = (char)layout;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setMultiViewInput(quint8 multiView, quint8 windowIndex, quint16 source)
+{
+    QByteArray cmd("CMvI");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)multiView;
+    payload[1] = (char)windowIndex;
+    U16_U8 val;
+    val.u16 = source;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1090,14 +1111,26 @@ void QAtemConnection::onMPCS(const QByteArray& payload)
 
 void QAtemConnection::onMvIn(const QByteArray& payload)
 {
+    quint8 index = (quint8)payload.at(6);
     quint8 mvindex = (quint8)payload.at(7);    // Index of multiview output
-    quint8 inputindex = (quint8)payload.at(8); // Index of input, these are mapped in the InPr command
-    m_multiViewInputs[mvindex] = inputindex;
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(8); // Index of input, these are mapped in the InPr command
+    val.u8[0] = (quint8)payload.at(9);
+
+    if(index < m_multiViews.count() && mvindex < 10)
+    {
+        m_multiViews[index]->sources[mvindex] = val.u16;
+    }
 }
 
 void QAtemConnection::onMvPr(const QByteArray& payload)
 {
-    m_multiViewLayout = (quint8)payload.at(7);
+    quint8 index = (quint8)payload.at(6);
+
+    if(index < m_multiViews.count())
+    {
+        m_multiViews[index]->layout = (quint8)payload.at(7);
+    }
 }
 
 void QAtemConnection::onVidM(const QByteArray& payload)
@@ -1202,7 +1235,6 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("_top", ObjectSlot(this, "on_top"));
     m_commandSlotHash.insert("Powr", ObjectSlot(this, "onPowr"));
     m_commandSlotHash.insert("_VMC", ObjectSlot(this, "onVMC"));
-    m_commandSlotHash.insert("_MvC", ObjectSlot(this, "on_MvC"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1756,7 +1788,14 @@ void QAtemConnection::onVMC(const QByteArray& payload)
     }
 }
 
-void QAtemConnection::on_MvC(const QByteArray& payload)
+QAtem::MultiView *QAtemConnection::multiView(quint8 index) const
 {
-    m_multiViewCount = (quint8)payload.at(6);
+    if(index < m_multiViews.count())
+    {
+        return m_multiViews[index];
+    }
+    else
+    {
+        return NULL;
+    }
 }

@@ -43,6 +43,16 @@ namespace QAtem
         quint8 index;
         QString name;
     };
+
+    struct MultiView
+    {
+        MultiView(quint8 i) : index(i) {}
+
+        quint8 index;
+        /// Multi view layout, 0 = prg/prv on top, 1 = prg/prv on bottom, 2 = prg/prv on left, 3 = prg/prv on right
+        quint8 layout;
+        quint16 sources[10];
+    };
 }
 
 #endif //QATEM_TOPOLOGY_H
