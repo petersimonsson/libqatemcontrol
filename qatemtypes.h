@@ -2,6 +2,7 @@
 #define QATEM_TOPOLOGY_H
 
 #include <QtGlobal>
+#include <QString>
 
 namespace QAtem
 {
@@ -16,6 +17,14 @@ namespace QAtem
         quint8 DVEs;
         quint8 supersources;
         bool hasSD;
+    };
+
+    struct VideoMode
+    {
+        VideoMode(quint8 i, const QString &n) : index(i), name(n) {}
+
+        quint8 index;
+        QString name;
     };
 }
 

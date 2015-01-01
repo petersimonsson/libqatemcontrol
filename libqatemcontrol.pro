@@ -12,8 +12,8 @@ HEADERS += qatemconnection.h\
         libqatemcontrol_global.h \
     qdownstreamkeysettings.h \
     qupstreamkeysettings.h \
-    topology.h \
-    qatemmixeffect.h
+    qatemmixeffect.h \
+    qatemtypes.h
 
 unix {
     target.path = /usr/lib

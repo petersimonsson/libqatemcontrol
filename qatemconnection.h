@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define QATEMCONNECTION_H
 
 #include "qdownstreamkeysettings.h"
-#include "topology.h"
+#include "qatemtypes.h"
 
 #include <QObject>
 #include <QUdpSocket>
@@ -200,6 +200,7 @@ public:
     /// @returns index of the input mapped to @p multiViewOutput
     quint8 multiViewInput(quint8 multiViewOutput) const { return m_multiViewInputs.value(multiViewOutput); }
 
+    QList<QAtem::VideoMode> availableVideoModes() const { return m_availableVideoModes; }
     /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
     quint8 videoFormat() const { return m_videoFormat; }
     quint8 framesPerSecond() const { return m_framesPerSecond; }
@@ -369,6 +370,7 @@ protected slots:
     void onFTDC(const QByteArray& payload);
     void on_top(const QByteArray& payload);
     void onPowr(const QByteArray& payload);
+    void onVMC(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -478,6 +480,8 @@ private:
     QAtem::Topology m_topology;
 
     quint8 m_powerStatus;
+
+    QList<QAtem::VideoMode> m_availableVideoModes;
 
 signals:
     void connected();

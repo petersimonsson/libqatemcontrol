@@ -1201,6 +1201,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("FTDC", ObjectSlot(this, "onFTDC"));
     m_commandSlotHash.insert("_top", ObjectSlot(this, "on_top"));
     m_commandSlotHash.insert("Powr", ObjectSlot(this, "onPowr"));
+    m_commandSlotHash.insert("_VMC", ObjectSlot(this, "onVMC"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1714,4 +1715,42 @@ void QAtemConnection::onPowr(const QByteArray& payload)
     m_powerStatus = (quint8)payload.at(6); // Bit 0: Main power on/off 1: Backup power on/off
 
     emit powerStatusChanged(m_powerStatus);
+}
+
+void QAtemConnection::onVMC(const QByteArray& payload)
+{
+    U32_U8 val;
+
+    val.u8[3] = (quint8)payload.at(6);
+    val.u8[2] = (quint8)payload.at(7);
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+
+    QVector<QString> modes(18);
+    modes[0] = "525i59.94 NTSC";
+    modes[1] = "625i50 PAL";
+    modes[2] = "525i59.94 NTSC 16:9";
+    modes[3] = "625i50 PAL 16:9";
+    modes[4] = "720p50";
+    modes[5] = "720p59.94";
+    modes[6] = "1080i50";
+    modes[7] = "1080i59.94";
+    modes[8] = "1080p23.98";
+    modes[9] = "1080p24";
+    modes[10] = "1080p25";
+    modes[11] = "1080p29.97";
+    modes[12] = "1080p50";
+    modes[13] = "1080p59.94";
+    modes[14] = "2160p23.98";
+    modes[15] = "2160p24";
+    modes[16] = "2160p25";
+    modes[17] = "2160p29.97";
+
+    for(int i = 0; i < 18; ++i)
+    {
+        if(val.u32 & (1 << i))
+        {
+            m_availableVideoModes.append(QAtem::VideoMode(i, modes[i]));
+        }
+    }
 }
