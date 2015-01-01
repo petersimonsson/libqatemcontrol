@@ -1779,6 +1779,8 @@ void QAtemConnection::onVMC(const QByteArray& payload)
     modes[16] = "2160p25";
     modes[17] = "2160p29.97";
 
+    m_availableVideoModes.clear();
+
     for(int i = 0; i < 18; ++i)
     {
         if(val.u32 & (1 << i))
