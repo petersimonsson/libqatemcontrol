@@ -195,6 +195,7 @@ public:
     MediaInfo stillMediaInfo(quint8 index) const { return m_stillMediaInfos.value(index); }
     MediaInfo clipMediaInfo(quint8 index) const { return m_clipMediaInfos.value(index); }
 
+    quint8 multiViewCount() const { return m_multiViewCount; }
     /// @returns index of the multi view layout, 0 = prg/prv on top, 1 = prg/prv on bottom, 2 = prg/prv on left, 3 = prg/prv on right
     quint8 multiViewLayout() const { return m_multiViewLayout; }
     /// @returns index of the input mapped to @p multiViewOutput
@@ -371,6 +372,7 @@ protected slots:
     void on_top(const QByteArray& payload);
     void onPowr(const QByteArray& payload);
     void onVMC(const QByteArray& payload);
+    void on_MvC(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -482,6 +484,7 @@ private:
     quint8 m_powerStatus;
 
     QList<QAtem::VideoMode> m_availableVideoModes;
+    quint8 m_multiViewCount;
 
 signals:
     void connected();

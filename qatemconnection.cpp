@@ -1202,6 +1202,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("_top", ObjectSlot(this, "on_top"));
     m_commandSlotHash.insert("Powr", ObjectSlot(this, "onPowr"));
     m_commandSlotHash.insert("_VMC", ObjectSlot(this, "onVMC"));
+    m_commandSlotHash.insert("_MvC", ObjectSlot(this, "on_MvC"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1753,4 +1754,9 @@ void QAtemConnection::onVMC(const QByteArray& payload)
             m_availableVideoModes.append(QAtem::VideoMode(i, modes[i]));
         }
     }
+}
+
+void QAtemConnection::on_MvC(const QByteArray& payload)
+{
+    m_multiViewCount = (quint8)payload.at(6);
 }
