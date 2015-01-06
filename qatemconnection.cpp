@@ -1236,6 +1236,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("Powr", ObjectSlot(this, "onPowr"));
     m_commandSlotHash.insert("_VMC", ObjectSlot(this, "onVMC"));
     m_commandSlotHash.insert("Warn", ObjectSlot(this, "onWarn"));
+    m_commandSlotHash.insert("_mpl", ObjectSlot(this, "on_mpl"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1808,4 +1809,10 @@ void QAtemConnection::onWarn(const QByteArray& payload)
     QString text = payload.mid(6);
 
     emit switcherWarning(text);
+}
+
+void QAtemConnection::on_mpl(const QByteArray& payload)
+{
+    m_mediaPoolStillBankCount = (quint8)payload.at(6);
+    m_mediaPoolClipBankCount = (quint8)payload.at(7);
 }

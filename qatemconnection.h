@@ -210,6 +210,11 @@ public:
     /// @returns size of clip 2 in the media pool
     quint8 mediaPoolClip2Size() const { return m_mediaPoolClip2Size; }
 
+    /// @returns number of still banks in the media pool
+    quint8 mediaPoolStillBankCount() const { return m_mediaPoolStillBankCount; }
+    /// @returns total number of clip banks in the media pool
+    quint8 mediaPoolClipBankCount() const { return m_mediaPoolClipBankCount; }
+
     /// @returns audio input info for input @p index
     AudioInput audioInput(quint16 index) { return m_audioInputs.value(index); }
     QHash<quint16, AudioInput> audioInputs() { return m_audioInputs; }
@@ -305,10 +310,10 @@ public slots:
     void setInputShortName(quint16 input, const QString& name);
 
     void setVideoFormat(quint8 format);
-    /// Set type of video down coversion to @p type. 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
+    /// Set type of video down conversion to @p type. 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
     void setVideoDownConvertType(quint8 type);
 
-    /// Sets the size of media pool clip 1 to @p size, max is 180. Clip 2 size will be 180 - @p size.
+    /// Sets the size of media pool clip 1 to @p size, max is mediaPoolClipBankCount(). Clip 2 size will be mediaPoolClipBankCount() - @p size.
     void setMediaPoolClipSplit(quint8 size);
 
     /// Sets the layout of multi viewer @p multiView to @p layout.
@@ -372,6 +377,7 @@ protected slots:
     void onPowr(const QByteArray& payload);
     void onVMC(const QByteArray& payload);
     void onWarn(const QByteArray& payload);
+    void on_mpl(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -451,6 +457,8 @@ private:
 
     quint8 m_mediaPoolClip1Size;
     quint8 m_mediaPoolClip2Size;
+    quint8 m_mediaPoolStillBankCount;
+    quint8 m_mediaPoolClipBankCount;
 
     QHash<quint16, AudioInput> m_audioInputs;
     QHash<quint16, bool> m_audioTally;
