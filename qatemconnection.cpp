@@ -79,6 +79,9 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_audioMasterOutputPeakRight = 0.0;
     m_audioMasterOutputGain = 0;
 
+    m_audioChannelCount = 0;
+    m_hasAudioMonitor = false;
+
     m_transferActive = false;
     m_transferStoreId = 0;
     m_transferIndex = 0;
@@ -1245,6 +1248,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("_mpl", ObjectSlot(this, "on_mpl"));
     m_commandSlotHash.insert("_TlC", ObjectSlot(this, "on_TlC"));
     m_commandSlotHash.insert("TlSr", ObjectSlot(this, "onTlSr"));
+    m_commandSlotHash.insert("_AMC", ObjectSlot(this, "on_AMC"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1902,4 +1906,10 @@ void QAtemConnection::resetAudioInputPeaks(quint16 input)
     payload[3] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
+}
+
+void QAtemConnection::on_AMC(const QByteArray& payload)
+{
+    m_audioChannelCount = (quint8)payload.at(6);
+    m_hasAudioMonitor = (quint8)payload.at(7);
 }

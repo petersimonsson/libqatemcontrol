@@ -255,6 +255,9 @@ public:
     float audioMasterOutputPeakLeft() const { return m_audioMasterOutputPeakLeft; }
     float audioMasterOutputPeakRight() const { return m_audioMasterOutputPeakRight; }
 
+    quint8 audioChannelCount() const { return m_audioChannelCount; }
+    bool hasAudioMonitor() const { return m_hasAudioMonitor; }
+
     /// Aquire the media pool lock with ID @p id. @returns false if the lock is already locked.
     bool aquireMediaLock(quint8 id, quint8 index);
     /// Unlock the media pool lock with ID @p id.
@@ -403,6 +406,7 @@ protected slots:
     void on_mpl(const QByteArray& payload);
     void on_TlC(const QByteArray& payload);
     void onTlSr(const QByteArray& payload);
+    void on_AMC(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -505,6 +509,9 @@ private:
     float m_audioMasterOutputPeakLeft;
     float m_audioMasterOutputPeakRight;
     float m_audioMasterOutputGain;
+
+    quint8 m_audioChannelCount;
+    bool m_hasAudioMonitor;
 
     QHash<quint8, bool> m_mediaLocks;
 
