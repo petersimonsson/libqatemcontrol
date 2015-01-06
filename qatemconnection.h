@@ -74,7 +74,19 @@ public:
 
     struct InputInfo
     {
+        InputInfo()
+        {
+            index = 0;
+            tally = 0;
+            externalType = 0;
+            internalType = 0;
+            availableExternalTypes = 0;
+            availability = 0;
+            meAvailability = 0;
+        }
+
         quint16 index;
+        quint8 tally;
         quint8 externalType; // 0 = Internal, 1 = SDI, 2 = HDMI, 3 = Composite, 4 = Component, 5 = SVideo
         quint8 internalType; // 0 = External, 1 = Black, 2 = Color Bars, 3 = Color Generator, 4 = Media Player Fill, 5 = Media Player Key, 6 = SuperSource, 128 = ME Output, 129 = Auxiliary, 130 = Mask
         quint8 availableExternalTypes; // Bit 0: SDI, 1: HDMI, 2: Component, 3: Composite, 4: SVideo
@@ -138,10 +150,13 @@ public:
     void setDebugEnabled(bool enabled) { m_debugEnabled = enabled; }
     bool debugEnabled() const { return m_debugEnabled; }
 
-    /// @returns the tally state of the input @p id. 1 = program, 2 = preview and 3 = both
-    quint8 tallyState(quint8 id) const;
-    /// @returns number of tally states
-    quint8 tallyStateCount() const { return m_tallyStateCount; }
+    /// @returns the tally state of the input @p index. 1 = program, 2 = preview and 3 = both
+    quint8 tallyByIndex(quint8 index) const;
+    /// @returns number of tally indexes available
+    quint8 tallyIndexCount() const { return m_tallyIndexCount; }
+
+    /// @returns number of tally channels available
+    quint16 tallyChannelCount() const { return m_tallyChannelCount; }
 
     /// @returns true if downstream key @p keyer is on air
     bool downstreamKeyOn(quint8 keyer) const;
@@ -378,6 +393,8 @@ protected slots:
     void onVMC(const QByteArray& payload);
     void onWarn(const QByteArray& payload);
     void on_mpl(const QByteArray& payload);
+    void on_TlC(const QByteArray& payload);
+    void onTlSr(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -426,8 +443,10 @@ private:
 
     QVector<QAtemMixEffect*> m_mixEffects;
 
-    quint8 m_tallyStateCount;
-    QHash<quint8, quint8> m_tallyStates;
+    quint16 m_tallyIndexCount;
+    QVector<quint8> m_tallyByIndex;
+
+    quint16 m_tallyChannelCount;
 
     QHash<quint8, QDownstreamKeySettings> m_downstreamKeys;
 

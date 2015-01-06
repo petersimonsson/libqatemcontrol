@@ -54,7 +54,8 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_debugEnabled = false;
 
-    m_tallyStateCount = 0;
+    m_tallyIndexCount = 0;
+    m_tallyChannelCount = 0;
 
     m_videoFormat = 0;
     m_videoDownConvertType = 0;
@@ -700,11 +701,11 @@ void QAtemConnection::mediaPlayerGoFrameForward(quint8 player)
     sendCommand(cmd, payload);
 }
 
-quint8 QAtemConnection::tallyState(quint8 id) const
+quint8 QAtemConnection::tallyByIndex(quint8 index) const
 {
-    if(id < m_tallyStateCount)
+    if(index < m_tallyIndexCount)
     {
-        return m_tallyStates.value(id);
+        return m_tallyByIndex.value(index);
     }
 
     return 0;
@@ -899,14 +900,16 @@ void QAtemConnection::setMultiViewInput(quint8 multiView, quint8 windowIndex, qu
 
 void QAtemConnection::onTlIn(const QByteArray& payload)
 {
-    m_tallyStateCount = payload.at(7);
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
+    m_tallyIndexCount = val.u16;
+    m_tallyByIndex.resize(m_tallyIndexCount);
 
-    for(quint8 i = 0; i < m_tallyStateCount; ++i)
+    for(quint8 i = 0; i < m_tallyIndexCount; ++i)
     {
-        m_tallyStates[i] = (quint8)payload.at(8 + i);
+        m_tallyByIndex[i] = (quint8)payload.at(8 + i);
     }
-
-    emit tallyStatesChanged();
 }
 
 void QAtemConnection::onDskS(const QByteArray& payload)
@@ -1237,6 +1240,8 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("_VMC", ObjectSlot(this, "onVMC"));
     m_commandSlotHash.insert("Warn", ObjectSlot(this, "onWarn"));
     m_commandSlotHash.insert("_mpl", ObjectSlot(this, "on_mpl"));
+    m_commandSlotHash.insert("_TlC", ObjectSlot(this, "on_TlC"));
+    m_commandSlotHash.insert("TlSr", ObjectSlot(this, "onTlSr"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1815,4 +1820,34 @@ void QAtemConnection::on_mpl(const QByteArray& payload)
 {
     m_mediaPoolStillBankCount = (quint8)payload.at(6);
     m_mediaPoolClipBankCount = (quint8)payload.at(7);
+}
+
+void QAtemConnection::on_TlC(const QByteArray& payload)
+{
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
+    m_tallyChannelCount = val.u16;
+}
+
+void QAtemConnection::onTlSr(const QByteArray& payload)
+{
+    U16_U8 count;
+    count.u8[1] = (quint8)payload.at(6);
+    count.u8[0] = (quint8)payload.at(7);
+
+    U16_U8 index;
+
+    for(int i = 0; i < count.u16; ++i)
+    {
+        index.u8[1] = (quint8)payload.at(8 + (i * 3));
+        index.u8[0] = (quint8)payload.at(9 + (i * 3));
+
+        if(m_inputInfos.contains(index.u16))
+        {
+            m_inputInfos[index.u16].tally = (quint8)payload.at(10 + (i * 3));
+        }
+    }
+
+    emit tallyStatesChanged();
 }
