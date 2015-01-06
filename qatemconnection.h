@@ -124,6 +124,7 @@ public:
     {
         quint16 index;
         quint8 type; // 0 = Video input, 1 = Media player, 2 = External
+        quint8 plugType; // 0 = Internal, 1 = SDI, 2 = HDMI, 3 = Component, 4 = Composite, 5 = SVideo, 32 = XLR, 64 = AES/EBU, 128 = RCA
         quint8 state; // 0 = Off, 1 = On, 2 = AFV
         float balance;
         float gain; // dB
@@ -134,6 +135,8 @@ public:
         quint8 index;
         float left;
         float right;
+        float peakLeft;
+        float peakRight;
     };
 
     explicit QAtemConnection(QObject* parent = NULL);
@@ -243,11 +246,14 @@ public:
     bool audioMonitorDimmed() const { return m_audioMonitorDimmed; }
     /// @returns the audio channel that is solo on monitor out. -1 = None.
     qint8 audioMonitorSolo() const { return m_audioMonitorSolo; }
+    float audioMonitorLevel() const { return m_audioMonitorLevel; }
     float audioMasterOutputGain() const { return m_audioMasterOutputGain; }
 
     AudioLevel audioLevel(quint16 index) const { return m_audioLevels.value(index); }
     float audioMasterOutputLevelLeft() const { return m_audioMasterOutputLevelLeft;}
     float audioMasterOutputLevelRight() const { return m_audioMasterOutputLevelRight;}
+    float audioMasterOutputPeakLeft() const { return m_audioMasterOutputPeakLeft; }
+    float audioMasterOutputPeakRight() const { return m_audioMasterOutputPeakRight; }
 
     /// Aquire the media pool lock with ID @p id. @returns false if the lock is already locked.
     bool aquireMediaLock(quint8 id, quint8 index);
@@ -352,6 +358,8 @@ public slots:
     void setAudioMonitorMuted(bool muted);
     void setAudioMonitorDimmed(bool dimmed);
     void setAudioMonitorSolo(qint8 solo);
+    void resetAudioMasterOutputPeaks();
+    void resetAudioInputPeaks(quint16 input);
 
 protected slots:
     void handleSocketData();
@@ -412,6 +420,8 @@ protected:
 
     void sendData(quint16 id, const QByteArray &data);
     void sendFileDescription();
+
+    static float convertToDecibel(quint16 level);
 
 private:
     struct ObjectSlot
@@ -488,9 +498,12 @@ private:
     bool m_audioMonitorDimmed;
     bool m_audioMonitorMuted;
     qint8 m_audioMonitorSolo;
+    float m_audioMonitorLevel;
 
     float m_audioMasterOutputLevelLeft;
     float m_audioMasterOutputLevelRight;
+    float m_audioMasterOutputPeakLeft;
+    float m_audioMasterOutputPeakRight;
     float m_audioMasterOutputGain;
 
     QHash<quint8, bool> m_mediaLocks;

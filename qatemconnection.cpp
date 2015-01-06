@@ -71,9 +71,12 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_audioMonitorDimmed = false;
     m_audioMonitorMuted = false;
     m_audioMonitorSolo = -1;
+    m_audioMonitorLevel = 0.0;
 
     m_audioMasterOutputLevelLeft = 0;
     m_audioMasterOutputLevelRight = 0;
+    m_audioMasterOutputPeakLeft = 0.0;
+    m_audioMasterOutputPeakRight = 0.0;
     m_audioMasterOutputGain = 0;
 
     m_transferActive = false;
@@ -1320,49 +1323,73 @@ void QAtemConnection::setAudioMasterOutputGain(float gain)
 void QAtemConnection::onAMLv(const QByteArray& payload)
 {
     // Audio mixer levels
-    quint8 numInputs = payload.at(7);
+    U16_U8 numInputs;
+    numInputs.u8[1] = (quint8)payload.at(6);
+    numInputs.u8[0] = (quint8)payload.at(7);
 
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(11);
     val.u8[0] = (quint8)payload.at(12);
-    m_audioMasterOutputLevelLeft = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioMasterOutputLevelLeft = convertToDecibel(val.u16);
     val.u8[1] = (quint8)payload.at(15);
     val.u8[0] = (quint8)payload.at(16);
-    m_audioMasterOutputLevelRight = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioMasterOutputLevelRight = convertToDecibel(val.u16);
+    val.u8[1] = (quint8)payload.at(19);
+    val.u8[0] = (quint8)payload.at(20);
+    m_audioMasterOutputPeakLeft = convertToDecibel(val.u16);
+    val.u8[1] = (quint8)payload.at(23);
+    val.u8[0] = (quint8)payload.at(24);
+    m_audioMasterOutputPeakRight = convertToDecibel(val.u16);
+    val.u8[1] = (quint8)payload.at(27);
+    val.u8[0] = (quint8)payload.at(28);
+    m_audioMonitorLevel = convertToDecibel(val.u16);
 
     QList<quint16> idlist;
 
-    for(int i = 0; i < numInputs; ++i)
+    for(int i = 0; i < numInputs.u16; ++i)
     {
         val.u8[1] = (quint8)payload.at(42 + (i * 2));
         val.u8[0] = (quint8)payload.at(43 + (i * 2));
         idlist.append(val.u16);
     }
 
-    int offset = 43 + ((numInputs - 1) * 2) + 4;
+    int offset = 43 + ((numInputs.u16 - 1) * 2) + 4;
 
-    for(int i = 0; i < numInputs; ++i)
+    for(int i = 0; i < numInputs.u16; ++i)
     {
         quint16 index = idlist[i];
         m_audioLevels[index].index = index;
         val.u8[1] = (quint8)payload.at(offset + (i * 16));
         val.u8[0] = (quint8)payload.at(offset + 1 + (i * 16));
-        m_audioLevels[index].left = log10f((quint16)val.u16 / 32768.0) * 20.0;
+        m_audioLevels[index].left = convertToDecibel(val.u16);
         val.u8[1] = (quint8)payload.at(offset + 4 + (i * 16));
         val.u8[0] = (quint8)payload.at(offset + 5 + (i * 16));
-        m_audioLevels[index].right = log10f((quint16)val.u16 / 32768.0) * 20.0;
+        m_audioLevels[index].right = convertToDecibel(val.u16);
+        val.u8[1] = (quint8)payload.at(offset + 8 + (i * 16));
+        val.u8[0] = (quint8)payload.at(offset + 9 + (i * 16));
+        m_audioLevels[index].peakLeft = convertToDecibel(val.u16);
+        val.u8[1] = (quint8)payload.at(offset + 12 + (i * 16));
+        val.u8[0] = (quint8)payload.at(offset + 13 + (i * 16));
+        m_audioLevels[index].peakRight = convertToDecibel(val.u16);
     }
 
     emit audioLevelsChanged();
 }
 
+float QAtemConnection::convertToDecibel(quint16 level)
+{
+    return (log10(level) - 2.1072099696) * 20 - 48;
+}
+
 void QAtemConnection::onAMTl(const QByteArray& payload)
 {
     // Audio mixer tally
-    quint8 count = (quint8)payload.at(7);
+    U16_U8 count;
+    count.u8[1] = (quint8)payload.at(6);
+    count.u8[0] = (quint8)payload.at(7);
     U16_U8 val;
 
-    for(int i = 0; i < count; ++i)
+    for(int i = 0; i < count.u16; ++i)
     {
         val.u8[1] = (quint8)payload.at(8 + (i * 3));
         val.u8[0] = (quint8)payload.at(9 + (i * 3));
@@ -1379,10 +1406,11 @@ void QAtemConnection::onAMIP(const QByteArray& payload)
     quint16 index = val.u16;
     m_audioInputs[index].index = index;
     m_audioInputs[index].type = (quint8)payload.at(8);
+    m_audioInputs[index].plugType = (quint8)payload.at(13);
     m_audioInputs[index].state = (quint8)payload.at(14);
     val.u8[1] = (quint8)payload.at(16);
     val.u8[0] = (quint8)payload.at(17);
-    m_audioInputs[index].gain = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioInputs[index].gain = convertToDecibel(val.u16);
     val.u8[1] = (quint8)payload.at(18);
     val.u8[0] = (quint8)payload.at(19);
     m_audioInputs[index].balance = (qint16)val.u16 / 10000.0;
@@ -1396,7 +1424,7 @@ void QAtemConnection::onAMmO(const QByteArray& payload)
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(8);
     val.u8[0] = (quint8)payload.at(9);
-    m_audioMonitorGain = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioMonitorGain = convertToDecibel(val.u16);
     m_audioMonitorMuted = (bool)payload.at(12);
     bool solo = (bool)payload.at(13);
 
@@ -1491,7 +1519,7 @@ void QAtemConnection::onAMMO(const QByteArray& payload)
     U16_U8 val;
     val.u8[1] = (quint8)payload.at(6);
     val.u8[0] = (quint8)payload.at(7);
-    m_audioMasterOutputGain = log10f((quint16)val.u16 / 32768.0) * 20.0;
+    m_audioMasterOutputGain = convertToDecibel(val.u16);
 
     emit audioMasterOutputGainChanged(m_audioMasterOutputGain);
 }
@@ -1850,4 +1878,28 @@ void QAtemConnection::onTlSr(const QByteArray& payload)
     }
 
     emit tallyStatesChanged();
+}
+
+void QAtemConnection::resetAudioMasterOutputPeaks()
+{
+    QByteArray cmd("RAMP");
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x04;
+    payload[4] = (char)0x01;
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::resetAudioInputPeaks(quint16 input)
+{
+    QByteArray cmd("RAMP");
+    QByteArray payload(8, (char)0x0);
+
+    payload[0] = (char)0x02;
+    U16_U8 val;
+    val.u16 = input;
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
 }
