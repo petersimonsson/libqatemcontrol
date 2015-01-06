@@ -371,6 +371,7 @@ protected slots:
     void on_top(const QByteArray& payload);
     void onPowr(const QByteArray& payload);
     void onVMC(const QByteArray& payload);
+    void onWarn(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -486,6 +487,8 @@ signals:
     void connected();
     void disconnected();
     void socketError(const QString& errorString);
+
+    void switcherWarning(const QString &warningString);
 
     void tallyStatesChanged();
 
