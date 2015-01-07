@@ -106,6 +106,7 @@ public:
     {
         quint8 index;
         bool used;
+        quint8 frameCount;
         QString name;
         MediaType type;
         QByteArray hash;

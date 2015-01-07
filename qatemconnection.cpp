@@ -1086,6 +1086,7 @@ void QAtemConnection::onMPfe(const QByteArray& payload)
 {
     MediaInfo info;
     info.type = StillMedia;
+    info.frameCount = 1;
     info.index = (quint8)payload.at(9);
     info.used = (quint8)payload.at(10);
     info.hash = payload.mid(11, 16);
@@ -1110,8 +1111,13 @@ void QAtemConnection::onMPCS(const QByteArray& payload)
 
     if(info.used)
     {
-        info.name = payload.mid(8);
+        info.name = payload.mid(8, 63);
     }
+
+    U16_U8 val;
+    val.u8[1] = (quint8)payload.at(72);
+    val.u8[0] = (quint8)payload.at(73);
+    info.frameCount = val.u16;
 
     m_clipMediaInfos.insert(info.index, info);
 
