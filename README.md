@@ -6,9 +6,13 @@ libqatemcontrol implements the protocol used to connect to BlackMagic ATEM switc
 The protocol has been documented here:
 http://skaarhoj.com/fileadmin/BMDPROTOCOL.html
 
-To build the library:
+## To build the library
+```
 qmake
 make
+```
 
-To install:
+## To install
+```
 make install
+```
