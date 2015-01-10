@@ -77,7 +77,7 @@ public:
     /// @returns the tally state of the input @p index. 1 = program, 2 = preview and 3 = both
     quint8 tallyByIndex(quint8 index) const;
     /// @returns number of tally indexes available
-    quint8 tallyIndexCount() const { return m_tallyIndexCount; }
+    int tallyIndexCount() const { return m_tallyByIndex.count(); }
 
     /// @returns number of tally channels available
     quint16 tallyChannelCount() const { return m_tallyChannelCount; }
@@ -378,7 +378,6 @@ private:
 
     QVector<QAtemMixEffect*> m_mixEffects;
 
-    quint16 m_tallyIndexCount;
     QVector<quint8> m_tallyByIndex;
 
     quint16 m_tallyChannelCount;

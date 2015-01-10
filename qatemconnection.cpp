@@ -53,7 +53,6 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_debugEnabled = false;
 
-    m_tallyIndexCount = 0;
     m_tallyChannelCount = 0;
 
     m_videoFormat = 0;
@@ -708,7 +707,7 @@ void QAtemConnection::mediaPlayerGoFrameForward(quint8 player)
 
 quint8 QAtemConnection::tallyByIndex(quint8 index) const
 {
-    if(index < m_tallyIndexCount)
+    if(index < m_tallyByIndex.count())
     {
         return m_tallyByIndex.value(index);
     }
@@ -908,13 +907,12 @@ void QAtemConnection::setMultiViewInput(quint8 multiView, quint8 windowIndex, qu
 
 void QAtemConnection::onTlIn(const QByteArray& payload)
 {
-    QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(6);
-    val.u8[0] = (quint8)payload.at(7);
-    m_tallyIndexCount = val.u16;
-    m_tallyByIndex.resize(m_tallyIndexCount);
+    QAtem::U16_U8 count;
+    count.u8[1] = (quint8)payload.at(6);
+    count.u8[0] = (quint8)payload.at(7);
+    m_tallyByIndex.resize(count.u16);
 
-    for(quint8 i = 0; i < m_tallyIndexCount; ++i)
+    for(quint8 i = 0; i < count.u16; ++i)
     {
         m_tallyByIndex[i] = (quint8)payload.at(8 + i);
     }
