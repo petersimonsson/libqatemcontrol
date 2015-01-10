@@ -288,7 +288,7 @@ void QAtemMixEffect::setKeyOnNextTransition (int index, bool state)
     }
     else if(stateValue == 0)
     {
-        emit keyersOnNextTransitionChanged(keyersOnNextTransition());
+        emit keyersOnNextTransitionChanged(m_id, keyersOnNextTransition());
         return;
     }
 
@@ -1532,7 +1532,7 @@ void QAtemMixEffect::onPrgI(const QByteArray& payload)
         val.u8[1] = (quint8)payload.at(8);
         val.u8[0] = (quint8)payload.at(9);
         m_programInput = val.u16;
-        emit programInputChanged(old, m_programInput);
+        emit programInputChanged(m_id, old, m_programInput);
     }
 }
 
@@ -1547,7 +1547,7 @@ void QAtemMixEffect::onPrvI(const QByteArray& payload)
         val.u8[1] = (quint8)payload.at(8);
         val.u8[0] = (quint8)payload.at(9);
         m_previewInput = val.u16;
-        emit previewInputChanged(old, m_previewInput);
+        emit previewInputChanged(m_id, old, m_previewInput);
     }
 }
 
@@ -1559,7 +1559,7 @@ void QAtemMixEffect::onTrPr(const QByteArray& payload)
     {
         m_transitionPreviewEnabled = (payload.at(7) > 0);
 
-        emit transitionPreviewChanged(m_transitionPreviewEnabled);
+        emit transitionPreviewChanged(m_id, m_transitionPreviewEnabled);
     }
 }
 
@@ -1572,8 +1572,8 @@ void QAtemMixEffect::onTrPs(const QByteArray& payload)
         m_transitionFrameCount = (quint8)payload.at(8);
         m_transitionPosition = ((quint8)payload.at(11) | ((quint8)payload.at(10) << 8));
 
-        emit transitionFrameCountChanged(m_transitionFrameCount);
-        emit transitionPositionChanged(m_transitionPosition);
+        emit transitionFrameCountChanged(m_id, m_transitionFrameCount);
+        emit transitionPositionChanged(m_id, m_transitionPosition);
     }
 }
 
@@ -1588,10 +1588,10 @@ void QAtemMixEffect::onTrSS(const QByteArray& payload)
         m_nextTransitionStyle = (quint8)payload.at(9); // Bit 0 = Mix, 1 = Dip, 2 = Wipe, 3 = DVE and 4 = Stinger, only bit 0-2 available on TVS
         m_keyersOnNextTransition = ((quint8)payload.at(10) & 0x1f); // Bit 0 = Background, 1-4 = keys, only bit 0 and 1 available on TVS
 
-        emit nextTransitionStyleChanged(m_nextTransitionStyle);
-        emit keyersOnNextTransitionChanged(m_keyersOnNextTransition);
-        emit currentTransitionStyleChanged(m_currentTransitionStyle);
-        emit keyersOnCurrentTransitionChanged(m_keyersOnCurrentTransition);
+        emit nextTransitionStyleChanged(m_id, m_nextTransitionStyle);
+        emit keyersOnNextTransitionChanged(m_id, m_keyersOnNextTransition);
+        emit currentTransitionStyleChanged(m_id, m_currentTransitionStyle);
+        emit keyersOnCurrentTransitionChanged(m_id, m_keyersOnCurrentTransition);
     }
 }
 
@@ -1605,8 +1605,8 @@ void QAtemMixEffect::onFtbS(const QByteArray& payload)
         m_fadeToBlackFading = (bool)payload.at(8);
         m_fadeToBlackFrameCount = (quint8)payload.at(9);
 
-        emit fadeToBlackChanged(m_fadeToBlackFading, m_fadeToBlackEnabled);
-        emit fadeToBlackFrameCountChanged(m_fadeToBlackFrameCount);
+        emit fadeToBlackChanged(m_id, m_fadeToBlackFading, m_fadeToBlackEnabled);
+        emit fadeToBlackFrameCountChanged(m_id, m_fadeToBlackFrameCount);
     }
 }
 
@@ -1618,7 +1618,7 @@ void QAtemMixEffect::onFtbP(const QByteArray& payload)
     {
         m_fadeToBlackFrames = (quint8)payload.at(7);
 
-        emit fadeToBlackFramesChanged(m_fadeToBlackFrames);
+        emit fadeToBlackFramesChanged(m_id, m_fadeToBlackFrames);
     }
 }
 
@@ -1630,7 +1630,7 @@ void QAtemMixEffect::onTMxP(const QByteArray& payload)
     {
         m_mixFrames = (quint8)payload.at(7);
 
-        emit mixFramesChanged(m_mixFrames);
+        emit mixFramesChanged(m_id, m_mixFrames);
     }
 }
 
@@ -1646,8 +1646,8 @@ void QAtemMixEffect::onTDpP(const QByteArray& payload)
         val.u8[0] = (quint8)payload.at(9);
         m_dipSource = val.u16;
 
-        emit dipFramesChanged(m_dipFrames);
-        emit dipSourceChanged(m_dipSource);
+        emit dipFramesChanged(m_id, m_dipFrames);
+        emit dipSourceChanged(m_id, m_dipSource);
     }
 }
 
@@ -1682,16 +1682,16 @@ void QAtemMixEffect::onTWpP(const QByteArray& payload)
         m_wipeReverseDirection = (quint8)payload.at(22);
         m_wipeFlipFlop = (quint8)payload.at(23);
 
-        emit wipeFramesChanged(m_wipeFrames);
-        emit wipeBorderWidthChanged(m_wipeBorderWidth);
-        emit wipeBorderSourceChanged(m_wipeBorderSource);
-        emit wipeBorderSoftnessChanged(m_wipeBorderSoftness);
-        emit wipeTypeChanged(m_wipeType);
-        emit wipeSymmetryChanged(m_wipeSymmetry);
-        emit wipeXPositionChanged(m_wipeXPosition);
-        emit wipeYPositionChanged(m_wipeYPosition);
-        emit wipeReverseDirectionChanged(m_wipeReverseDirection);
-        emit wipeFlipFlopChanged(m_wipeFlipFlop);
+        emit wipeFramesChanged(m_id, m_wipeFrames);
+        emit wipeBorderWidthChanged(m_id, m_wipeBorderWidth);
+        emit wipeBorderSourceChanged(m_id, m_wipeBorderSource);
+        emit wipeBorderSoftnessChanged(m_id, m_wipeBorderSoftness);
+        emit wipeTypeChanged(m_id, m_wipeType);
+        emit wipeSymmetryChanged(m_id, m_wipeSymmetry);
+        emit wipeXPositionChanged(m_id, m_wipeXPosition);
+        emit wipeYPositionChanged(m_id, m_wipeYPosition);
+        emit wipeReverseDirectionChanged(m_id, m_wipeReverseDirection);
+        emit wipeFlipFlopChanged(m_id, m_wipeFlipFlop);
     }
 }
 
@@ -1722,17 +1722,17 @@ void QAtemMixEffect::onTDvP(const QByteArray& payload)
         m_dveReverseDirection = (bool)payload.at(21);
         m_dveFlipFlopDirection = (bool)payload.at(22);
 
-        emit dveRateChanged(m_dveRate);
-        emit dveEffectChanged(m_dveEffect);
-        emit dveFillSourceChanged(m_dveFillSource);
-        emit dveKeySourceChanged(m_dveKeySource);
-        emit dveEnableKeyChanged(m_dveKeyEnabled);
-        emit dveEnablePreMultipliedKeyChanged(m_dvePreMultipliedKeyEnabled);
-        emit dveKeyClipChanged(m_dveKeyClip);
-        emit dveKeyGainChanged(m_dveKeyGain);
-        emit dveEnableInvertKeyChanged(m_dveEnableInvertKey);
-        emit dveReverseDirectionChanged(m_dveReverseDirection);
-        emit dveFlipFlopDirectionChanged(m_dveFlipFlopDirection);
+        emit dveRateChanged(m_id, m_dveRate);
+        emit dveEffectChanged(m_id, m_dveEffect);
+        emit dveFillSourceChanged(m_id, m_dveFillSource);
+        emit dveKeySourceChanged(m_id, m_dveKeySource);
+        emit dveEnableKeyChanged(m_id, m_dveKeyEnabled);
+        emit dveEnablePreMultipliedKeyChanged(m_id, m_dvePreMultipliedKeyEnabled);
+        emit dveKeyClipChanged(m_id, m_dveKeyClip);
+        emit dveKeyGainChanged(m_id, m_dveKeyGain);
+        emit dveEnableInvertKeyChanged(m_id, m_dveEnableInvertKey);
+        emit dveReverseDirectionChanged(m_id, m_dveReverseDirection);
+        emit dveFlipFlopDirectionChanged(m_id, m_dveFlipFlopDirection);
     }
 }
 
@@ -1765,15 +1765,15 @@ void QAtemMixEffect::onTStP(const QByteArray& payload)
         val.u8[0] = (quint8)payload.at(23);
         m_stingerMixRate = val.u16;
 
-        emit stingerSourceChanged(m_stingerSource);
-        emit stingerEnablePreMultipliedKeyChanged(m_stingerPreMultipliedKeyEnabled);
-        emit stingerClipChanged(m_stingerClip);
-        emit stingerGainChanged(m_stingerGain);
-        emit stingerEnableInvertKeyChanged(m_stingerInvertKeyEnabled);
-        emit stingerPreRollChanged(m_stingerPreRoll);
-        emit stingerClipDurationChanged(m_stingerClipDuration);
-        emit stingerTriggerPointChanged(m_stingerTriggerPoint);
-        emit stingerMixRateChanged(m_stingerMixRate);
+        emit stingerSourceChanged(m_id, m_stingerSource);
+        emit stingerEnablePreMultipliedKeyChanged(m_id, m_stingerPreMultipliedKeyEnabled);
+        emit stingerClipChanged(m_id, m_stingerClip);
+        emit stingerGainChanged(m_id, m_stingerGain);
+        emit stingerEnableInvertKeyChanged(m_id, m_stingerInvertKeyEnabled);
+        emit stingerPreRollChanged(m_id, m_stingerPreRoll);
+        emit stingerClipDurationChanged(m_id, m_stingerClipDuration);
+        emit stingerTriggerPointChanged(m_id, m_stingerTriggerPoint);
+        emit stingerMixRateChanged(m_id, m_stingerMixRate);
     }
 }
 
@@ -1786,7 +1786,7 @@ void QAtemMixEffect::onKeOn(const QByteArray& payload)
         quint8 index = (quint8)payload.at(7);
         m_upstreamKeys[index]->m_onAir = (quint8)payload.at(8);
 
-        emit upstreamKeyOnAirChanged(index, m_upstreamKeys[index]->m_onAir);
+        emit upstreamKeyOnAirChanged(m_id, index, m_upstreamKeys[index]->m_onAir);
     }
 }
 
@@ -1816,15 +1816,15 @@ void QAtemMixEffect::onKeBP(const QByteArray& payload)
     val.u8[0] = (quint8)payload.at(25);
     m_upstreamKeys[index]->m_rightMask = (qint16)val.u16 / 1000.0;
 
-    emit upstreamKeyTypeChanged(index, m_upstreamKeys[index]->m_type);
-    emit upstreamKeyEnableFlyChanged(index, m_upstreamKeys[index]->m_enableFly);
-    emit upstreamKeyFillSourceChanged(index, m_upstreamKeys[index]->m_fillSource);
-    emit upstreamKeyKeySourceChanged(index, m_upstreamKeys[index]->m_keySource);
-    emit upstreamKeyEnableMaskChanged(index, m_upstreamKeys[index]->m_enableMask);
-    emit upstreamKeyTopMaskChanged(index, m_upstreamKeys[index]->m_topMask);
-    emit upstreamKeyBottomMaskChanged(index, m_upstreamKeys[index]->m_bottomMask);
-    emit upstreamKeyLeftMaskChanged(index, m_upstreamKeys[index]->m_leftMask);
-    emit upstreamKeyRightMaskChanged(index, m_upstreamKeys[index]->m_rightMask);
+    emit upstreamKeyTypeChanged(m_id, index, m_upstreamKeys[index]->m_type);
+    emit upstreamKeyEnableFlyChanged(m_id, index, m_upstreamKeys[index]->m_enableFly);
+    emit upstreamKeyFillSourceChanged(m_id, index, m_upstreamKeys[index]->m_fillSource);
+    emit upstreamKeyKeySourceChanged(m_id, index, m_upstreamKeys[index]->m_keySource);
+    emit upstreamKeyEnableMaskChanged(m_id, index, m_upstreamKeys[index]->m_enableMask);
+    emit upstreamKeyTopMaskChanged(m_id, index, m_upstreamKeys[index]->m_topMask);
+    emit upstreamKeyBottomMaskChanged(m_id, index, m_upstreamKeys[index]->m_bottomMask);
+    emit upstreamKeyLeftMaskChanged(m_id, index, m_upstreamKeys[index]->m_leftMask);
+    emit upstreamKeyRightMaskChanged(m_id, index, m_upstreamKeys[index]->m_rightMask);
 }
 
 void QAtemMixEffect::onKeLm(const QByteArray& payload)
@@ -1840,10 +1840,10 @@ void QAtemMixEffect::onKeLm(const QByteArray& payload)
     m_upstreamKeys[index]->m_lumaGain = val.u16 / 10.0;
     m_upstreamKeys[index]->m_lumaInvertKey = (quint8)payload.at(14);
 
-    emit upstreamKeyLumaPreMultipliedKeyChanged(index, m_upstreamKeys[index]->m_lumaPreMultipliedKey);
-    emit upstreamKeyLumaClipChanged(index, m_upstreamKeys[index]->m_lumaClip);
-    emit upstreamKeyLumaGainChanged(index, m_upstreamKeys[index]->m_lumaGain);
-    emit upstreamKeyLumaInvertKeyChanged(index, m_upstreamKeys[index]->m_lumaInvertKey);
+    emit upstreamKeyLumaPreMultipliedKeyChanged(m_id, index, m_upstreamKeys[index]->m_lumaPreMultipliedKey);
+    emit upstreamKeyLumaClipChanged(m_id, index, m_upstreamKeys[index]->m_lumaClip);
+    emit upstreamKeyLumaGainChanged(m_id, index, m_upstreamKeys[index]->m_lumaGain);
+    emit upstreamKeyLumaInvertKeyChanged(m_id, index, m_upstreamKeys[index]->m_lumaInvertKey);
 }
 
 void QAtemMixEffect::onKeCk(const QByteArray& payload)
@@ -1864,11 +1864,11 @@ void QAtemMixEffect::onKeCk(const QByteArray& payload)
     m_upstreamKeys[index]->m_chromaLift = val.u16 / 10.0;
     m_upstreamKeys[index]->m_chromaNarrowRange = (quint8)payload.at(16);
 
-    emit upstreamKeyChromaHueChanged(index, m_upstreamKeys[index]->m_chromaHue);
-    emit upstreamKeyChromaGainChanged(index, m_upstreamKeys[index]->m_chromaGain);
-    emit upstreamKeyChromaYSuppressChanged(index, m_upstreamKeys[index]->m_chromaYSuppress);
-    emit upstreamKeyChromaLiftChanged(index, m_upstreamKeys[index]->m_chromaLift);
-    emit upstreamKeyChromaNarrowRangeChanged(index, m_upstreamKeys[index]->m_chromaNarrowRange);
+    emit upstreamKeyChromaHueChanged(m_id, index, m_upstreamKeys[index]->m_chromaHue);
+    emit upstreamKeyChromaGainChanged(m_id, index, m_upstreamKeys[index]->m_chromaGain);
+    emit upstreamKeyChromaYSuppressChanged(m_id, index, m_upstreamKeys[index]->m_chromaYSuppress);
+    emit upstreamKeyChromaLiftChanged(m_id, index, m_upstreamKeys[index]->m_chromaLift);
+    emit upstreamKeyChromaNarrowRangeChanged(m_id, index, m_upstreamKeys[index]->m_chromaNarrowRange);
 }
 
 void QAtemMixEffect::onKePt(const QByteArray& payload)
@@ -1893,13 +1893,13 @@ void QAtemMixEffect::onKePt(const QByteArray& payload)
     m_upstreamKeys[index]->m_patternYPosition = val.u16 / 1000.0;
     m_upstreamKeys[index]->m_patternInvertPattern = (quint8)payload.at(20);
 
-    emit upstreamKeyPatternPatternChanged(index, m_upstreamKeys[index]->m_patternPattern);
-    emit upstreamKeyPatternSizeChanged(index, m_upstreamKeys[index]->m_patternSize);
-    emit upstreamKeyPatternSymmetryChanged(index, m_upstreamKeys[index]->m_patternSymmetry);
-    emit upstreamKeyPatternSoftnessChanged(index, m_upstreamKeys[index]->m_patternSoftness);
-    emit upstreamKeyPatternXPositionChanged(index, m_upstreamKeys[index]->m_patternXPosition);
-    emit upstreamKeyPatternYPositionChanged(index, m_upstreamKeys[index]->m_patternYPosition);
-    emit upstreamKeyPatternInvertPatternChanged(index, m_upstreamKeys[index]->m_patternInvertPattern);
+    emit upstreamKeyPatternPatternChanged(m_id, index, m_upstreamKeys[index]->m_patternPattern);
+    emit upstreamKeyPatternSizeChanged(m_id, index, m_upstreamKeys[index]->m_patternSize);
+    emit upstreamKeyPatternSymmetryChanged(m_id, index, m_upstreamKeys[index]->m_patternSymmetry);
+    emit upstreamKeyPatternSoftnessChanged(m_id, index, m_upstreamKeys[index]->m_patternSoftness);
+    emit upstreamKeyPatternXPositionChanged(m_id, index, m_upstreamKeys[index]->m_patternXPosition);
+    emit upstreamKeyPatternYPositionChanged(m_id, index, m_upstreamKeys[index]->m_patternYPosition);
+    emit upstreamKeyPatternInvertPatternChanged(m_id, index, m_upstreamKeys[index]->m_patternInvertPattern);
 }
 
 void QAtemMixEffect::onKeDV(const QByteArray& payload)
@@ -1954,23 +1954,23 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
     m_upstreamKeys[index]->m_dveLightSourceAltitude = (quint8)payload.at(52);
     m_upstreamKeys[index]->m_dveRate = (quint8)payload.at(62);
 
-    emit upstreamKeyDVEXPositionChanged(index, m_upstreamKeys[index]->m_dveXPosition);
-    emit upstreamKeyDVEYPositionChanged(index, m_upstreamKeys[index]->m_dveYPosition);
-    emit upstreamKeyDVEXSizeChanged(index, m_upstreamKeys[index]->m_dveXSize);
-    emit upstreamKeyDVEYSizeChanged(index, m_upstreamKeys[index]->m_dveYSize);
-    emit upstreamKeyDVERotationChanged(index, m_upstreamKeys[index]->m_dveRotation);
-    emit upstreamKeyDVEEnableDropShadowChanged(index, m_upstreamKeys[index]->m_dveEnableDropShadow);
-    emit upstreamKeyDVELighSourceDirectionChanged(index, m_upstreamKeys[index]->m_dveLightSourceDirection);
-    emit upstreamKeyDVELightSourceAltitudeChanged(index, m_upstreamKeys[index]->m_dveLightSourceAltitude);
-    emit upstreamKeyDVEEnableBorderChanged(index, m_upstreamKeys[index]->m_dveEnableBorder);
-    emit upstreamKeyDVEBorderStyleChanged(index, m_upstreamKeys[index]->m_dveBorderStyle);
-    emit upstreamKeyDVEBorderColorChanged(index, m_upstreamKeys[index]->m_dveBorderColor);
-    emit upstreamKeyDVEBorderOutsideWidthChanged(index, m_upstreamKeys[index]->m_dveBorderOutsideWidth);
-    emit upstreamKeyDVEBorderInsideWidthChanged(index, m_upstreamKeys[index]->m_dveBorderInsideWidth);
-    emit upstreamKeyDVEBorderOutsideSoftenChanged(index, m_upstreamKeys[index]->m_dveBorderOutsideSoften);
-    emit upstreamKeyDVEBorderInsideSoftenChanged(index, m_upstreamKeys[index]->m_dveBorderInsideSoften);
-    emit upstreamKeyDVEBorderOpacityChanged(index, m_upstreamKeys[index]->m_dveBorderOpacity);
-    emit upstreamKeyDVERateChanged(index, m_upstreamKeys[index]->m_dveRate);
+    emit upstreamKeyDVEXPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveXPosition);
+    emit upstreamKeyDVEYPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveYPosition);
+    emit upstreamKeyDVEXSizeChanged(m_id, index, m_upstreamKeys[index]->m_dveXSize);
+    emit upstreamKeyDVEYSizeChanged(m_id, index, m_upstreamKeys[index]->m_dveYSize);
+    emit upstreamKeyDVERotationChanged(m_id, index, m_upstreamKeys[index]->m_dveRotation);
+    emit upstreamKeyDVEEnableDropShadowChanged(m_id, index, m_upstreamKeys[index]->m_dveEnableDropShadow);
+    emit upstreamKeyDVELighSourceDirectionChanged(m_id, index, m_upstreamKeys[index]->m_dveLightSourceDirection);
+    emit upstreamKeyDVELightSourceAltitudeChanged(m_id, index, m_upstreamKeys[index]->m_dveLightSourceAltitude);
+    emit upstreamKeyDVEEnableBorderChanged(m_id, index, m_upstreamKeys[index]->m_dveEnableBorder);
+    emit upstreamKeyDVEBorderStyleChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderStyle);
+    emit upstreamKeyDVEBorderColorChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderColor);
+    emit upstreamKeyDVEBorderOutsideWidthChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOutsideWidth);
+    emit upstreamKeyDVEBorderInsideWidthChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderInsideWidth);
+    emit upstreamKeyDVEBorderOutsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOutsideSoften);
+    emit upstreamKeyDVEBorderInsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderInsideSoften);
+    emit upstreamKeyDVEBorderOpacityChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOpacity);
+    emit upstreamKeyDVERateChanged(m_id, index, m_upstreamKeys[index]->m_dveRate);
 }
 
 void QAtemMixEffect::onKeFS(const QByteArray& payload)
@@ -1979,6 +1979,6 @@ void QAtemMixEffect::onKeFS(const QByteArray& payload)
     m_upstreamKeys[index]->m_dveKeyFrameASet = (bool)payload.at(8);
     m_upstreamKeys[index]->m_dveKeyFrameBSet = (bool)payload.at(9);
 
-    emit upstreamKeyDVEKeyFrameASetChanged(index, m_upstreamKeys[index]->m_dveKeyFrameASet);
-    emit upstreamKeyDVEKeyFrameBSetChanged(index, m_upstreamKeys[index]->m_dveKeyFrameBSet);
+    emit upstreamKeyDVEKeyFrameASetChanged(m_id, index, m_upstreamKeys[index]->m_dveKeyFrameASet);
+    emit upstreamKeyDVEKeyFrameBSetChanged(m_id, index, m_upstreamKeys[index]->m_dveKeyFrameBSet);
 }

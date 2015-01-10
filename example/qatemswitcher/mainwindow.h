@@ -25,8 +25,8 @@ protected slots:
 
     void changeProgramInput(int input);
     void changePreviewInput(int input);
-    void updateProgramInput(quint16 oldInput, quint16 newInput);
-    void updatePreviewInput(quint16 oldInput, quint16 newInput);
+    void updateProgramInput(quint8 me, quint16 oldInput, quint16 newInput);
+    void updatePreviewInput(quint8 me, quint16 oldInput, quint16 newInput);
 
     void toogleDsk1Tie();
     void toogleDsk1OnAir();
@@ -37,19 +37,21 @@ protected slots:
     void updateDskTie(quint8 key, bool tie);
     void updateDskOn(quint8 key, bool on);
 
-    void setTransitionRate(quint8 rate);
-    void setTransitionStyle(quint8 style);
+    void setTransitionRate(quint8 me, quint8 rate);
+    void setTransitionStyle(quint8 me, quint8 style);
     void changeTransitionStyle(int style);
-    void updateKeysOnNextTransition(quint8 keyers);
+    void updateKeysOnNextTransition(quint8 me, quint8 keyers);
     void changeKeysTransition(int btn, bool state);
-    void setTransitionPosition(quint16 pos);
+    void setTransitionPosition(quint8 me, quint16 pos);
     void changeTransitionPosition(int pos);
 
-    void setFadeToBlackRate(quint8 rate);
-    void setFadeToBlack(bool fading, bool state);
+    void setFadeToBlackRate(quint8 me, quint8 rate);
+    void setFadeToBlack(quint8 me, bool fading, bool state);
 
-    void setUpstreamKeyOnAir(quint8 key, bool state);
+    void setUpstreamKeyOnAir(quint8 me, quint8 key, bool state);
     void changeKeyOnAir(int index, bool state);
+
+    void updateTransitionPreview(quint8 me, bool state);
 
 private:
     Ui::MainWindow *m_ui;

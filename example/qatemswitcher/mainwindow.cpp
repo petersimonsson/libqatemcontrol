@@ -150,35 +150,35 @@ void MainWindow::onAtemConnected()
     connect(m_ui->cutButton, SIGNAL(clicked()),
             me, SLOT(cut()));
 
-    connect(me, SIGNAL(programInputChanged(quint16,quint16)),
-            this, SLOT(updateProgramInput(quint16,quint16)));
-    connect(me, SIGNAL(previewInputChanged(quint16,quint16)),
-            this, SLOT(updatePreviewInput(quint16,quint16)));
+    connect(me, SIGNAL(programInputChanged(quint8,quint16,quint16)),
+            this, SLOT(updateProgramInput(quint8,quint16,quint16)));
+    connect(me, SIGNAL(previewInputChanged(quint8,quint16,quint16)),
+            this, SLOT(updatePreviewInput(quint8,quint16,quint16)));
 
-    connect(me, SIGNAL(transitionFrameCountChanged(quint8)),
-            this, SLOT(setTransitionRate(quint8)));
-    connect(me, SIGNAL(nextTransitionStyleChanged(quint8)),
-            this, SLOT(setTransitionStyle(quint8)));
-    connect(me, SIGNAL(keyersOnNextTransitionChanged(quint8)),
-            this, SLOT(updateKeysOnNextTransition(quint8)));
-    connect(me, SIGNAL(transitionPreviewChanged(bool)),
-            m_ui->prevTransBtn, SLOT(setChecked(bool)));
+    connect(me, SIGNAL(transitionFrameCountChanged(quint8,quint8)),
+            this, SLOT(setTransitionRate(quint8,quint8)));
+    connect(me, SIGNAL(nextTransitionStyleChanged(quint8,quint8)),
+            this, SLOT(setTransitionStyle(quint8,quint8)));
+    connect(me, SIGNAL(keyersOnNextTransitionChanged(quint8,quint8)),
+            this, SLOT(updateKeysOnNextTransition(quint8,quint8)));
+    connect(me, SIGNAL(transitionPreviewChanged(quint8,bool)),
+            this, SLOT(updateTransitionPreview(quint8,bool)));
     connect(m_ui->prevTransBtn, SIGNAL(toggled(bool)),
             me, SLOT(setTransitionPreview(bool)));
-    connect(me, SIGNAL(transitionPositionChanged(quint16)),
-            this, SLOT(setTransitionPosition(quint16)));
+    connect(me, SIGNAL(transitionPositionChanged(quint8,quint16)),
+            this, SLOT(setTransitionPosition(quint8,quint16)));
     connect(m_ui->tBar, SIGNAL(valueChanged(int)),
             this, SLOT(changeTransitionPosition(int)));
 
-    connect(me, SIGNAL(fadeToBlackFrameCountChanged(quint8)),
-            this, SLOT(setFadeToBlackRate(quint8)));
-    connect(me, SIGNAL(fadeToBlackChanged(bool,bool)),
-            this, SLOT(setFadeToBlack(bool,bool)));
+    connect(me, SIGNAL(fadeToBlackFrameCountChanged(quint8,quint8)),
+            this, SLOT(setFadeToBlackRate(quint8,quint8)));
+    connect(me, SIGNAL(fadeToBlackChanged(quint8,bool,bool)),
+            this, SLOT(setFadeToBlack(quint8,bool,bool)));
     connect(m_ui->ftbBtn, SIGNAL(clicked()),
             me, SLOT(toggleFadeToBlack()));
 
-    connect(me, SIGNAL(upstreamKeyOnAirChanged(quint8,bool)),
-            this, SLOT(setUpstreamKeyOnAir(quint8,bool)));
+    connect(me, SIGNAL(upstreamKeyOnAirChanged(quint8,quint8,bool)),
+            this, SLOT(setUpstreamKeyOnAir(quint8,quint8,bool)));
 
     if(me->programInput() > 0 && me->programInput() <= 8)
     {
@@ -189,17 +189,17 @@ void MainWindow::onAtemConnected()
         m_previewGroup->button(me->previewInput())->setChecked(true);
     }
 
-    setTransitionRate(me->transitionFrameCount());
-    setTransitionStyle(me->nextTransitionStyle());
-    updateKeysOnNextTransition(me->keyersOnNextTransition());
+    setTransitionRate(0, me->transitionFrameCount());
+    setTransitionStyle(0, me->nextTransitionStyle());
+    updateKeysOnNextTransition(0, me->keyersOnNextTransition());
     m_ui->prevTransBtn->setChecked(me->transitionPreviewEnabled());
 
-    setFadeToBlackRate(me->fadeToBlackFrameCount());
-    setFadeToBlack(me->fadeToBlackFading(), me->fadeToBlackEnabled());
+    setFadeToBlackRate(0, me->fadeToBlackFrameCount());
+    setFadeToBlack(0, me->fadeToBlackFading(), me->fadeToBlackEnabled());
 
     for(int i = 0; i < me->upstreamKeyCount(); ++i)
     {
-        setUpstreamKeyOnAir(i, me->upstreamKeyOnAir(i));
+        setUpstreamKeyOnAir(0, i, me->upstreamKeyOnAir(i));
     }
 }
 
@@ -213,8 +213,10 @@ void MainWindow::changePreviewInput(int input)
     m_atemConnection->mixEffect(0)->changePreviewInput(input);
 }
 
-void MainWindow::updateProgramInput(quint16 oldInput, quint16 newInput)
+void MainWindow::updateProgramInput(quint8 me, quint16 oldInput, quint16 newInput)
 {
+    Q_UNUSED(me)
+
     if(newInput > 0 && newInput <= 8)
     {
         m_programGroup->button(newInput)->setChecked(true);
@@ -225,8 +227,10 @@ void MainWindow::updateProgramInput(quint16 oldInput, quint16 newInput)
     }
 }
 
-void MainWindow::updatePreviewInput(quint16 oldInput, quint16 newInput)
+void MainWindow::updatePreviewInput(quint8 me, quint16 oldInput, quint16 newInput)
 {
+    Q_UNUSED(me)
+
     if(newInput > 0 && newInput <= 8)
     {
         m_previewGroup->button(newInput)->setChecked(true);
@@ -291,13 +295,17 @@ void MainWindow::updateDskOn(quint8 key, bool on)
     }
 }
 
-void MainWindow::setTransitionRate(quint8 rate)
+void MainWindow::setTransitionRate(quint8 me, quint8 rate)
 {
+    Q_UNUSED(me)
+
     m_ui->transitionRate->display(rate);
 }
 
-void MainWindow::setTransitionStyle(quint8 style)
+void MainWindow::setTransitionStyle(quint8 me, quint8 style)
 {
+    Q_UNUSED(me)
+
     m_transitionStyleGroup->button(style)->setChecked(true);
 }
 
@@ -306,8 +314,10 @@ void MainWindow::changeTransitionStyle(int style)
     m_atemConnection->mixEffect(0)->setTransitionType(style);
 }
 
-void MainWindow::updateKeysOnNextTransition(quint8 keyers)
+void MainWindow::updateKeysOnNextTransition(quint8 me, quint8 keyers)
 {
+    Q_UNUSED(me)
+
     bool state = m_keysTransitionGroup->blockSignals(true);
     m_ui->bkgdBtn->setChecked(keyers & 1);
     m_ui->key1Btn->setChecked(keyers & (1 << 1));
@@ -329,8 +339,10 @@ void MainWindow::changeKeysTransition(int btn, bool state)
     }
 }
 
-void MainWindow::setTransitionPosition(quint16 pos)
+void MainWindow::setTransitionPosition(quint8 me, quint16 pos)
 {
+    Q_UNUSED(me)
+
     bool state = m_ui->tBar->blockSignals(true);
 
     if(m_ui->tBar->value() > 9000 && pos == 0)
@@ -347,18 +359,24 @@ void MainWindow::changeTransitionPosition(int pos)
     m_atemConnection->mixEffect(0)->setTransitionPosition(pos);
 }
 
-void MainWindow::setFadeToBlackRate(quint8 rate)
+void MainWindow::setFadeToBlackRate(quint8 me, quint8 rate)
 {
+    Q_UNUSED(me)
+
     m_ui->ftbRate->display(rate);
 }
 
-void MainWindow::setFadeToBlack(bool fading, bool state)
+void MainWindow::setFadeToBlack(quint8 me, bool fading, bool state)
 {
+    Q_UNUSED(me)
+
     m_ui->ftbBtn->setChecked(fading || state);
 }
 
-void MainWindow::setUpstreamKeyOnAir(quint8 key, bool state)
+void MainWindow::setUpstreamKeyOnAir(quint8 me, quint8 key, bool state)
 {
+    Q_UNUSED(me)
+
     bool block = m_keyOnAirGroup->blockSignals(true);
     m_keyOnAirGroup->button(key)->setChecked(state);
     m_keyOnAirGroup->blockSignals(block);
@@ -367,4 +385,11 @@ void MainWindow::setUpstreamKeyOnAir(quint8 key, bool state)
 void MainWindow::changeKeyOnAir(int index, bool state)
 {
     m_atemConnection->mixEffect(0)->setUpstreamKeyOnAir(index, state);
+}
+
+void MainWindow::updateTransitionPreview(quint8 me, bool state)
+{
+    Q_UNUSED(me)
+
+    m_ui->prevTransBtn->setChecked(state);
 }
