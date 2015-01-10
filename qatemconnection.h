@@ -259,7 +259,7 @@ public slots:
     void setVideoDownConvertType(quint8 type);
 
     /// Sets the size of media pool clip 1 to @p size, max is mediaPoolClipBankCount(). Clip 2 size will be mediaPoolClipBankCount() - @p size.
-    void setMediaPoolClipSplit(quint8 size);
+    void setMediaPoolClipSplit(quint16 size);
 
     /// Sets the layout of multi viewer @p multiView to @p layout.
     void setMultiViewLayout(quint8 multiView, quint8 layout);
@@ -409,8 +409,8 @@ private:
     quint8 m_framesPerSecond;
     quint8 m_videoDownConvertType;
 
-    quint8 m_mediaPoolClip1Size;
-    quint8 m_mediaPoolClip2Size;
+    quint16 m_mediaPoolClip1Size;
+    quint16 m_mediaPoolClip2Size;
     quint8 m_mediaPoolStillBankCount;
     quint8 m_mediaPoolClipBankCount;
 
@@ -494,8 +494,8 @@ signals:
     void videoFormatChanged(quint8 format);
     void videoDownConvertTypeChanged(quint8 type);
 
-    void mediaPoolClip1SizeChanged(quint8 size);
-    void mediaPoolClip2SizeChanged(quint8 size);
+    void mediaPoolClip1SizeChanged(quint16 size);
+    void mediaPoolClip2SizeChanged(quint16 size);
 
     void audioInputChanged(quint8 index, const QAtem::AudioInput& input);
     void audioMonitorEnabledChanged(bool enabled);

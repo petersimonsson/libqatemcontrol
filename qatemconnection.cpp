@@ -23,7 +23,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QHostAddress>
 #include <QImage>
 #include <QPainter>
-#include <QThread>
 #include <QCryptographicHash>
 
 #include <math.h>
@@ -867,12 +866,15 @@ void QAtemConnection::setVideoDownConvertType(quint8 type)
     sendCommand(cmd, payload);
 }
 
-void QAtemConnection::setMediaPoolClipSplit(quint8 size)
+void QAtemConnection::setMediaPoolClipSplit(quint16 size)
 {
     QByteArray cmd("CMPS");
     QByteArray payload(4, (char)0x0);
 
-    payload[1] = (char)size;
+    QAtem::U16_U8 val;
+    val.u16 = size;
+    payload[0] = (char)val.u8[1];
+    payload[1] = (char)val.u8[0];
 
     sendCommand(cmd, payload);
 }
@@ -1198,8 +1200,13 @@ void QAtemConnection::onDcOt(const QByteArray& payload)
 
 void QAtemConnection::onMPSp(const QByteArray& payload)
 {
-    m_mediaPoolClip1Size = (quint8)payload.at(7);
-    m_mediaPoolClip2Size = (quint8)payload.at(9);
+    QAtem::U16_U8 val;
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
+    m_mediaPoolClip1Size = val.u16;
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_mediaPoolClip2Size = val.u16;
 
     emit mediaPoolClip1SizeChanged(m_mediaPoolClip1Size);
     emit mediaPoolClip2SizeChanged(m_mediaPoolClip2Size);
