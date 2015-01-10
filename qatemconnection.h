@@ -29,18 +29,6 @@ class QTimer;
 class QHostAddress;
 class QAtemMixEffect;
 
-typedef union
-{
-    quint16 u16;
-    quint8 u8[2];
-} U16_U8;
-
-typedef union
-{
-    quint32 u32;
-    quint8 u8[4];
-} U32_U8;
-
 class QAtemConnection : public QObject
 {
     Q_OBJECT
@@ -70,74 +58,6 @@ public:
         {
             bitmask = size = uid = ackId = packageId = 0;
         }
-    };
-
-    struct InputInfo
-    {
-        InputInfo()
-        {
-            index = 0;
-            tally = 0;
-            externalType = 0;
-            internalType = 0;
-            availableExternalTypes = 0;
-            availability = 0;
-            meAvailability = 0;
-        }
-
-        quint16 index;
-        quint8 tally;
-        quint8 externalType; // 0 = Internal, 1 = SDI, 2 = HDMI, 3 = Composite, 4 = Component, 5 = SVideo
-        quint8 internalType; // 0 = External, 1 = Black, 2 = Color Bars, 3 = Color Generator, 4 = Media Player Fill, 5 = Media Player Key, 6 = SuperSource, 128 = ME Output, 129 = Auxiliary, 130 = Mask
-        quint8 availableExternalTypes; // Bit 0: SDI, 1: HDMI, 2: Component, 3: Composite, 4: SVideo
-        quint8 availability; // Bit 0: Auxiliary, 1: Multiviewer, 2: SuperSource Art, 3: SuperSource Box, 4: Key Sources
-        quint8 meAvailability; // Bit 0: ME1 + Fill Sources, 1: ME2 + Fill Sources
-        QString longText;
-        QString shortText;
-    };
-
-    enum MediaType
-    {
-        StillMedia = 1,
-        ClipMedia = 2
-    };
-
-    struct MediaInfo
-    {
-        quint8 index;
-        bool used;
-        quint8 frameCount;
-        QString name;
-        MediaType type;
-        QByteArray hash;
-    };
-
-    struct MediaPlayerState
-    {
-        quint8 index;
-        bool loop;
-        bool playing;
-        bool atBegining;
-        quint8 currentFrame;
-    };
-
-    struct AudioInput
-    {
-        quint16 index;
-        quint8 type; // 0 = Video input, 1 = Media player, 2 = External
-        quint8 plugType; // 0 = Internal, 1 = SDI, 2 = HDMI, 3 = Component, 4 = Composite, 5 = SVideo, 32 = XLR, 64 = AES/EBU, 128 = RCA
-        quint8 state; // 0 = Off, 1 = On, 2 = AFV
-        float balance;
-        float gain; // dB
-    };
-
-    struct AudioLevel
-    {
-        quint8 index;
-        float left;
-        float right;
-        float peakLeft;
-        float peakRight;
     };
 
     explicit QAtemConnection(QObject* parent = NULL);
@@ -199,7 +119,7 @@ public:
     quint8 mediaPlayerSelectedStill(quint8 player) const;
     quint8 mediaPlayerSelectedClip(quint8 player) const;
     /// @returns the current state of the media player @p player
-    MediaPlayerState mediaPlayerState(quint8 player) const { return m_mediaPlayerStates.value(player); }
+    QAtem::MediaPlayerState mediaPlayerState(quint8 player) const { return m_mediaPlayerStates.value(player); }
 
     quint16 auxSource(quint8 aux) const;
 
@@ -208,11 +128,11 @@ public:
     quint16 minorVersion() const { return m_minorversion; }
 
     /// @returns Info about the input @p index
-    InputInfo inputInfo(quint16 index) const { return m_inputInfos.value(index); }
-    QMap<quint16, InputInfo> inputInfos () const { return m_inputInfos; }
+    QAtem::InputInfo inputInfo(quint16 index) const { return m_inputInfos.value(index); }
+    QMap<quint16, QAtem::InputInfo> inputInfos () const { return m_inputInfos; }
 
-    MediaInfo stillMediaInfo(quint8 index) const { return m_stillMediaInfos.value(index); }
-    MediaInfo clipMediaInfo(quint8 index) const { return m_clipMediaInfos.value(index); }
+    QAtem::MediaInfo stillMediaInfo(quint8 index) const { return m_stillMediaInfos.value(index); }
+    QAtem::MediaInfo clipMediaInfo(quint8 index) const { return m_clipMediaInfos.value(index); }
 
     quint8 multiViewCount() const { return m_multiViews.count(); }
     QAtem::MultiView *multiView(quint8 index) const;
@@ -235,8 +155,8 @@ public:
     quint8 mediaPoolClipBankCount() const { return m_mediaPoolClipBankCount; }
 
     /// @returns audio input info for input @p index
-    AudioInput audioInput(quint16 index) { return m_audioInputs.value(index); }
-    QHash<quint16, AudioInput> audioInputs() { return m_audioInputs; }
+    QAtem::AudioInput audioInput(quint16 index) { return m_audioInputs.value(index); }
+    QHash<quint16, QAtem::AudioInput> audioInputs() { return m_audioInputs; }
     /// @return audio tally state for audio input @p index
     bool audioTallyState(quint16 index) { return m_audioTally.value(index); }
 
@@ -250,7 +170,7 @@ public:
     float audioMonitorLevel() const { return m_audioMonitorLevel; }
     float audioMasterOutputGain() const { return m_audioMasterOutputGain; }
 
-    AudioLevel audioLevel(quint16 index) const { return m_audioLevels.value(index); }
+    QAtem::AudioLevel audioLevel(quint16 index) const { return m_audioLevels.value(index); }
     float audioMasterOutputLevelLeft() const { return m_audioMasterOutputLevelLeft;}
     float audioMasterOutputLevelRight() const { return m_audioMasterOutputLevelRight;}
     float audioMasterOutputPeakLeft() const { return m_audioMasterOutputPeakLeft; }
@@ -470,7 +390,7 @@ private:
     QHash<quint8, quint8> m_mediaPlayerType;
     QHash<quint8, quint8> m_mediaPlayerSelectedStill;
     QHash<quint8, quint8> m_mediaPlayerSelectedClip;
-    QHash<quint8, MediaPlayerState> m_mediaPlayerStates;
+    QHash<quint8, QAtem::MediaPlayerState> m_mediaPlayerStates;
 
     QHash<quint8, quint16> m_auxSource;
 
@@ -478,10 +398,10 @@ private:
     quint16 m_majorversion;
     quint16 m_minorversion;
 
-    QMap<quint16, InputInfo> m_inputInfos;
+    QMap<quint16, QAtem::InputInfo> m_inputInfos;
 
-    QHash<quint8, MediaInfo> m_stillMediaInfos;
-    QHash<quint8, MediaInfo> m_clipMediaInfos;
+    QHash<quint8, QAtem::MediaInfo> m_stillMediaInfos;
+    QHash<quint8, QAtem::MediaInfo> m_clipMediaInfos;
 
     QVector<QAtem::MultiView*> m_multiViews;
 
@@ -494,9 +414,9 @@ private:
     quint8 m_mediaPoolStillBankCount;
     quint8 m_mediaPoolClipBankCount;
 
-    QHash<quint16, AudioInput> m_audioInputs;
+    QHash<quint16, QAtem::AudioInput> m_audioInputs;
     QHash<quint16, bool> m_audioTally;
-    QHash<quint16, AudioLevel> m_audioLevels;
+    QHash<quint16, QAtem::AudioLevel> m_audioLevels;
 
     bool m_audioMonitorEnabled;
     float m_audioMonitorGain;
@@ -558,13 +478,13 @@ signals:
     void colorGeneratorColorChanged(quint8 generator, const QColor& color);
 
     void mediaPlayerChanged(quint8 player, quint8 type, quint8 still, quint8 clip);
-    void mediaPlayerStateChanged(quint8 player, const MediaPlayerState& state);
+    void mediaPlayerStateChanged(quint8 player, const QAtem::MediaPlayerState& state);
 
     void auxSourceChanged(quint8 aux, quint16 source);
 
-    void inputInfoChanged(const QAtemConnection::InputInfo& info);
+    void inputInfoChanged(const QAtem::InputInfo& info);
 
-    void mediaInfoChanged(const QAtemConnection::MediaInfo& info);
+    void mediaInfoChanged(const QAtem::MediaInfo& info);
 
     void productInformationChanged(const QString& info);
     void versionChanged(quint16 major, quint16 minor);
@@ -577,7 +497,7 @@ signals:
     void mediaPoolClip1SizeChanged(quint8 size);
     void mediaPoolClip2SizeChanged(quint8 size);
 
-    void audioInputChanged(quint8 index, const QAtemConnection::AudioInput& input);
+    void audioInputChanged(quint8 index, const QAtem::AudioInput& input);
     void audioMonitorEnabledChanged(bool enabled);
     void audioMonitorGainChanged(float gain);
     void audioMonitorMutedChanged(bool muted);

@@ -179,7 +179,7 @@ void QAtemMixEffect::changeProgramInput(quint16 index)
 
     QByteArray cmd("CPgI");
     QByteArray payload(4, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[0] = (char)m_id;
     val.u16 = index;
@@ -198,7 +198,7 @@ void QAtemMixEffect::setTransitionPosition(quint16 position)
 
     QByteArray cmd("CTPs");
     QByteArray payload(4, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     val.u16 = position;
 
@@ -218,7 +218,7 @@ void QAtemMixEffect::changePreviewInput(quint16 index)
 
     QByteArray cmd("CPvI");
     QByteArray payload(4, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[0] = (char)m_id;
     val.u16 = index;
@@ -354,7 +354,7 @@ void QAtemMixEffect::setDipSource(quint16 source)
 {
     QByteArray cmd("CTDp");
     QByteArray payload(8, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[0] = (char)0x02;
     payload[1] = (char)m_id;
@@ -369,7 +369,7 @@ void QAtemMixEffect::setWipeBorderSource(quint16 source)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[1] = (char)0x08;
     payload[2] = (char)m_id;
@@ -396,7 +396,7 @@ void QAtemMixEffect::setWipeBorderWidth(quint16 width)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = width;
 
     payload[1] = (char)0x04;
@@ -411,7 +411,7 @@ void QAtemMixEffect::setWipeBorderSoftness(quint16 softness)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = softness;
 
     payload[1] = (char)0x20;
@@ -438,7 +438,7 @@ void QAtemMixEffect::setWipeSymmetry(quint16 value)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = value;
 
     payload[1] = (char)0x10;
@@ -453,7 +453,7 @@ void QAtemMixEffect::setWipeXPosition(quint16 value)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = value;
 
     payload[1] = (char)0x40;
@@ -468,7 +468,7 @@ void QAtemMixEffect::setWipeYPosition(quint16 value)
 {
     QByteArray cmd("CTWp");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = value;
 
     payload[1] = (char)0x80;
@@ -507,7 +507,7 @@ void QAtemMixEffect::setDVERate(quint8 frames)
 {
     QByteArray cmd("CTDv");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = frames;
 
     payload[1] = (char)0x01;
@@ -534,7 +534,7 @@ void QAtemMixEffect::setDVEFillSource(quint16 source)
 {
     QByteArray cmd("CTDv");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[1] = (char)0x08;
     payload[2] = (char)m_id;
@@ -549,7 +549,7 @@ void QAtemMixEffect::setDVEKeySource(quint16 source)
 {
     QByteArray cmd("CTDv");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[1] = (char)0x10;
     payload[2] = (char)m_id;
@@ -588,7 +588,7 @@ void QAtemMixEffect::setDVEKeyClip(float percent)
 {
     QByteArray cmd("CTDv");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = percent * 10;
 
     payload[1] = (char)0x80;
@@ -603,7 +603,7 @@ void QAtemMixEffect::setDVEKeyGain(float percent)
 {
     QByteArray cmd("CTDv");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = percent * 10;
 
     payload[0] = (char)0x01;
@@ -678,7 +678,7 @@ void QAtemMixEffect::setStingerClip(float percent)
 {
     QByteArray cmd("CTSt");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = percent * 10;
 
     payload[1] = (char)0x04;
@@ -693,7 +693,7 @@ void QAtemMixEffect::setStingerGain(float percent)
 {
     QByteArray cmd("CTSt");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = percent * 10;
 
     payload[1] = (char)0x08;
@@ -720,7 +720,7 @@ void QAtemMixEffect::setStingerPreRoll(quint16 frames)
 {
     QByteArray cmd("CTSt");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = frames;
 
     payload[1] = (char)0x20;
@@ -735,7 +735,7 @@ void QAtemMixEffect::setStingerClipDuration(quint16 frames)
 {
     QByteArray cmd("CTSt");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = frames;
 
     payload[1] = (char)0x40;
@@ -750,7 +750,7 @@ void QAtemMixEffect::setStingerTriggerPoint(quint16 frames)
 {
     QByteArray cmd("CTSt");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = frames;
 
     payload[1] = (char)0x80;
@@ -765,7 +765,7 @@ void QAtemMixEffect::setStingerMixRate(quint16 frames)
 {
     QByteArray cmd("CTSt");
     QByteArray payload(20, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = frames;
 
     payload[0] = (char)0x01;
@@ -832,7 +832,7 @@ void QAtemMixEffect::setUpstreamKeyFillSource(quint8 keyer, quint16 source)
 
     QByteArray cmd("CKeF");
     QByteArray payload(4, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[0] = (char)m_id;
     payload[1] = (char)keyer;
@@ -852,7 +852,7 @@ void QAtemMixEffect::setUpstreamKeyKeySource(quint8 keyer, quint16 source)
 
     QByteArray cmd("CKeC");
     QByteArray payload(4, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[0] = (char)m_id;
     payload[1] = (char)keyer;
@@ -885,7 +885,7 @@ void QAtemMixEffect::setUpstreamKeyMask(quint8 keyer, float top, float bottom, f
 {
     QByteArray cmd("CKMs");
     QByteArray payload(12, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[0] = (char)0x1e;
     payload[1] = (char)m_id;
@@ -951,7 +951,7 @@ void QAtemMixEffect::setUpstreamKeyLumaClip(quint8 keyer, float clip)
 
     QByteArray cmd("CKLm");
     QByteArray payload(12, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = clip * 10;
 
     payload[0] = (char)0x02;
@@ -972,7 +972,7 @@ void QAtemMixEffect::setUpstreamKeyLumaGain(quint8 keyer, float gain)
 
     QByteArray cmd("CKLm");
     QByteArray payload(12, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = gain * 10;
 
     payload[0] = (char)0x04;
@@ -993,7 +993,7 @@ void QAtemMixEffect::setUpstreamKeyChromaHue(quint8 keyer, float hue)
 
     QByteArray cmd("CKCk");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = hue * 10;
 
     payload[0] = (char)0x01;
@@ -1014,7 +1014,7 @@ void QAtemMixEffect::setUpstreamKeyChromaGain(quint8 keyer, float gain)
 
     QByteArray cmd("CKCk");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = gain * 10;
 
     payload[0] = (char)0x02;
@@ -1035,7 +1035,7 @@ void QAtemMixEffect::setUpstreamKeyChromaYSuppress(quint8 keyer, float ySuppress
 
     QByteArray cmd("CKCk");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = ySuppress * 10;
 
     payload[0] = (char)0x04;
@@ -1056,7 +1056,7 @@ void QAtemMixEffect::setUpstreamKeyChromaLift(quint8 keyer, float lift)
 
     QByteArray cmd("CKCk");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = lift * 10;
 
     payload[0] = (char)0x08;
@@ -1131,7 +1131,7 @@ void QAtemMixEffect::setUpstreamKeyPatternSize(quint8 keyer, float size)
 
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = size * 100;
 
     payload[0] = (char)0x02;
@@ -1152,7 +1152,7 @@ void QAtemMixEffect::setUpstreamKeyPatternSymmetry(quint8 keyer, float symmetry)
 
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = symmetry * 100;
 
     payload[0] = (char)0x04;
@@ -1173,7 +1173,7 @@ void QAtemMixEffect::setUpstreamKeyPatternSoftness(quint8 keyer, float softness)
 
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = softness * 100;
 
     payload[0] = (char)0x08;
@@ -1194,7 +1194,7 @@ void QAtemMixEffect::setUpstreamKeyPatternXPosition(quint8 keyer, float xPositio
 
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = xPosition * 1000;
 
     payload[0] = (char)0x10;
@@ -1215,7 +1215,7 @@ void QAtemMixEffect::setUpstreamKeyPatternYPosition(quint8 keyer, float yPositio
 
     QByteArray cmd("CKPt");
     QByteArray payload(16, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u16 = yPosition * 1000;
 
     payload[0] = (char)0x20;
@@ -1231,7 +1231,7 @@ void QAtemMixEffect::setUpstreamKeyDVEPosition(quint8 keyer, float xPosition, fl
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[3] = (char)0x0c;
     payload[4] = (char)m_id;
@@ -1250,7 +1250,7 @@ void QAtemMixEffect::setUpstreamKeyDVESize(quint8 keyer, float xSize, float ySiz
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[3] = (char)0x03;
     payload[4] = (char)m_id;
@@ -1269,7 +1269,7 @@ void QAtemMixEffect::setUpstreamKeyDVERotation(quint8 keyer, float rotation)
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[3] = (char)0x10;
     payload[4] = (char)m_id;
@@ -1285,7 +1285,7 @@ void QAtemMixEffect::setUpstreamKeyDVELightSource(quint8 keyer, float direction,
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[1] = (char)0x0c;
     payload[4] = (char)m_id;
@@ -1341,7 +1341,7 @@ void QAtemMixEffect::setUpstreamKeyDVEBorderColorH(quint8 keyer, float h)
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[2] = (char)0x80;
     payload[4] = (char)m_id;
@@ -1357,7 +1357,7 @@ void QAtemMixEffect::setUpstreamKeyDVEBorderColorS(quint8 keyer, float s)
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[1] = (char)0x01;
     payload[4] = (char)m_id;
@@ -1373,7 +1373,7 @@ void QAtemMixEffect::setUpstreamKeyDVEBorderColorL(quint8 keyer, float l)
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[1] = (char)0x02;
     payload[4] = (char)m_id;
@@ -1396,7 +1396,7 @@ void QAtemMixEffect::setUpstreamKeyDVEBorderWidth(quint8 keyer, float outside, f
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
-    U16_U8 val;
+    QAtem::U16_U8 val;
 
     payload[2] = (char)0x03;
     payload[4] = (char)m_id;
@@ -1528,7 +1528,7 @@ void QAtemMixEffect::onPrgI(const QByteArray& payload)
     if (me == m_id)
     {
         quint16 old = m_programInput;
-        U16_U8 val;
+        QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(8);
         val.u8[0] = (quint8)payload.at(9);
         m_programInput = val.u16;
@@ -1543,7 +1543,7 @@ void QAtemMixEffect::onPrvI(const QByteArray& payload)
     if (me == m_id)
     {
         quint16 old = m_previewInput;
-        U16_U8 val;
+        QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(8);
         val.u8[0] = (quint8)payload.at(9);
         m_previewInput = val.u16;
@@ -1640,7 +1640,7 @@ void QAtemMixEffect::onTDpP(const QByteArray& payload)
 
     if(me == m_id)
     {
-        U16_U8 val;
+        QAtem::U16_U8 val;
         m_dipFrames = (quint8)payload.at(7);
         val.u8[1] = (quint8)payload.at(8);
         val.u8[0] = (quint8)payload.at(9);
@@ -1660,7 +1660,7 @@ void QAtemMixEffect::onTWpP(const QByteArray& payload)
         m_wipeFrames = (quint8)payload.at(7);
         m_wipeType = (quint8)payload.at(8);
 
-        U16_U8 val;
+        QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(10);
         val.u8[0] = (quint8)payload.at(11);
         m_wipeBorderWidth = val.u16;
@@ -1703,7 +1703,7 @@ void QAtemMixEffect::onTDvP(const QByteArray& payload)
     {
         m_dveRate = (quint8)payload.at(7);
         m_dveEffect = (quint8)payload.at(9);
-        U16_U8 val;
+        QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(10);
         val.u8[0] = (quint8)payload.at(11);
         m_dveFillSource = val.u16;
@@ -1744,7 +1744,7 @@ void QAtemMixEffect::onTStP(const QByteArray& payload)
     {
         m_stingerSource = (quint8)payload.at(7);
         m_stingerPreMultipliedKeyEnabled = (quint8)payload.at(8);
-        U16_U8 val;
+        QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(10);
         val.u8[0] = (quint8)payload.at(11);
         m_stingerClip = val.u16 / 10.0;
@@ -1792,7 +1792,7 @@ void QAtemMixEffect::onKeOn(const QByteArray& payload)
 
 void QAtemMixEffect::onKeBP(const QByteArray& payload)
 {
-    U16_U8 val;
+    QAtem::U16_U8 val;
     quint8 index = (quint8)payload.at(7);
     m_upstreamKeys[index]->m_type = (quint8)payload.at(8);
     m_upstreamKeys[index]->m_enableFly = (bool)payload.at(11);
@@ -1831,7 +1831,7 @@ void QAtemMixEffect::onKeLm(const QByteArray& payload)
 {
     quint8 index = (quint8)payload.at(7);
     m_upstreamKeys[index]->m_lumaPreMultipliedKey = (quint8)payload.at(8);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u8[1] = (quint8)payload.at(10);
     val.u8[0] = (quint8)payload.at(11);
     m_upstreamKeys[index]->m_lumaClip = val.u16 / 10.0;
@@ -1849,7 +1849,7 @@ void QAtemMixEffect::onKeLm(const QByteArray& payload)
 void QAtemMixEffect::onKeCk(const QByteArray& payload)
 {
     quint8 index = (quint8)payload.at(7);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u8[1] = (quint8)payload.at(8);
     val.u8[0] = (quint8)payload.at(9);
     m_upstreamKeys[index]->m_chromaHue = val.u16 / 10.0;
@@ -1875,7 +1875,7 @@ void QAtemMixEffect::onKePt(const QByteArray& payload)
 {
     quint8 index = (quint8)payload.at(7);
     m_upstreamKeys[index]->m_patternPattern = (quint8)payload.at(8);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u8[1] = (quint8)payload.at(10);
     val.u8[0] = (quint8)payload.at(11);
     m_upstreamKeys[index]->m_patternSize = val.u16 / 100.0;
@@ -1905,7 +1905,7 @@ void QAtemMixEffect::onKePt(const QByteArray& payload)
 void QAtemMixEffect::onKeDV(const QByteArray& payload)
 {
     quint8 index = (quint8)payload.at(7);
-    U16_U8 val;
+    QAtem::U16_U8 val;
     val.u8[1] = (quint8)payload.at(12);
     val.u8[0] = (quint8)payload.at(13);
     m_upstreamKeys[index]->m_dveXSize = val.u16 / 1000.0;
@@ -1935,7 +1935,7 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
     m_upstreamKeys[index]->m_dveBorderBevelSoften = (quint8)payload.at(40);
     m_upstreamKeys[index]->m_dveBorderBevelPosition = ((quint8)payload.at(41)) / 100.0;
     m_upstreamKeys[index]->m_dveBorderOpacity = (quint8)payload.at(42);
-    U16_U8 h, s, l;
+    QAtem::U16_U8 h, s, l;
 
     h.u8[1] = (quint8)payload.at(44);
     h.u8[0] = (quint8)payload.at(45);
