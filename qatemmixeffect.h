@@ -263,6 +263,8 @@ public:
     bool upstreamKeyDVEKeyFrameBSet(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveKeyFrameBSet; }
     /// @returns true if fly is enabled for non DVE type of the upstream key @p keyer
     bool upstreamKeyEnableFly(quint8 keyer) const { return m_upstreamKeys[keyer]->m_enableFly; }
+    /// @returns the current key frame settings for keyer @p keyer and key frame @frame. 1 = KeyFrame A, 2 = KeyFrame B
+    QAtem::DveKeyFrame upstreamKeyKeyFrame(quint8 keyer, quint8 frame) const { return m_upstreamKeys[keyer]->m_keyFrames[frame]; }
 
 public slots:
     void cut();
@@ -461,6 +463,7 @@ public slots:
     void onKePt(const QByteArray& payload);
     void onKeDV(const QByteArray& payload);
     void onKeFS(const QByteArray& payload);
+    void onKKFP(const QByteArray& payload);
 
 protected:
     void setKeyOnNextTransition (int index, bool state);
@@ -625,6 +628,7 @@ signals:
     void upstreamKeyDVEKeyFrameASetChanged(quint8 me, quint8 keyer, bool set);
     void upstreamKeyDVEKeyFrameBSetChanged(quint8 me, quint8 keyer, bool set);
     void upstreamKeyEnableFlyChanged(quint8 me, quint8 keyer, bool enabled);
+    void upstreamKeyDVEKeyFrameChanged(quint8 me, quint8 keyer, quint8 frame);
 };
 
 #endif // QATEMMIXEFFECT_H

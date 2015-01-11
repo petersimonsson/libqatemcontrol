@@ -18,6 +18,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef QUPSTREAMKEYSETTINGS_H
 #define QUPSTREAMKEYSETTINGS_H
 
+#include "qatemtypes.h"
+
 #include <QColor>
 
 struct QUpstreamKeySettings
@@ -120,6 +122,8 @@ struct QUpstreamKeySettings
     bool m_dveKeyFrameASet;
     bool m_dveKeyFrameBSet;
     bool m_enableFly;
+
+    QAtem::DveKeyFrame m_keyFrames[2];
 };
 
 #endif // QUPSTREAMKEYSETTINGS_H

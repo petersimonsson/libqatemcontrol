@@ -103,6 +103,7 @@ QAtemMixEffect::QAtemMixEffect(quint8 id, QAtemConnection *parent) :
     m_atemConnection->registerCommand("KePt", this, "onKePt");
     m_atemConnection->registerCommand("KeDV", this, "onKeDV");
     m_atemConnection->registerCommand("KeFS", this, "onKeFS");
+    m_atemConnection->registerCommand("KKFP", this, "onKKFP");
 }
 
 QAtemMixEffect::~QAtemMixEffect()
@@ -134,6 +135,7 @@ QAtemMixEffect::~QAtemMixEffect()
     m_atemConnection->unregisterCommand("KePt", this);
     m_atemConnection->unregisterCommand("KeDV", this);
     m_atemConnection->unregisterCommand("KeFS", this);
+    m_atemConnection->unregisterCommand("KKFP", this);
 
     qDeleteAll(m_upstreamKeys);
 }
@@ -1792,193 +1794,284 @@ void QAtemMixEffect::onKeOn(const QByteArray& payload)
 
 void QAtemMixEffect::onKeBP(const QByteArray& payload)
 {
-    QAtem::U16_U8 val;
-    quint8 index = (quint8)payload.at(7);
-    m_upstreamKeys[index]->m_type = (quint8)payload.at(8);
-    m_upstreamKeys[index]->m_enableFly = (bool)payload.at(11);
-    val.u8[1] = (quint8)payload[12];
-    val.u8[0] = (quint8)payload[13];
-    m_upstreamKeys[index]->m_fillSource = val.u16;
-    val.u8[1] = (quint8)payload[14];
-    val.u8[0] = (quint8)payload[15];
-    m_upstreamKeys[index]->m_keySource = val.u16;
-    m_upstreamKeys[index]->m_enableMask = (quint8)payload.at(16);
-    val.u8[1] = (quint8)payload.at(18);
-    val.u8[0] = (quint8)payload.at(19);
-    m_upstreamKeys[index]->m_topMask = (qint16)val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(20);
-    val.u8[0] = (quint8)payload.at(21);
-    m_upstreamKeys[index]->m_bottomMask = (qint16)val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(22);
-    val.u8[0] = (quint8)payload.at(23);
-    m_upstreamKeys[index]->m_leftMask = (qint16)val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(24);
-    val.u8[0] = (quint8)payload.at(25);
-    m_upstreamKeys[index]->m_rightMask = (qint16)val.u16 / 1000.0;
+    quint8 me = (quint8)payload.at(6);
 
-    emit upstreamKeyTypeChanged(m_id, index, m_upstreamKeys[index]->m_type);
-    emit upstreamKeyEnableFlyChanged(m_id, index, m_upstreamKeys[index]->m_enableFly);
-    emit upstreamKeyFillSourceChanged(m_id, index, m_upstreamKeys[index]->m_fillSource);
-    emit upstreamKeyKeySourceChanged(m_id, index, m_upstreamKeys[index]->m_keySource);
-    emit upstreamKeyEnableMaskChanged(m_id, index, m_upstreamKeys[index]->m_enableMask);
-    emit upstreamKeyTopMaskChanged(m_id, index, m_upstreamKeys[index]->m_topMask);
-    emit upstreamKeyBottomMaskChanged(m_id, index, m_upstreamKeys[index]->m_bottomMask);
-    emit upstreamKeyLeftMaskChanged(m_id, index, m_upstreamKeys[index]->m_leftMask);
-    emit upstreamKeyRightMaskChanged(m_id, index, m_upstreamKeys[index]->m_rightMask);
+    if(me == m_id)
+    {
+        QAtem::U16_U8 val;
+        quint8 index = (quint8)payload.at(7);
+        m_upstreamKeys[index]->m_type = (quint8)payload.at(8);
+        m_upstreamKeys[index]->m_enableFly = (bool)payload.at(11);
+        val.u8[1] = (quint8)payload[12];
+        val.u8[0] = (quint8)payload[13];
+        m_upstreamKeys[index]->m_fillSource = val.u16;
+        val.u8[1] = (quint8)payload[14];
+        val.u8[0] = (quint8)payload[15];
+        m_upstreamKeys[index]->m_keySource = val.u16;
+        m_upstreamKeys[index]->m_enableMask = (quint8)payload.at(16);
+        val.u8[1] = (quint8)payload.at(18);
+        val.u8[0] = (quint8)payload.at(19);
+        m_upstreamKeys[index]->m_topMask = (qint16)val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(20);
+        val.u8[0] = (quint8)payload.at(21);
+        m_upstreamKeys[index]->m_bottomMask = (qint16)val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(22);
+        val.u8[0] = (quint8)payload.at(23);
+        m_upstreamKeys[index]->m_leftMask = (qint16)val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(24);
+        val.u8[0] = (quint8)payload.at(25);
+        m_upstreamKeys[index]->m_rightMask = (qint16)val.u16 / 1000.0;
+
+        emit upstreamKeyTypeChanged(m_id, index, m_upstreamKeys[index]->m_type);
+        emit upstreamKeyEnableFlyChanged(m_id, index, m_upstreamKeys[index]->m_enableFly);
+        emit upstreamKeyFillSourceChanged(m_id, index, m_upstreamKeys[index]->m_fillSource);
+        emit upstreamKeyKeySourceChanged(m_id, index, m_upstreamKeys[index]->m_keySource);
+        emit upstreamKeyEnableMaskChanged(m_id, index, m_upstreamKeys[index]->m_enableMask);
+        emit upstreamKeyTopMaskChanged(m_id, index, m_upstreamKeys[index]->m_topMask);
+        emit upstreamKeyBottomMaskChanged(m_id, index, m_upstreamKeys[index]->m_bottomMask);
+        emit upstreamKeyLeftMaskChanged(m_id, index, m_upstreamKeys[index]->m_leftMask);
+        emit upstreamKeyRightMaskChanged(m_id, index, m_upstreamKeys[index]->m_rightMask);
+    }
 }
 
 void QAtemMixEffect::onKeLm(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(7);
-    m_upstreamKeys[index]->m_lumaPreMultipliedKey = (quint8)payload.at(8);
-    QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(10);
-    val.u8[0] = (quint8)payload.at(11);
-    m_upstreamKeys[index]->m_lumaClip = val.u16 / 10.0;
-    val.u8[1] = (quint8)payload.at(12);
-    val.u8[0] = (quint8)payload.at(13);
-    m_upstreamKeys[index]->m_lumaGain = val.u16 / 10.0;
-    m_upstreamKeys[index]->m_lumaInvertKey = (quint8)payload.at(14);
+    quint8 me = (quint8)payload.at(6);
 
-    emit upstreamKeyLumaPreMultipliedKeyChanged(m_id, index, m_upstreamKeys[index]->m_lumaPreMultipliedKey);
-    emit upstreamKeyLumaClipChanged(m_id, index, m_upstreamKeys[index]->m_lumaClip);
-    emit upstreamKeyLumaGainChanged(m_id, index, m_upstreamKeys[index]->m_lumaGain);
-    emit upstreamKeyLumaInvertKeyChanged(m_id, index, m_upstreamKeys[index]->m_lumaInvertKey);
+    if(me == m_id)
+    {
+        quint8 index = (quint8)payload.at(7);
+        m_upstreamKeys[index]->m_lumaPreMultipliedKey = (quint8)payload.at(8);
+        QAtem::U16_U8 val;
+        val.u8[1] = (quint8)payload.at(10);
+        val.u8[0] = (quint8)payload.at(11);
+        m_upstreamKeys[index]->m_lumaClip = val.u16 / 10.0;
+        val.u8[1] = (quint8)payload.at(12);
+        val.u8[0] = (quint8)payload.at(13);
+        m_upstreamKeys[index]->m_lumaGain = val.u16 / 10.0;
+        m_upstreamKeys[index]->m_lumaInvertKey = (quint8)payload.at(14);
+
+        emit upstreamKeyLumaPreMultipliedKeyChanged(m_id, index, m_upstreamKeys[index]->m_lumaPreMultipliedKey);
+        emit upstreamKeyLumaClipChanged(m_id, index, m_upstreamKeys[index]->m_lumaClip);
+        emit upstreamKeyLumaGainChanged(m_id, index, m_upstreamKeys[index]->m_lumaGain);
+        emit upstreamKeyLumaInvertKeyChanged(m_id, index, m_upstreamKeys[index]->m_lumaInvertKey);
+    }
 }
 
 void QAtemMixEffect::onKeCk(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(7);
-    QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
-    m_upstreamKeys[index]->m_chromaHue = val.u16 / 10.0;
-    val.u8[1] = (quint8)payload.at(10);
-    val.u8[0] = (quint8)payload.at(11);
-    m_upstreamKeys[index]->m_chromaGain = val.u16 / 10.0;
-    val.u8[1] = (quint8)payload.at(12);
-    val.u8[0] = (quint8)payload.at(13);
-    m_upstreamKeys[index]->m_chromaYSuppress = val.u16 / 10.0;
-    val.u8[1] = (quint8)payload.at(14);
-    val.u8[0] = (quint8)payload.at(15);
-    m_upstreamKeys[index]->m_chromaLift = val.u16 / 10.0;
-    m_upstreamKeys[index]->m_chromaNarrowRange = (quint8)payload.at(16);
+    quint8 me = (quint8)payload.at(6);
 
-    emit upstreamKeyChromaHueChanged(m_id, index, m_upstreamKeys[index]->m_chromaHue);
-    emit upstreamKeyChromaGainChanged(m_id, index, m_upstreamKeys[index]->m_chromaGain);
-    emit upstreamKeyChromaYSuppressChanged(m_id, index, m_upstreamKeys[index]->m_chromaYSuppress);
-    emit upstreamKeyChromaLiftChanged(m_id, index, m_upstreamKeys[index]->m_chromaLift);
-    emit upstreamKeyChromaNarrowRangeChanged(m_id, index, m_upstreamKeys[index]->m_chromaNarrowRange);
+    if(me == m_id)
+    {
+        quint8 index = (quint8)payload.at(7);
+        QAtem::U16_U8 val;
+        val.u8[1] = (quint8)payload.at(8);
+        val.u8[0] = (quint8)payload.at(9);
+        m_upstreamKeys[index]->m_chromaHue = val.u16 / 10.0;
+        val.u8[1] = (quint8)payload.at(10);
+        val.u8[0] = (quint8)payload.at(11);
+        m_upstreamKeys[index]->m_chromaGain = val.u16 / 10.0;
+        val.u8[1] = (quint8)payload.at(12);
+        val.u8[0] = (quint8)payload.at(13);
+        m_upstreamKeys[index]->m_chromaYSuppress = val.u16 / 10.0;
+        val.u8[1] = (quint8)payload.at(14);
+        val.u8[0] = (quint8)payload.at(15);
+        m_upstreamKeys[index]->m_chromaLift = val.u16 / 10.0;
+        m_upstreamKeys[index]->m_chromaNarrowRange = (quint8)payload.at(16);
+
+        emit upstreamKeyChromaHueChanged(m_id, index, m_upstreamKeys[index]->m_chromaHue);
+        emit upstreamKeyChromaGainChanged(m_id, index, m_upstreamKeys[index]->m_chromaGain);
+        emit upstreamKeyChromaYSuppressChanged(m_id, index, m_upstreamKeys[index]->m_chromaYSuppress);
+        emit upstreamKeyChromaLiftChanged(m_id, index, m_upstreamKeys[index]->m_chromaLift);
+        emit upstreamKeyChromaNarrowRangeChanged(m_id, index, m_upstreamKeys[index]->m_chromaNarrowRange);
+    }
 }
 
 void QAtemMixEffect::onKePt(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(7);
-    m_upstreamKeys[index]->m_patternPattern = (quint8)payload.at(8);
-    QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(10);
-    val.u8[0] = (quint8)payload.at(11);
-    m_upstreamKeys[index]->m_patternSize = val.u16 / 100.0;
-    val.u8[1] = (quint8)payload.at(12);
-    val.u8[0] = (quint8)payload.at(13);
-    m_upstreamKeys[index]->m_patternSymmetry = val.u16 / 100.0;
-    val.u8[1] = (quint8)payload.at(14);
-    val.u8[0] = (quint8)payload.at(15);
-    m_upstreamKeys[index]->m_patternSoftness = val.u16 / 100.0;
-    val.u8[1] = (quint8)payload.at(16);
-    val.u8[0] = (quint8)payload.at(17);
-    m_upstreamKeys[index]->m_patternXPosition = val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(18);
-    val.u8[0] = (quint8)payload.at(19);
-    m_upstreamKeys[index]->m_patternYPosition = val.u16 / 1000.0;
-    m_upstreamKeys[index]->m_patternInvertPattern = (quint8)payload.at(20);
+    quint8 me = (quint8)payload.at(6);
 
-    emit upstreamKeyPatternPatternChanged(m_id, index, m_upstreamKeys[index]->m_patternPattern);
-    emit upstreamKeyPatternSizeChanged(m_id, index, m_upstreamKeys[index]->m_patternSize);
-    emit upstreamKeyPatternSymmetryChanged(m_id, index, m_upstreamKeys[index]->m_patternSymmetry);
-    emit upstreamKeyPatternSoftnessChanged(m_id, index, m_upstreamKeys[index]->m_patternSoftness);
-    emit upstreamKeyPatternXPositionChanged(m_id, index, m_upstreamKeys[index]->m_patternXPosition);
-    emit upstreamKeyPatternYPositionChanged(m_id, index, m_upstreamKeys[index]->m_patternYPosition);
-    emit upstreamKeyPatternInvertPatternChanged(m_id, index, m_upstreamKeys[index]->m_patternInvertPattern);
+    if(me == m_id)
+    {
+        quint8 index = (quint8)payload.at(7);
+        m_upstreamKeys[index]->m_patternPattern = (quint8)payload.at(8);
+        QAtem::U16_U8 val;
+        val.u8[1] = (quint8)payload.at(10);
+        val.u8[0] = (quint8)payload.at(11);
+        m_upstreamKeys[index]->m_patternSize = val.u16 / 100.0;
+        val.u8[1] = (quint8)payload.at(12);
+        val.u8[0] = (quint8)payload.at(13);
+        m_upstreamKeys[index]->m_patternSymmetry = val.u16 / 100.0;
+        val.u8[1] = (quint8)payload.at(14);
+        val.u8[0] = (quint8)payload.at(15);
+        m_upstreamKeys[index]->m_patternSoftness = val.u16 / 100.0;
+        val.u8[1] = (quint8)payload.at(16);
+        val.u8[0] = (quint8)payload.at(17);
+        m_upstreamKeys[index]->m_patternXPosition = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(18);
+        val.u8[0] = (quint8)payload.at(19);
+        m_upstreamKeys[index]->m_patternYPosition = val.u16 / 1000.0;
+        m_upstreamKeys[index]->m_patternInvertPattern = (quint8)payload.at(20);
+
+        emit upstreamKeyPatternPatternChanged(m_id, index, m_upstreamKeys[index]->m_patternPattern);
+        emit upstreamKeyPatternSizeChanged(m_id, index, m_upstreamKeys[index]->m_patternSize);
+        emit upstreamKeyPatternSymmetryChanged(m_id, index, m_upstreamKeys[index]->m_patternSymmetry);
+        emit upstreamKeyPatternSoftnessChanged(m_id, index, m_upstreamKeys[index]->m_patternSoftness);
+        emit upstreamKeyPatternXPositionChanged(m_id, index, m_upstreamKeys[index]->m_patternXPosition);
+        emit upstreamKeyPatternYPositionChanged(m_id, index, m_upstreamKeys[index]->m_patternYPosition);
+        emit upstreamKeyPatternInvertPatternChanged(m_id, index, m_upstreamKeys[index]->m_patternInvertPattern);
+    }
 }
 
 void QAtemMixEffect::onKeDV(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(7);
-    QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(12);
-    val.u8[0] = (quint8)payload.at(13);
-    m_upstreamKeys[index]->m_dveXSize = val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(16);
-    val.u8[0] = (quint8)payload.at(17);
-    m_upstreamKeys[index]->m_dveYSize = val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(20);
-    val.u8[0] = (quint8)payload.at(21);
-    m_upstreamKeys[index]->m_dveXPosition = val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(24);
-    val.u8[0] = (quint8)payload.at(25);
-    m_upstreamKeys[index]->m_dveYPosition = val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(28);
-    val.u8[0] = (quint8)payload.at(29);
-    m_upstreamKeys[index]->m_dveRotation = val.u16 / 10.0;
-    m_upstreamKeys[index]->m_dveEnableBorder = (bool)payload.at(30);
-    m_upstreamKeys[index]->m_dveEnableDropShadow = (bool)payload.at(31);
-    m_upstreamKeys[index]->m_dveBorderStyle = (quint8)payload.at(32);
-    val.u8[1] = (quint8)payload.at(34);
-    val.u8[0] = (quint8)payload.at(35);
-    m_upstreamKeys[index]->m_dveBorderOutsideWidth = val.u16 / 100.0;
-    val.u8[1] = (quint8)payload.at(36);
-    val.u8[0] = (quint8)payload.at(37);
-    m_upstreamKeys[index]->m_dveBorderInsideWidth = val.u16 / 100.0;
-    m_upstreamKeys[index]->m_dveBorderOutsideSoften = (quint8)payload.at(38);
-    m_upstreamKeys[index]->m_dveBorderInsideSoften = (quint8)payload.at(39);
-    m_upstreamKeys[index]->m_dveBorderBevelSoften = (quint8)payload.at(40);
-    m_upstreamKeys[index]->m_dveBorderBevelPosition = ((quint8)payload.at(41)) / 100.0;
-    m_upstreamKeys[index]->m_dveBorderOpacity = (quint8)payload.at(42);
-    QAtem::U16_U8 h, s, l;
+    quint8 me = (quint8)payload.at(6);
 
-    h.u8[1] = (quint8)payload.at(44);
-    h.u8[0] = (quint8)payload.at(45);
-    s.u8[1] = (quint8)payload.at(46);
-    s.u8[0] = (quint8)payload.at(47);
-    l.u8[1] = (quint8)payload.at(48);
-    l.u8[0] = (quint8)payload.at(49);
+    if(me == m_id)
+    {
+        quint8 index = (quint8)payload.at(7);
+        QAtem::U16_U8 val;
+        val.u8[1] = (quint8)payload.at(12);
+        val.u8[0] = (quint8)payload.at(13);
+        m_upstreamKeys[index]->m_dveXSize = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(16);
+        val.u8[0] = (quint8)payload.at(17);
+        m_upstreamKeys[index]->m_dveYSize = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(20);
+        val.u8[0] = (quint8)payload.at(21);
+        m_upstreamKeys[index]->m_dveXPosition = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(24);
+        val.u8[0] = (quint8)payload.at(25);
+        m_upstreamKeys[index]->m_dveYPosition = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(28);
+        val.u8[0] = (quint8)payload.at(29);
+        m_upstreamKeys[index]->m_dveRotation = val.u16 / 10.0;
+        m_upstreamKeys[index]->m_dveEnableBorder = (bool)payload.at(30);
+        m_upstreamKeys[index]->m_dveEnableDropShadow = (bool)payload.at(31);
+        m_upstreamKeys[index]->m_dveBorderStyle = (quint8)payload.at(32);
+        val.u8[1] = (quint8)payload.at(34);
+        val.u8[0] = (quint8)payload.at(35);
+        m_upstreamKeys[index]->m_dveBorderOutsideWidth = val.u16 / 100.0;
+        val.u8[1] = (quint8)payload.at(36);
+        val.u8[0] = (quint8)payload.at(37);
+        m_upstreamKeys[index]->m_dveBorderInsideWidth = val.u16 / 100.0;
+        m_upstreamKeys[index]->m_dveBorderOutsideSoften = (quint8)payload.at(38);
+        m_upstreamKeys[index]->m_dveBorderInsideSoften = (quint8)payload.at(39);
+        m_upstreamKeys[index]->m_dveBorderBevelSoften = (quint8)payload.at(40);
+        m_upstreamKeys[index]->m_dveBorderBevelPosition = ((quint8)payload.at(41)) / 100.0;
+        m_upstreamKeys[index]->m_dveBorderOpacity = (quint8)payload.at(42);
+        QAtem::U16_U8 h, s, l;
 
-    QColor color;
-    float hf = ((h.u16 / 10) % 360) / 360.0;
-    color.setHslF(hf, s.u16 / 1000.0, l.u16 / 1000.0);
-    m_upstreamKeys[index]->m_dveBorderColor = color;
-    val.u8[1] = (quint8)payload.at(50);
-    val.u8[0] = (quint8)payload.at(51);
-    m_upstreamKeys[index]->m_dveLightSourceDirection = val.u16 / 10.0;
-    m_upstreamKeys[index]->m_dveLightSourceAltitude = (quint8)payload.at(52);
-    m_upstreamKeys[index]->m_dveRate = (quint8)payload.at(62);
+        h.u8[1] = (quint8)payload.at(44);
+        h.u8[0] = (quint8)payload.at(45);
+        s.u8[1] = (quint8)payload.at(46);
+        s.u8[0] = (quint8)payload.at(47);
+        l.u8[1] = (quint8)payload.at(48);
+        l.u8[0] = (quint8)payload.at(49);
 
-    emit upstreamKeyDVEXPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveXPosition);
-    emit upstreamKeyDVEYPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveYPosition);
-    emit upstreamKeyDVEXSizeChanged(m_id, index, m_upstreamKeys[index]->m_dveXSize);
-    emit upstreamKeyDVEYSizeChanged(m_id, index, m_upstreamKeys[index]->m_dveYSize);
-    emit upstreamKeyDVERotationChanged(m_id, index, m_upstreamKeys[index]->m_dveRotation);
-    emit upstreamKeyDVEEnableDropShadowChanged(m_id, index, m_upstreamKeys[index]->m_dveEnableDropShadow);
-    emit upstreamKeyDVELighSourceDirectionChanged(m_id, index, m_upstreamKeys[index]->m_dveLightSourceDirection);
-    emit upstreamKeyDVELightSourceAltitudeChanged(m_id, index, m_upstreamKeys[index]->m_dveLightSourceAltitude);
-    emit upstreamKeyDVEEnableBorderChanged(m_id, index, m_upstreamKeys[index]->m_dveEnableBorder);
-    emit upstreamKeyDVEBorderStyleChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderStyle);
-    emit upstreamKeyDVEBorderColorChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderColor);
-    emit upstreamKeyDVEBorderOutsideWidthChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOutsideWidth);
-    emit upstreamKeyDVEBorderInsideWidthChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderInsideWidth);
-    emit upstreamKeyDVEBorderOutsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOutsideSoften);
-    emit upstreamKeyDVEBorderInsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderInsideSoften);
-    emit upstreamKeyDVEBorderOpacityChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOpacity);
-    emit upstreamKeyDVERateChanged(m_id, index, m_upstreamKeys[index]->m_dveRate);
+        QColor color;
+        float hf = ((h.u16 / 10) % 360) / 360.0;
+        color.setHslF(hf, s.u16 / 1000.0, l.u16 / 1000.0);
+        m_upstreamKeys[index]->m_dveBorderColor = color;
+        val.u8[1] = (quint8)payload.at(50);
+        val.u8[0] = (quint8)payload.at(51);
+        m_upstreamKeys[index]->m_dveLightSourceDirection = val.u16 / 10.0;
+        m_upstreamKeys[index]->m_dveLightSourceAltitude = (quint8)payload.at(52);
+        m_upstreamKeys[index]->m_dveRate = (quint8)payload.at(62);
+
+        emit upstreamKeyDVEXPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveXPosition);
+        emit upstreamKeyDVEYPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveYPosition);
+        emit upstreamKeyDVEXSizeChanged(m_id, index, m_upstreamKeys[index]->m_dveXSize);
+        emit upstreamKeyDVEYSizeChanged(m_id, index, m_upstreamKeys[index]->m_dveYSize);
+        emit upstreamKeyDVERotationChanged(m_id, index, m_upstreamKeys[index]->m_dveRotation);
+        emit upstreamKeyDVEEnableDropShadowChanged(m_id, index, m_upstreamKeys[index]->m_dveEnableDropShadow);
+        emit upstreamKeyDVELighSourceDirectionChanged(m_id, index, m_upstreamKeys[index]->m_dveLightSourceDirection);
+        emit upstreamKeyDVELightSourceAltitudeChanged(m_id, index, m_upstreamKeys[index]->m_dveLightSourceAltitude);
+        emit upstreamKeyDVEEnableBorderChanged(m_id, index, m_upstreamKeys[index]->m_dveEnableBorder);
+        emit upstreamKeyDVEBorderStyleChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderStyle);
+        emit upstreamKeyDVEBorderColorChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderColor);
+        emit upstreamKeyDVEBorderOutsideWidthChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOutsideWidth);
+        emit upstreamKeyDVEBorderInsideWidthChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderInsideWidth);
+        emit upstreamKeyDVEBorderOutsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOutsideSoften);
+        emit upstreamKeyDVEBorderInsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderInsideSoften);
+        emit upstreamKeyDVEBorderOpacityChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOpacity);
+        emit upstreamKeyDVERateChanged(m_id, index, m_upstreamKeys[index]->m_dveRate);
+    }
 }
 
 void QAtemMixEffect::onKeFS(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(7);
-    m_upstreamKeys[index]->m_dveKeyFrameASet = (bool)payload.at(8);
-    m_upstreamKeys[index]->m_dveKeyFrameBSet = (bool)payload.at(9);
+    quint8 me = (quint8)payload.at(6);
 
-    emit upstreamKeyDVEKeyFrameASetChanged(m_id, index, m_upstreamKeys[index]->m_dveKeyFrameASet);
-    emit upstreamKeyDVEKeyFrameBSetChanged(m_id, index, m_upstreamKeys[index]->m_dveKeyFrameBSet);
+    if(me == m_id)
+    {
+        quint8 index = (quint8)payload.at(7);
+        m_upstreamKeys[index]->m_dveKeyFrameASet = (bool)payload.at(8);
+        m_upstreamKeys[index]->m_dveKeyFrameBSet = (bool)payload.at(9);
+
+        emit upstreamKeyDVEKeyFrameASetChanged(m_id, index, m_upstreamKeys[index]->m_dveKeyFrameASet);
+        emit upstreamKeyDVEKeyFrameBSetChanged(m_id, index, m_upstreamKeys[index]->m_dveKeyFrameBSet);
+    }
+}
+
+void QAtemMixEffect::onKKFP(const QByteArray& payload)
+{
+    quint8 me = (quint8)payload.at(6);
+
+    if(me == m_id)
+    {
+        quint8 index = (quint8)payload.at(7);
+        quint8 frameIndex = (quint8)payload.at(8);
+        QAtem::DveKeyFrame keyFrame;
+
+        QAtem::U16_U8 val;
+        val.u8[1] = (quint8)payload.at(12);
+        val.u8[0] = (quint8)payload.at(13);
+        keyFrame.size.setWidth(val.u16 / 1000.0);
+        val.u8[1] = (quint8)payload.at(16);
+        val.u8[0] = (quint8)payload.at(17);
+        keyFrame.size.setHeight(val.u16 / 1000.0);
+        val.u8[1] = (quint8)payload.at(20);
+        val.u8[0] = (quint8)payload.at(21);
+        keyFrame.position.setX(val.u16 / 1000.0);
+        val.u8[1] = (quint8)payload.at(24);
+        val.u8[0] = (quint8)payload.at(25);
+        keyFrame.position.setY(val.u16 / 1000.0);
+        val.u8[1] = (quint8)payload.at(28);
+        val.u8[0] = (quint8)payload.at(29);
+        keyFrame.rotation = val.u16 / 10.0;
+        val.u8[1] = (quint8)payload.at(30);
+        val.u8[0] = (quint8)payload.at(31);
+        keyFrame.borderOutsideWidth = val.u16 / 100.0;
+        val.u8[1] = (quint8)payload.at(32);
+        val.u8[0] = (quint8)payload.at(33);
+        keyFrame.borderInsideWidth = val.u16 / 100.0;
+        keyFrame.borderOutsideSoften = (quint8)payload.at(34);
+        keyFrame.borderInsideSoften = (quint8)payload.at(35);
+        keyFrame.borderBevelSoften = (quint8)payload.at(36);
+        keyFrame.borderBevelPosition = ((quint8)payload.at(37)) / 100.0;
+        keyFrame.borderOpacity = (quint8)payload.at(38);
+        QAtem::U16_U8 h, s, l;
+
+        h.u8[1] = (quint8)payload.at(40);
+        h.u8[0] = (quint8)payload.at(41);
+        s.u8[1] = (quint8)payload.at(42);
+        s.u8[0] = (quint8)payload.at(43);
+        l.u8[1] = (quint8)payload.at(44);
+        l.u8[0] = (quint8)payload.at(45);
+
+        QColor color;
+        float hf = ((h.u16 / 10) % 360) / 360.0;
+        color.setHslF(hf, s.u16 / 1000.0, l.u16 / 1000.0);
+        keyFrame.borderColor = color;
+        val.u8[1] = (quint8)payload.at(46);
+        val.u8[0] = (quint8)payload.at(47);
+        keyFrame.lightSourceDirection = val.u16 / 10.0;
+        keyFrame.lightSourceAltitude = (quint8)payload.at(48);
+
+        m_upstreamKeys[index]->m_keyFrames[frameIndex] = keyFrame;
+
+        emit upstreamKeyDVEKeyFrameChanged(m_id, index, frameIndex);
+    }
 }

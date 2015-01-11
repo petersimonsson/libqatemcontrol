@@ -20,6 +20,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtGlobal>
 #include <QString>
+#include <QPointF>
+#include <QSizeF>
+#include <QColor>
 
 namespace QAtem
 {
@@ -132,6 +135,23 @@ namespace QAtem
         float right;
         float peakLeft;
         float peakRight;
+    };
+
+    struct DveKeyFrame
+    {
+        QPointF position;
+        QSizeF size;
+        float rotation;
+        float lightSourceDirection;
+        quint8 lightSourceAltitude;
+        QColor borderColor;
+        float borderOutsideWidth;
+        float borderInsideWidth;
+        quint8 borderOutsideSoften;
+        quint8 borderInsideSoften;
+        quint8 borderOpacity;
+        float borderBevelPosition;
+        quint8 borderBevelSoften;
     };
 }
 
