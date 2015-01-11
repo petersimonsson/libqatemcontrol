@@ -1261,6 +1261,8 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("TlSr", ObjectSlot(this, "onTlSr"));
     m_commandSlotHash.insert("_AMC", ObjectSlot(this, "on_AMC"));
     m_commandSlotHash.insert("MPAS", ObjectSlot(this, "onMPAS"));
+    m_commandSlotHash.insert("MPfM", ObjectSlot(this, "onMPfM"));
+    m_commandSlotHash.insert("AuxP", ObjectSlot(this, "onAuxP"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1940,4 +1942,21 @@ void QAtemConnection::onMPAS(const QByteArray& payload)
     }
 
     m_soundMediaInfos.insert(info.index, info);
+}
+
+void QAtemConnection::onMPfM(const QByteArray& payload)
+{
+    if(debugEnabled())
+    {
+        qDebug() << "MPfM:" << payload.mid(6).toHex();
+    }
+}
+
+void QAtemConnection::onAuxP(const QByteArray& payload)
+{
+    if(debugEnabled())
+    {
+        quint8 index = (quint8)payload.at(6);
+        qDebug() << "AuxP for aux" << index <<":" << payload.mid(7).toHex();
+    }
 }

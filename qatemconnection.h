@@ -330,6 +330,8 @@ protected slots:
     void onTlSr(const QByteArray& payload);
     void on_AMC(const QByteArray& payload);
     void onMPAS(const QByteArray& payload);
+    void onMPfM(const QByteArray& payload);
+    void onAuxP(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
