@@ -96,7 +96,8 @@ namespace QAtem
     enum MediaType
     {
         StillMedia = 1,
-        ClipMedia = 2
+        ClipMedia = 2,
+        SoundMedia = 3
     };
 
     struct MediaInfo

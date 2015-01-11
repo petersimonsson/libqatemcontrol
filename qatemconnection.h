@@ -133,6 +133,7 @@ public:
 
     QAtem::MediaInfo stillMediaInfo(quint8 index) const { return m_stillMediaInfos.value(index); }
     QAtem::MediaInfo clipMediaInfo(quint8 index) const { return m_clipMediaInfos.value(index); }
+    QAtem::MediaInfo soundMediaInfo(quint8 index) const { return m_soundMediaInfos.value(index); }
 
     quint8 multiViewCount() const { return m_multiViews.count(); }
     QAtem::MultiView *multiView(quint8 index) const;
@@ -328,6 +329,7 @@ protected slots:
     void on_TlC(const QByteArray& payload);
     void onTlSr(const QByteArray& payload);
     void on_AMC(const QByteArray& payload);
+    void onMPAS(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -401,6 +403,7 @@ private:
 
     QHash<quint8, QAtem::MediaInfo> m_stillMediaInfos;
     QHash<quint8, QAtem::MediaInfo> m_clipMediaInfos;
+    QHash<quint8, QAtem::MediaInfo> m_soundMediaInfos;
 
     QVector<QAtem::MultiView*> m_multiViews;
 

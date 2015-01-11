@@ -1260,6 +1260,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("_TlC", ObjectSlot(this, "on_TlC"));
     m_commandSlotHash.insert("TlSr", ObjectSlot(this, "onTlSr"));
     m_commandSlotHash.insert("_AMC", ObjectSlot(this, "on_AMC"));
+    m_commandSlotHash.insert("MPAS", ObjectSlot(this, "onMPAS"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1923,4 +1924,20 @@ void QAtemConnection::on_AMC(const QByteArray& payload)
 {
     m_audioChannelCount = (quint8)payload.at(6);
     m_hasAudioMonitor = (quint8)payload.at(7);
+}
+
+void QAtemConnection::onMPAS(const QByteArray& payload)
+{
+    QAtem::MediaInfo info;
+    info.type = QAtem::SoundMedia;
+    info.frameCount = 1;
+    info.index = (quint8)payload.at(6);
+    info.used = (quint8)payload.at(7);
+
+    if(info.used)
+    {
+        info.name = payload.mid(24);
+    }
+
+    m_soundMediaInfos.insert(info.index, info);
 }
