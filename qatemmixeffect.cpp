@@ -2070,7 +2070,7 @@ void QAtemMixEffect::onKKFP(const QByteArray& payload)
         keyFrame.lightSourceDirection = val.u16 / 10.0;
         keyFrame.lightSourceAltitude = (quint8)payload.at(48);
 
-        m_upstreamKeys[index]->m_keyFrames[frameIndex] = keyFrame;
+        m_upstreamKeys[index]->m_keyFrames[frameIndex - 1] = keyFrame;
 
         emit upstreamKeyDVEKeyFrameChanged(m_id, index, frameIndex);
     }

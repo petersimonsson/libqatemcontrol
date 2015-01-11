@@ -264,7 +264,7 @@ public:
     /// @returns true if fly is enabled for non DVE type of the upstream key @p keyer
     bool upstreamKeyEnableFly(quint8 keyer) const { return m_upstreamKeys[keyer]->m_enableFly; }
     /// @returns the current key frame settings for keyer @p keyer and key frame @frame. 1 = KeyFrame A, 2 = KeyFrame B
-    QAtem::DveKeyFrame upstreamKeyKeyFrame(quint8 keyer, quint8 frame) const { return m_upstreamKeys[keyer]->m_keyFrames[frame]; }
+    QAtem::DveKeyFrame upstreamKeyKeyFrame(quint8 keyer, quint8 frame) const { return m_upstreamKeys[keyer]->m_keyFrames[frame - 1]; }
 
 public slots:
     void cut();
