@@ -24,11 +24,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QImage>
 #include <QPainter>
 #include <QCryptographicHash>
+#include <QThread>
 
 #include <math.h>
-#include <unistd.h>
 
 #define SIZE_OF_HEADER 0x0c
+
+/// Hack to use QThread::usleep in Qt 4.x
+class QAtemThread : public QThread
+{
+public:
+    static void usleep (unsigned long interval) { QThread::usleep(interval); }
+};
 
 QAtemConnection::QAtemConnection(QObject* parent)
     : QObject(parent)
@@ -1643,7 +1650,7 @@ void QAtemConnection::flushTransferBuffer(quint8 count)
         m_transferData = m_transferData.remove(0, data.size());
         sendData(m_transferId, data);
         m_socket->flush();
-        usleep(50);
+        QAtemThread::usleep(50); // QAtemThread is a hack to support Qt 4.x
         ++i;
     }
 
