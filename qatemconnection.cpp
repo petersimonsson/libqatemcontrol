@@ -233,7 +233,7 @@ QAtemConnection::CommandHeader QAtemConnection::parseCommandHeader(const QByteAr
 void QAtemConnection::parsePayLoad(const QByteArray& datagram)
 {
     quint16 offset = SIZE_OF_HEADER;
-    quint16 size = (quint8)datagram[offset + 1] | ((quint8)datagram[offset] << 8);
+    quint16 size = (quint8)datagram.at(offset + 1) | ((quint8)datagram.at(offset) << 8);
 
     while((offset + size) <= datagram.size())
     {
@@ -310,7 +310,7 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
 
         if((offset + 2) < datagram.size())
         {
-            size = (quint8)datagram[offset + 1] | ((quint8)datagram[offset] << 8);
+            size = (quint8)datagram.at(offset + 1) | ((quint8)datagram.at(offset) << 8);
         }
     }
 }
