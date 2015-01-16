@@ -1403,7 +1403,7 @@ void QAtemConnection::onAMLv(const QByteArray& payload)
 
 float QAtemConnection::convertToDecibel(quint16 level)
 {
-    return (log10(level) - 2.1072099696) * 20 - 48;
+    return (log10((float)level) - 2.1072099696) * 20 - 48;
 }
 
 void QAtemConnection::onAMTl(const QByteArray& payload)
