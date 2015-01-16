@@ -1996,6 +1996,8 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
         emit upstreamKeyDVEBorderOutsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOutsideSoften);
         emit upstreamKeyDVEBorderInsideSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderInsideSoften);
         emit upstreamKeyDVEBorderOpacityChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderOpacity);
+        emit upstreamKeyDVEBorderBevelPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderBevelPosition);
+        emit upstreamKeyDVEBorderBevelSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderBevelSoften);
         emit upstreamKeyDVERateChanged(m_id, index, m_upstreamKeys[index]->m_dveRate);
     }
 }

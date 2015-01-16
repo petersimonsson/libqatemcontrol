@@ -254,7 +254,7 @@ public:
     /// @returns the bevel position of the border of the DVE for upstream key @p keyer
     float upstreamKeyDVEBorderBevelPosition(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveBorderBevelPosition; }
     /// @returns the bevel soften (%) of the border of the DVE for upstream key @p keyer
-    quint8 upstreamKeyDVEBorderBevelSofter(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveBorderBevelSoften; }
+    quint8 upstreamKeyDVEBorderBevelSoften(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveBorderBevelSoften; }
     /// @returns the rate in frames the DVE for upstream key @p keyer runs at
     quint8 upstreamKeyDVERate(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveRate; }
     /// @returns true if key frame A has been set for the DVE for upstream key @p keyer
@@ -624,6 +624,8 @@ signals:
     void upstreamKeyDVEBorderOutsideSoftenChanged(quint8 me, quint8 keyer, quint8 soften);
     void upstreamKeyDVEBorderInsideSoftenChanged(quint8 me, quint8 keyer, quint8 soften);
     void upstreamKeyDVEBorderOpacityChanged(quint8 me, quint8 keyer, quint8 opacity);
+    void upstreamKeyDVEBorderBevelPositionChanged(quint8 me, quint8 keyer, float position);
+    void upstreamKeyDVEBorderBevelSoftenChanged(quint8 me, quint8 keyer, quint8 soften);
     void upstreamKeyDVERateChanged(quint8 me, quint8 keyer, quint8 rate);
     void upstreamKeyDVEKeyFrameASetChanged(quint8 me, quint8 keyer, bool set);
     void upstreamKeyDVEKeyFrameBSetChanged(quint8 me, quint8 keyer, bool set);
