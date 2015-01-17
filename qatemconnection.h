@@ -352,6 +352,8 @@ protected:
 
     static float convertToDecibel(quint16 level);
 
+    void setInitialized(bool state);
+
 private:
     struct ObjectSlot
     {

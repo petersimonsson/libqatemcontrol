@@ -163,11 +163,16 @@ void QAtemConnection::handleSocketData()
             QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, 0x0);
             sendDatagram(ackDatagram);
         }
-        else if(m_isInitialized && (header.bitmask & Cmd_AckRequest))
+        else if((m_isInitialized && (header.bitmask & Cmd_AckRequest)) || (!m_isInitialized && datagram.size() == SIZE_OF_HEADER && header.bitmask & Cmd_AckRequest))
         {
             QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packageId);
             sendDatagram(ackDatagram);
             m_socket->flush();
+
+            if(!m_isInitialized)
+            {
+                setInitialized(true);
+            }
         }
 
         if(datagram.size() > (SIZE_OF_HEADER + 2) && !(header.bitmask & (Cmd_HelloPacket | Cmd_Resend)))
@@ -244,8 +249,7 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
 
         if(cmd == "InCm")
         {
-            m_isInitialized = true;
-            QMetaObject::invokeMethod(this, "emitConnectedSignal", Qt::QueuedConnection);
+            setInitialized(true);
         }
         else if(cmd == "_MeC")
         {
@@ -312,6 +316,16 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
         {
             size = (quint8)datagram.at(offset + 1) | ((quint8)datagram.at(offset) << 8);
         }
+    }
+}
+
+void QAtemConnection::setInitialized(bool state)
+{
+    m_isInitialized = state;
+
+    if(m_isInitialized)
+    {
+        QMetaObject::invokeMethod(this, "emitConnectedSignal", Qt::QueuedConnection);
     }
 }
 
