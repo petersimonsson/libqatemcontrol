@@ -158,7 +158,12 @@ namespace QAtem
     struct Camera
     {
         Camera(quint8 i) :
-            input(i), focus(0), autoFocused(false), iris(0), zoomSpeed(0)
+            input(i), focus(0), autoFocused(false), iris(0), zoomSpeed(0),
+            gain(0), whiteBalance(0), shutter(0),
+            liftR(0), liftG(0), liftB(0), liftY(0),
+            gammaR(0), gammaG(0), gammaB(0), gammaY(0),
+            gainR(0), gainG(0), gainB(0), gainY(0),
+            contrast(0)
         {
         }
 
@@ -170,6 +175,22 @@ namespace QAtem
         quint16 gain;
         quint16 whiteBalance;
         quint16 shutter;
+        float liftR;
+        float liftG;
+        float liftB;
+        float liftY;
+        float gammaR;
+        float gammaG;
+        float gammaB;
+        float gammaY;
+        float gainR;
+        float gainG;
+        float gainB;
+        float gainY;
+        quint8 contrast;
+        quint8 lumMix;
+        quint16 hue;
+        quint8 saturation;
     };
 }
 

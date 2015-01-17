@@ -106,6 +106,76 @@ void QAtemCameraControl::onCCdP(const QByteArray& payload)
 
         break;
     case 8: //Chip
+        switch(feature)
+        {
+        case 0: //Lift
+            val.u8[1] = (quint8)payload.at(22);
+            val.u8[0] = (quint8)payload.at(23);
+            camera->liftR = (qint16)val.u16 / 4096.0;
+            val.u8[1] = (quint8)payload.at(24);
+            val.u8[0] = (quint8)payload.at(25);
+            camera->liftB = (qint16)val.u16 / 4096.0;
+            val.u8[1] = (quint8)payload.at(26);
+            val.u8[0] = (quint8)payload.at(27);
+            camera->liftG = (qint16)val.u16 / 4096.0;
+            val.u8[1] = (quint8)payload.at(28);
+            val.u8[0] = (quint8)payload.at(29);
+            camera->liftY = (qint16)val.u16 / 4096.0;
+            break;
+        case 1: //Gamma
+            val.u8[1] = (quint8)payload.at(22);
+            val.u8[0] = (quint8)payload.at(23);
+            camera->gammaR = (qint16)val.u16 / 8192.0;
+            val.u8[1] = (quint8)payload.at(24);
+            val.u8[0] = (quint8)payload.at(25);
+            camera->gammaB = (qint16)val.u16 / 8192.0;
+            val.u8[1] = (quint8)payload.at(26);
+            val.u8[0] = (quint8)payload.at(27);
+            camera->gammaG = (qint16)val.u16 / 8192.0;
+            val.u8[1] = (quint8)payload.at(28);
+            val.u8[0] = (quint8)payload.at(29);
+            camera->gammaY = (qint16)val.u16 / 8192.0;
+            break;
+        case 2: //Gain
+            val.u8[1] = (quint8)payload.at(22);
+            val.u8[0] = (quint8)payload.at(23);
+            camera->gainR = (qint16)val.u16 / 2048.0;
+            val.u8[1] = (quint8)payload.at(24);
+            val.u8[0] = (quint8)payload.at(25);
+            camera->gainB = (qint16)val.u16 / 2048.0;
+            val.u8[1] = (quint8)payload.at(26);
+            val.u8[0] = (quint8)payload.at(27);
+            camera->gainG = (qint16)val.u16 / 2048.0;
+            val.u8[1] = (quint8)payload.at(28);
+            val.u8[0] = (quint8)payload.at(29);
+            camera->gainY = (qint16)val.u16 / 2048.0;
+            break;
+        case 3: //Aperture
+//            qDebug() << payload.mid(6).toHex();
+            break;
+        case 4: //Contrast
+            val.u8[1] = (quint8)payload.at(24);
+            val.u8[0] = (quint8)payload.at(25);
+            camera->contrast = qRound(((qint16)val.u16 / 4096.0) * 100);
+            break;
+        case 5: //Lum
+            val.u8[1] = (quint8)payload.at(22);
+            val.u8[0] = (quint8)payload.at(23);
+            camera->lumMix = qRound(((qint16)val.u16 / 2048.0) * 100);
+            break;
+        case 6: //Hue & Saturation
+            val.u8[1] = (quint8)payload.at(22);
+            val.u8[0] = (quint8)payload.at(23);
+            camera->hue = 180 + qRound(((qint16)val.u16 / 2048.0) * 180);
+            val.u8[1] = (quint8)payload.at(24);
+            val.u8[0] = (quint8)payload.at(25);
+            camera->saturation = qRound(((qint16)val.u16 / 4096.0) * 100);
+            break;
+        default:
+            qDebug() << "[doCCdP] Unknown chip feature:" << feature;
+            break;
+        }
+
         break;
     default:
         qDebug() << "[onCCdP] Unknown adjustment domain:" << adjustmentDomain;
