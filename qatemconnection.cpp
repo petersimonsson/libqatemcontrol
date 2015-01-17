@@ -38,16 +38,8 @@ public:
 };
 
 QAtemConnection::QAtemConnection(QObject* parent)
-    : QObject(parent)
+    : QObject(parent), m_socket(NULL)
 {
-    m_socket = new QUdpSocket(this);
-    m_socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
-
-    connect(m_socket, SIGNAL(readyRead()),
-            this, SLOT(handleSocketData()));
-    connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(handleError(QAbstractSocket::SocketError)));
-
     m_connectionTimer = new QTimer(this);
     m_connectionTimer->setInterval(1000);
     connect(m_connectionTimer, SIGNAL(timeout()),
@@ -116,11 +108,20 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connect
         return;
     }
 
-    if (m_socket->isOpen())
+    if (m_socket)
     {
         m_connectionTimer->stop();
-        m_socket->close();
+        delete m_socket;
+        m_socket = NULL;
     }
+
+    m_socket = new QUdpSocket(this);
+    m_socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+
+    connect(m_socket, SIGNAL(readyRead()),
+            this, SLOT(handleSocketData()));
+    connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(handleError(QAbstractSocket::SocketError)));
 
     m_socket->bind();
     m_packetCounter = 0;
@@ -138,12 +139,18 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connect
 
 void QAtemConnection::disconnectFromSwitcher()
 {
-    m_socket->close();
+    delete m_socket;
+    m_socket = NULL;
     m_connectionTimer->stop();
 }
 
 void QAtemConnection::handleSocketData()
 {
+    if(!m_socket)
+    {
+        return;
+    }
+
     while (m_socket->hasPendingDatagrams())
     {
         m_connectionTimer->start();
@@ -336,6 +343,11 @@ void QAtemConnection::emitConnectedSignal()
 
 bool QAtemConnection::sendDatagram(const QByteArray& datagram)
 {
+    if(!m_socket)
+    {
+        return false;
+    }
+
     qint64 sent = m_socket->writeDatagram(datagram, m_address, m_port);
 
     return sent != -1;
@@ -363,15 +375,22 @@ bool QAtemConnection::sendCommand(const QByteArray& cmd, const QByteArray& paylo
 
 void QAtemConnection::handleError(QAbstractSocket::SocketError)
 {
-    m_socket->close();
     m_connectionTimer->stop();
+
     emit socketError(m_socket->errorString());
+
+    delete m_socket;
+    m_socket = NULL;
+    m_isInitialized = false;
+
     emit disconnected();
 }
 
 void QAtemConnection::handleConnectionTimeout()
 {
-    m_socket->close();
+    delete m_socket;
+    m_socket = NULL;
+    m_isInitialized = false;
     m_connectionTimer->stop();
     emit socketError(tr("The switcher connection timed out"));
     emit disconnected();
@@ -1658,7 +1677,7 @@ void QAtemConnection::flushTransferBuffer(quint8 count)
 {
     int i = 0;
 
-    while(!m_transferData.isEmpty() && i < count)
+    while(!m_transferData.isEmpty() && i < count && m_socket)
     {
         QByteArray data = m_transferData.left(1392);
         m_transferData = m_transferData.remove(0, data.size());
