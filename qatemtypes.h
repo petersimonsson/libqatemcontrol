@@ -154,6 +154,23 @@ namespace QAtem
         float borderBevelPosition;
         quint8 borderBevelSoften;
     };
+
+    struct Camera
+    {
+        Camera(quint8 i) :
+            input(i), focus(0), autoFocused(false), iris(0), zoomSpeed(0)
+        {
+        }
+
+        quint8 input;
+        quint16 focus;
+        bool autoFocused;
+        quint16 iris;
+        qint16 zoomSpeed;
+        quint16 gain;
+        quint16 whiteBalance;
+        quint16 shutter;
+    };
 }
 
 #endif //QATEM_TOPOLOGY_H

@@ -436,6 +436,7 @@ public slots:
     /// Enable fly on the non DVE key types of the upstream key @p keyer
     void setUpstreamKeyFlyEnabled(quint8 keyer, bool enable);
 
+protected slots:
     void onPrgI(const QByteArray& payload);
     void onPrvI(const QByteArray& payload);
 

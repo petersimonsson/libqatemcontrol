@@ -17,6 +17,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "qatemconnection.h"
 #include "qatemmixeffect.h"
+#include "qatemcameracontrol.h"
 
 #include <QDebug>
 #include <QTimer>
@@ -86,12 +87,17 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_lastTransferId = 0;
 
     initCommandSlotHash();
+
+    m_cameraControl = new QAtemCameraControl(this);
 }
 
 QAtemConnection::~QAtemConnection()
 {
     qDeleteAll(m_multiViews);
     qDeleteAll(m_mixEffects);
+
+    delete m_cameraControl;
+    m_cameraControl = NULL;
 }
 
 bool QAtemConnection::isConnected() const

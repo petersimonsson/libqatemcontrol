@@ -28,11 +28,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 class QTimer;
 class QHostAddress;
 class QAtemMixEffect;
+class QAtemCameraControl;
 
 class QAtemConnection : public QObject
 {
     Q_OBJECT
 friend class QAtemMixEffect;
+friend class QAtemCameraControl;
 public:
     enum Command
     {
@@ -217,6 +219,8 @@ public:
 
     /// @returns the power status as a bitmask. Bit 0: Main power on/off, 1: Backup power on/off
     quint8 powerStatus() const { return m_powerStatus; }
+
+    QAtemCameraControl *cameraControl() const { return m_cameraControl; }
 
 public slots:
     void setDownstreamKeyOn(quint8 keyer, bool state);
@@ -456,6 +460,8 @@ private:
     quint8 m_powerStatus;
 
     QList<QAtem::VideoMode> m_availableVideoModes;
+
+    QAtemCameraControl *m_cameraControl;
 
 signals:
     void connected();
