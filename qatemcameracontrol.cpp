@@ -341,3 +341,171 @@ void QAtemCameraControl::setShutter(quint8 input, quint16 shutter)
 
     m_atemConnection->sendCommand(cmd, payload);
 }
+
+void QAtemCameraControl::setLift(quint8 input, float r, float g, float b, float y)
+{
+    if(input < 1)
+    {
+        return;
+    }
+
+    QByteArray cmd("CCmd");
+    QByteArray payload(24, (char)0x0);
+
+    payload[0] = (char)input;
+    payload[1] = (char)0x08; //Chip
+    payload[2] = (char)0x00; //Lift
+    payload[4] = (char)0x80; //Unknown, but needs to be set
+    payload[9] = (char)0x04; //Unknown, but needs to be set
+    QAtem::U16_U8 val;
+    val.u16 = qRound(r * 4096);
+    payload[16] = (char)val.u8[1];
+    payload[17] = (char)val.u8[0];
+    val.u16 = qRound(g * 4096);
+    payload[18] = (char)val.u8[1];
+    payload[19] = (char)val.u8[0];
+    val.u16 = qRound(b * 4096);
+    payload[20] = (char)val.u8[1];
+    payload[21] = (char)val.u8[0];
+    val.u16 = qRound(y * 4096);
+    payload[22] = (char)val.u8[1];
+    payload[23] = (char)val.u8[0];
+
+    m_atemConnection->sendCommand(cmd, payload);
+}
+
+void QAtemCameraControl::setGamma(quint8 input, float r, float g, float b, float y)
+{
+    if(input < 1)
+    {
+        return;
+    }
+
+    QByteArray cmd("CCmd");
+    QByteArray payload(24, (char)0x0);
+
+    payload[0] = (char)input;
+    payload[1] = (char)0x08; //Chip
+    payload[2] = (char)0x01; //Gamma
+    payload[4] = (char)0x80; //Unknown, but needs to be set
+    payload[9] = (char)0x04; //Unknown, but needs to be set
+    QAtem::U16_U8 val;
+    val.u16 = qRound(r * 8192);
+    payload[16] = (char)val.u8[1];
+    payload[17] = (char)val.u8[0];
+    val.u16 = qRound(g * 8192);
+    payload[18] = (char)val.u8[1];
+    payload[19] = (char)val.u8[0];
+    val.u16 = qRound(b * 8192);
+    payload[20] = (char)val.u8[1];
+    payload[21] = (char)val.u8[0];
+    val.u16 = qRound(y * 8192);
+    payload[22] = (char)val.u8[1];
+    payload[23] = (char)val.u8[0];
+
+    m_atemConnection->sendCommand(cmd, payload);
+}
+
+void QAtemCameraControl::setGain(quint8 input, float r, float g, float b, float y)
+{
+    if(input < 1)
+    {
+        return;
+    }
+
+    QByteArray cmd("CCmd");
+    QByteArray payload(24, (char)0x0);
+
+    payload[0] = (char)input;
+    payload[1] = (char)0x08; //Chip
+    payload[2] = (char)0x02; //Gain
+    payload[4] = (char)0x80; //Unknown, but needs to be set
+    payload[9] = (char)0x04; //Unknown, but needs to be set
+    QAtem::U16_U8 val;
+    val.u16 = qRound(r * 2048);
+    payload[16] = (char)val.u8[1];
+    payload[17] = (char)val.u8[0];
+    val.u16 = qRound(g * 2048);
+    payload[18] = (char)val.u8[1];
+    payload[19] = (char)val.u8[0];
+    val.u16 = qRound(b * 2048);
+    payload[20] = (char)val.u8[1];
+    payload[21] = (char)val.u8[0];
+    val.u16 = qRound(y * 2048);
+    payload[22] = (char)val.u8[1];
+    payload[23] = (char)val.u8[0];
+
+    m_atemConnection->sendCommand(cmd, payload);
+}
+
+void QAtemCameraControl::setContrast(quint8 input, quint8 contrast)
+{
+    if(input < 1)
+    {
+        return;
+    }
+
+    QByteArray cmd("CCmd");
+    QByteArray payload(24, (char)0x0);
+
+    payload[0] = (char)input;
+    payload[1] = (char)0x08; //Chip
+    payload[2] = (char)0x04; //Contrast
+    payload[4] = (char)0x80; //Unknown, but needs to be set
+    payload[9] = (char)0x02; //Unknown, but needs to be set
+    QAtem::U16_U8 val;
+    val.u16 = qRound((contrast / 100.0) * 4096.0);
+    payload[18] = (char)val.u8[1];
+    payload[19] = (char)val.u8[0];
+
+    m_atemConnection->sendCommand(cmd, payload);
+}
+
+void QAtemCameraControl::setLumMix(quint8 input, quint8 mix)
+{
+    if(input < 1)
+    {
+        return;
+    }
+
+    QByteArray cmd("CCmd");
+    QByteArray payload(24, (char)0x0);
+
+    payload[0] = (char)input;
+    payload[1] = (char)0x08; //Chip
+    payload[2] = (char)0x05; //Lum
+    payload[4] = (char)0x80; //Unknown, but needs to be set
+    payload[9] = (char)0x01; //Unknown, but needs to be set
+    QAtem::U16_U8 val;
+    val.u16 = qRound((mix / 100.0) * 2048.0);
+    payload[16] = (char)val.u8[1];
+    payload[17] = (char)val.u8[0];
+
+    m_atemConnection->sendCommand(cmd, payload);
+}
+
+void QAtemCameraControl::setHueSaturation(quint8 input, quint16 hue, quint8 saturation)
+{
+    if(input < 1)
+    {
+        return;
+    }
+
+    QByteArray cmd("CCmd");
+    QByteArray payload(24, (char)0x0);
+
+    payload[0] = (char)input;
+    payload[1] = (char)0x08; //Chip
+    payload[2] = (char)0x06; //Hue & Saturation
+    payload[4] = (char)0x80; //Unknown, but needs to be set
+    payload[9] = (char)0x02; //Unknown, but needs to be set
+    QAtem::U16_U8 val;
+    val.u16 = qRound(((hue - 180) / 180.0) * 2048.0);
+    payload[16] = (char)val.u8[1];
+    payload[17] = (char)val.u8[0];
+    val.u16 = qRound((saturation / 100.0) * 4096.0);
+    payload[18] = (char)val.u8[1];
+    payload[19] = (char)val.u8[0];
+
+    m_atemConnection->sendCommand(cmd, payload);
+}

@@ -43,6 +43,13 @@ public slots:
     void setWhiteBalance(quint8 input, quint16 wb);
     void setShutter(quint8 input, quint16 shutter);
 
+    void setLift(quint8 input, float r, float g, float b, float y);
+    void setGamma(quint8 input, float r, float g, float b, float y);
+    void setGain(quint8 input, float r, float g, float b, float y);
+    void setContrast(quint8 input, quint8 contrast);
+    void setLumMix(quint8 input, quint8 mix);
+    void setHueSaturation(quint8 input, quint16 hue, quint8 saturation);
+
 protected slots:
     void onCCdP(const QByteArray& payload);
 
