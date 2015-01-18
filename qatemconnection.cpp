@@ -1745,7 +1745,7 @@ void QAtemConnection::onFTDC(const QByteArray& payload)
 QByteArray QAtemConnection::prepImageForSwitcher(QImage &image, const int width, const int height)
 {
     // Size the image
-    image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
     if(image.width() > width) {
         image = image.copy((image.width()-width) / 2, 0, width, image.height());
