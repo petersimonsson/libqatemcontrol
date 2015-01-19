@@ -1940,13 +1940,13 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
         m_upstreamKeys[index]->m_dveYSize = val.u16 / 1000.0;
         val.u8[1] = (quint8)payload.at(20);
         val.u8[0] = (quint8)payload.at(21);
-        m_upstreamKeys[index]->m_dveXPosition = val.u16 / 1000.0;
+        m_upstreamKeys[index]->m_dveXPosition = (qint16)val.u16 / 1000.0;
         val.u8[1] = (quint8)payload.at(24);
         val.u8[0] = (quint8)payload.at(25);
-        m_upstreamKeys[index]->m_dveYPosition = val.u16 / 1000.0;
+        m_upstreamKeys[index]->m_dveYPosition = (qint16)val.u16 / 1000.0;
         val.u8[1] = (quint8)payload.at(28);
         val.u8[0] = (quint8)payload.at(29);
-        m_upstreamKeys[index]->m_dveRotation = val.u16 / 10.0;
+        m_upstreamKeys[index]->m_dveRotation = (qint16)val.u16 / 10.0;
         m_upstreamKeys[index]->m_dveEnableBorder = (bool)payload.at(30);
         m_upstreamKeys[index]->m_dveEnableDropShadow = (bool)payload.at(31);
         m_upstreamKeys[index]->m_dveBorderStyle = (quint8)payload.at(32);
