@@ -413,7 +413,7 @@ public slots:
     void setUpstreamKeyDVEBorderSoften(quint8 keyer, quint8 outside, quint8 inside);
     void setUpstreamKeyDVEBorderOpacity(quint8 keyer, quint8 opacity);
     void setUpstreamKeyDVEBorderBevelPosition(quint8 keyer, float position);
-    void setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 soften);
+    void setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, float soften);
     void setUpstreamKeyDVERate(quint8 keyer, quint8 rate);
     /// Set the @p keyFrame of the DVE for upstream keyer @p keyer. 1 = Keyframe A, 2 = Keyframe B
     void setUpstreamKeyDVEKeyFrame(quint8 keyer, quint8 keyFrame);
@@ -626,7 +626,7 @@ signals:
     void upstreamKeyDVEBorderInsideSoftenChanged(quint8 me, quint8 keyer, quint8 soften);
     void upstreamKeyDVEBorderOpacityChanged(quint8 me, quint8 keyer, quint8 opacity);
     void upstreamKeyDVEBorderBevelPositionChanged(quint8 me, quint8 keyer, float position);
-    void upstreamKeyDVEBorderBevelSoftenChanged(quint8 me, quint8 keyer, quint8 soften);
+    void upstreamKeyDVEBorderBevelSoftenChanged(quint8 me, quint8 keyer, float soften);
     void upstreamKeyDVERateChanged(quint8 me, quint8 keyer, quint8 rate);
     void upstreamKeyDVEKeyFrameASetChanged(quint8 me, quint8 keyer, bool set);
     void upstreamKeyDVEKeyFrameBSetChanged(quint8 me, quint8 keyer, bool set);

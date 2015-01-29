@@ -1453,7 +1453,7 @@ void QAtemMixEffect::setUpstreamKeyDVEBorderBevelPosition(quint8 keyer, float po
     m_atemConnection->sendCommand(cmd, payload);
 }
 
-void QAtemMixEffect::setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 soften)
+void QAtemMixEffect::setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, float soften)
 {
     QByteArray cmd("CKDV");
     QByteArray payload(64, (char)0x0);
@@ -1461,7 +1461,7 @@ void QAtemMixEffect::setUpstreamKeyDVEBorderBevelSoften(quint8 keyer, quint8 sof
     payload[2] = (char)0x10;
     payload[4] = (char)m_id;
     payload[5] = (char)keyer;
-    payload[38] = (char)soften;
+    payload[38] = (char)(soften * 100);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -1957,7 +1957,7 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
         m_upstreamKeys[index]->m_dveBorderInsideWidth = val.u16 / 100.0;
         m_upstreamKeys[index]->m_dveBorderOutsideSoften = (quint8)payload.at(38);
         m_upstreamKeys[index]->m_dveBorderInsideSoften = (quint8)payload.at(39);
-        m_upstreamKeys[index]->m_dveBorderBevelSoften = (quint8)payload.at(40);
+        m_upstreamKeys[index]->m_dveBorderBevelSoften = (quint8)payload.at(40) / 100.0;
         m_upstreamKeys[index]->m_dveBorderBevelPosition = ((quint8)payload.at(41)) / 100.0;
         m_upstreamKeys[index]->m_dveBorderOpacity = (quint8)payload.at(42);
         QAtem::U16_U8 h, s, l;

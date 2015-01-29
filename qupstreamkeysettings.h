@@ -117,7 +117,7 @@ struct QUpstreamKeySettings
     quint8 m_dveBorderInsideSoften;
     quint8 m_dveBorderOpacity;
     float m_dveBorderBevelPosition;
-    quint8 m_dveBorderBevelSoften;
+    float m_dveBorderBevelSoften;
     quint8 m_dveRate;
     bool m_dveKeyFrameASet;
     bool m_dveKeyFrameBSet;
