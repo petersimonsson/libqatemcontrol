@@ -1493,19 +1493,18 @@ void QAtemMixEffect::setUpstreamKeyDVEKeyFrame(quint8 keyer, quint8 keyFrame)
 
 void QAtemMixEffect::runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 direction)
 {
-    QByteArray cmd("RFlK"); // TODO Verify this is correct
+    QByteArray cmd("RFlK");
     QByteArray payload(8, (char)0x0);
 
     payload[1] = (char)m_id;
     payload[2] = (char)keyer;
+    payload[4] = (char)position;
 
     if(position == 4)
     {
         payload[0] = (char)0x02; // This is needed else the direction will be ignore
-        payload[4] = (char)direction;
+        payload[5] = (char)direction;
     }
-
-    payload[5] = (char)position;
 
     m_atemConnection->sendCommand(cmd, payload);
 }
