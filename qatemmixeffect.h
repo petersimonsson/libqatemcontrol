@@ -261,6 +261,11 @@ public:
     bool upstreamKeyDVEKeyFrameASet(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveKeyFrameASet; }
     /// @returns true if key frame B has been set for the DVE for upstream key @p keyer
     bool upstreamKeyDVEKeyFrameBSet(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveKeyFrameBSet; }
+    bool upstreamKeyDVEMaskEnabled(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveMaskEnabled; }
+    float upstreamKeyDVEMaskTop(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveMaskTop; }
+    float upstreamKeyDVEMaskBottom(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveMaskBottom; }
+    float upstreamKeyDVEMaskLeft(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveMaskLeft; }
+    float upstreamKeyDVEMaskRight(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveMaskRight; }
     /// @returns true if fly is enabled for non DVE type of the upstream key @p keyer
     bool upstreamKeyEnableFly(quint8 keyer) const { return m_upstreamKeys[keyer]->m_enableFly; }
     /// @returns the current key frame settings for keyer @p keyer and key frame @frame. 1 = KeyFrame A, 2 = KeyFrame B
@@ -435,6 +440,8 @@ public slots:
     void runUpstreamKeyTo(quint8 keyer, quint8 position, quint8 direction);
     /// Enable fly on the non DVE key types of the upstream key @p keyer
     void setUpstreamKeyFlyEnabled(quint8 keyer, bool enable);
+    void setUpstreamKeyDVEMaskEnabled(quint8 keyer, bool enable);
+    void setUpstreamKeyDVEMask(quint8 keyer, float top, float bottom, float left, float right);
 
 protected slots:
     void onPrgI(const QByteArray& payload);
@@ -632,6 +639,11 @@ signals:
     void upstreamKeyDVEKeyFrameBSetChanged(quint8 me, quint8 keyer, bool set);
     void upstreamKeyEnableFlyChanged(quint8 me, quint8 keyer, bool enabled);
     void upstreamKeyDVEKeyFrameChanged(quint8 me, quint8 keyer, quint8 frame);
+    void upstreamKeyDVEMaskEnabledChanged(quint8 me, quint8 keyer, bool enabled);
+    void upstreamKeyDVEMaskTopChanged(quint8 me, quint8 keyer, float top);
+    void upstreamKeyDVEMaskBottomChanged(quint8 me, quint8 keyer, float bottom);
+    void upstreamKeyDVEMaskLeftChanged(quint8 me, quint8 keyer, float left);
+    void upstreamKeyDVEMaskRightChanged(quint8 me, quint8 keyer, float right);
 };
 
 #endif // QATEMMIXEFFECT_H

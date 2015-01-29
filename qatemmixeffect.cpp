@@ -1522,6 +1522,46 @@ void QAtemMixEffect::setUpstreamKeyFlyEnabled(quint8 keyer, bool enable)
     m_atemConnection->sendCommand(cmd, payload);
 }
 
+void QAtemMixEffect::setUpstreamKeyDVEMaskEnabled(quint8 keyer, bool enable)
+{
+    QByteArray cmd("CKDV");
+    QByteArray payload(64, (char)0x0);
+
+    payload[1] = (char)0x10;
+    payload[4] = (char)m_id;
+    payload[5] = (char)keyer;
+    payload[51] = (char)enable;
+
+    m_atemConnection->sendCommand(cmd, payload);
+}
+
+void QAtemMixEffect::setUpstreamKeyDVEMask(quint8 keyer, float top, float bottom, float left, float right)
+{
+    QByteArray cmd("CKDV");
+    QByteArray payload(64, (char)0x0);
+    QAtem::U16_U8 val;
+
+    payload[0] = (char)0x01;
+    payload[1] = (char)0xe0;
+    payload[4] = (char)m_id;
+    payload[5] = (char)keyer;
+
+    val.u16 = top * 1000;
+    payload[52] = (char)val.u8[1];
+    payload[53] = (char)val.u8[0];
+    val.u16 = bottom * 1000;
+    payload[54] = (char)val.u8[1];
+    payload[55] = (char)val.u8[0];
+    val.u16 = left * 1000;
+    payload[56] = (char)val.u8[1];
+    payload[57] = (char)val.u8[0];
+    val.u16 = right * 1000;
+    payload[58] = (char)val.u8[1];
+    payload[59] = (char)val.u8[0];
+
+    m_atemConnection->sendCommand(cmd, payload);
+}
+
 void QAtemMixEffect::onPrgI(const QByteArray& payload)
 {
     quint8 me = (quint8)payload.at(6);
@@ -1977,6 +2017,19 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
         val.u8[0] = (quint8)payload.at(51);
         m_upstreamKeys[index]->m_dveLightSourceDirection = val.u16 / 10.0;
         m_upstreamKeys[index]->m_dveLightSourceAltitude = (quint8)payload.at(52);
+        m_upstreamKeys[index]->m_dveMaskEnabled = (bool)payload.at(53);
+        val.u8[1] = (quint8)payload.at(54);
+        val.u8[0] = (quint8)payload.at(55);
+        m_upstreamKeys[index]->m_dveMaskTop = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(56);
+        val.u8[0] = (quint8)payload.at(57);
+        m_upstreamKeys[index]->m_dveMaskBottom = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(58);
+        val.u8[0] = (quint8)payload.at(59);
+        m_upstreamKeys[index]->m_dveMaskLeft = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(60);
+        val.u8[0] = (quint8)payload.at(61);
+        m_upstreamKeys[index]->m_dveMaskRight = val.u16 / 1000.0;
         m_upstreamKeys[index]->m_dveRate = (quint8)payload.at(62);
 
         emit upstreamKeyDVEXPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveXPosition);
@@ -1998,6 +2051,11 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
         emit upstreamKeyDVEBorderBevelPositionChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderBevelPosition);
         emit upstreamKeyDVEBorderBevelSoftenChanged(m_id, index, m_upstreamKeys[index]->m_dveBorderBevelSoften);
         emit upstreamKeyDVERateChanged(m_id, index, m_upstreamKeys[index]->m_dveRate);
+        emit upstreamKeyDVEMaskEnabledChanged(m_id, index, m_upstreamKeys[index]->m_dveMaskEnabled);
+        emit upstreamKeyDVEMaskTopChanged(m_id, index, m_upstreamKeys[index]->m_dveMaskTop);
+        emit upstreamKeyDVEMaskBottomChanged(m_id, index, m_upstreamKeys[index]->m_dveMaskBottom);
+        emit upstreamKeyDVEMaskLeftChanged(m_id, index, m_upstreamKeys[index]->m_dveMaskLeft);
+        emit upstreamKeyDVEMaskRightChanged(m_id, index, m_upstreamKeys[index]->m_dveMaskRight);
     }
 }
 

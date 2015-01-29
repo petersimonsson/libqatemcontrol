@@ -71,6 +71,11 @@ struct QUpstreamKeySettings
         m_dveRate = 0;
         m_dveKeyFrameASet = 0;
         m_dveKeyFrameBSet = 0;
+        m_dveMaskEnabled = false;
+        m_dveMaskTop = 0;
+        m_dveMaskBottom = 0;
+        m_dveMaskLeft = 0;
+        m_dveMaskRight = 0;
         m_enableFly = false;
     }
 
@@ -121,6 +126,11 @@ struct QUpstreamKeySettings
     quint8 m_dveRate;
     bool m_dveKeyFrameASet;
     bool m_dveKeyFrameBSet;
+    bool m_dveMaskEnabled;
+    float m_dveMaskTop;
+    float m_dveMaskBottom;
+    float m_dveMaskLeft;
+    float m_dveMaskRight;
     bool m_enableFly;
 
     QAtem::DveKeyFrame m_keyFrames[2];
