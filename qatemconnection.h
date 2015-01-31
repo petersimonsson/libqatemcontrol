@@ -355,6 +355,7 @@ protected:
     void sendFileDescription();
 
     static float convertToDecibel(quint16 level);
+    static quint16 convertFromDecibel(float level);
 
     void setInitialized(bool state);
 

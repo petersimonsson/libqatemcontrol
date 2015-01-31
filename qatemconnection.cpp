@@ -1363,7 +1363,7 @@ void QAtemConnection::setAudioInputGain(quint16 index, float gain)
     val.u16 = index;
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
-    val.u16 = pow(10, gain / 20.0) * 32768;
+    val.u16 = convertFromDecibel(gain);
     payload[6] = (char)val.u8[1];
     payload[7] = (char)val.u8[0];
 
@@ -1377,7 +1377,7 @@ void QAtemConnection::setAudioMasterOutputGain(float gain)
     QAtem::U16_U8 val;
 
     payload[0] = (char)0x01;
-    val.u16 = pow(10, gain / 20.0) * 32768;
+    val.u16 = convertFromDecibel(gain);
     payload[2] = (char)val.u8[1];
     payload[3] = (char)val.u8[0];
 
@@ -1442,7 +1442,13 @@ void QAtemConnection::onAMLv(const QByteArray& payload)
 
 float QAtemConnection::convertToDecibel(quint16 level)
 {
-    return (log10((float)level) - 2.1072099696) * 20 - 48;
+    return log10((float)level / 32768.0) * 20.0;
+}
+
+
+quint16 QAtemConnection::convertFromDecibel(float level)
+{
+    return pow(10,level / 20) * 32768;
 }
 
 void QAtemConnection::onAMTl(const QByteArray& payload)
