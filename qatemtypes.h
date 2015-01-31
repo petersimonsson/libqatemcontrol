@@ -153,6 +153,10 @@ namespace QAtem
         quint8 borderOpacity;
         float borderBevelPosition;
         quint8 borderBevelSoften;
+        float maskTop;
+        float maskBottom;
+        float maskLeft;
+        float maskRight;
     };
 
     struct Camera
@@ -163,7 +167,7 @@ namespace QAtem
             liftR(0), liftG(0), liftB(0), liftY(0),
             gammaR(0), gammaG(0), gammaB(0), gammaY(0),
             gainR(0), gainG(0), gainB(0), gainY(0),
-            contrast(0)
+            contrast(0), lumMix(0), hue(0), saturation(0)
         {
         }
 

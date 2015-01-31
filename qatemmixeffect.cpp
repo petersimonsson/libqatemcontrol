@@ -2128,6 +2128,18 @@ void QAtemMixEffect::onKKFP(const QByteArray& payload)
         val.u8[0] = (quint8)payload.at(47);
         keyFrame.lightSourceDirection = val.u16 / 10.0;
         keyFrame.lightSourceAltitude = (quint8)payload.at(48);
+        val.u8[1] = (quint8)payload.at(50);
+        val.u8[0] = (quint8)payload.at(51);
+        keyFrame.maskTop = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(52);
+        val.u8[0] = (quint8)payload.at(53);
+        keyFrame.maskBottom = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(54);
+        val.u8[0] = (quint8)payload.at(55);
+        keyFrame.maskLeft = val.u16 / 1000.0;
+        val.u8[1] = (quint8)payload.at(56);
+        val.u8[0] = (quint8)payload.at(57);
+        keyFrame.maskRight = val.u16 / 1000.0;
 
         m_upstreamKeys[index]->m_keyFrames[frameIndex - 1] = keyFrame;
 
