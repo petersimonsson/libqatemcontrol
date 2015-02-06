@@ -526,6 +526,9 @@ signals:
     void topologyChanged(const QAtem::Topology &topology);
 
     void powerStatusChanged(quint8 status);
+
+    void multiViewLayoutChanged(quint8 multiView, quint8 layout);
+    void multiViewInputsChanged(quint8 multiView);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)

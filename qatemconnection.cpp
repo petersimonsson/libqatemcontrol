@@ -1181,6 +1181,7 @@ void QAtemConnection::onMvIn(const QByteArray& payload)
     if(index < m_multiViews.count() && mvindex < 10)
     {
         m_multiViews[index]->sources[mvindex] = val.u16;
+        emit multiViewInputsChanged(index);
     }
 }
 
@@ -1191,6 +1192,8 @@ void QAtemConnection::onMvPr(const QByteArray& payload)
     if(index < m_multiViews.count())
     {
         m_multiViews[index]->layout = (quint8)payload.at(7);
+
+        emit multiViewLayoutChanged(index, m_multiViews[index]->layout);
     }
 }
 
