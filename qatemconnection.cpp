@@ -829,8 +829,8 @@ void QAtemConnection::setInputType(quint16 input, quint8 type)
 
     payload[0] = (char)0x04;
     val.u16 = input;
-    payload[1] = (char)val.u8[1];
-    payload[2] = (char)val.u8[0];
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
     payload[29] = (char)type;
 
     sendCommand(cmd, payload);
@@ -851,9 +851,9 @@ void QAtemConnection::setInputLongName(quint16 input, const QString &name)
 
     payload[0] = (char)0x01;
     val.u16 = input;
-    payload[1] = (char)val.u8[1];
-    payload[2] = (char)val.u8[0];
-    payload.replace(3, 21, namearray);
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+    payload.replace(4, 20, namearray);
     payload[28] = (char)0xff;
 
     sendCommand(cmd, payload);
@@ -874,8 +874,8 @@ void QAtemConnection::setInputShortName(quint16 input, const QString &name)
 
     payload[0] = (char)0x02;
     val.u16 = input;
-    payload[1] = (char)val.u8[1];
-    payload[2] = (char)val.u8[0];
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
     payload.replace(24, 4, namearray);
 
     sendCommand(cmd, payload);
