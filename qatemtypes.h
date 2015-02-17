@@ -196,6 +196,14 @@ namespace QAtem
         quint16 hue;
         quint8 saturation;
     };
+
+    struct MacroInfo
+    {
+        quint8 index;
+        bool used;
+        QString name;
+        QString description;
+    };
 }
 
 #endif //QATEM_TOPOLOGY_H

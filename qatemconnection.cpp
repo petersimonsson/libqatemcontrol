@@ -89,6 +89,8 @@ QAtemConnection::QAtemConnection(QObject* parent)
     initCommandSlotHash();
 
     m_cameraControl = new QAtemCameraControl(this);
+
+    m_macroInfos.resize(100);
 }
 
 QAtemConnection::~QAtemConnection()
@@ -1312,6 +1314,10 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("MPAS", ObjectSlot(this, "onMPAS"));
     m_commandSlotHash.insert("MPfM", ObjectSlot(this, "onMPfM"));
     m_commandSlotHash.insert("AuxP", ObjectSlot(this, "onAuxP"));
+    m_commandSlotHash.insert("MPrp", ObjectSlot(this, "onMPrp"));
+    m_commandSlotHash.insert("MRPr", ObjectSlot(this, "onMRPr"));
+    m_commandSlotHash.insert("MRcS", ObjectSlot(this, "onMRcS"));
+    m_commandSlotHash.insert("_MAC", ObjectSlot(this, "on_MAC"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -2014,4 +2020,197 @@ void QAtemConnection::onAuxP(const QByteArray& payload)
         quint8 index = (quint8)payload.at(6);
         qDebug() << "AuxP for aux" << index <<":" << payload.mid(7).toHex();
     }
+}
+
+void QAtemConnection::onMPrp(const QByteArray& payload)
+{
+    QAtem::MacroInfo info;
+    QAtem::U16_U8 lenName, lenDesc;
+
+    info.index = (quint8)payload.at(7);
+    info.used = (bool)payload.at(8);
+    lenName.u8[1] = (quint8)payload.at(10);
+    lenName.u8[0] = (quint8)payload.at(11);
+    lenDesc.u8[1] = (quint8)payload.at(12);
+    lenDesc.u8[0] = (quint8)payload.at(13);
+
+    if(lenName.u16 > 0)
+    {
+        info.name = payload.mid(14, lenName.u16);
+    }
+    if(lenDesc.u16 > 0)
+    {
+        info.description = payload.mid(14 + lenName.u16, lenDesc.u16);
+    }
+
+    m_macroInfos[info.index] = info;
+    emit macroInfoChanged(info.index, info);
+}
+
+void QAtemConnection::onMRPr(const QByteArray& payload)
+{
+    m_macroRunning = (bool)payload.at(6);
+    m_macroRepeating = (bool)payload.at(7);
+    m_runningMacro = (quint8)payload.at(9);
+
+    emit macroRunningStateChanged(m_macroRunning, m_macroRepeating, m_runningMacro);
+}
+
+void QAtemConnection::onMRcS(const QByteArray& payload)
+{
+    m_macroRecording = (bool)payload.at(6);
+    m_recordingMacro = (quint8)payload.at(9);
+
+    emit macroRecordingStateChanged(m_macroRecording, m_recordingMacro);
+}
+
+void QAtemConnection::on_MAC(const QByteArray& payload)
+{
+    m_macroInfos.resize((quint8)payload.at(6));
+}
+
+void QAtemConnection::runMacro(quint8 macroIndex)
+{
+    QByteArray cmd("MAct");
+    QByteArray payload(4, (char)0x0);
+
+    payload[1] = (char)macroIndex;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setMacroRepeating(bool state)
+{
+    QByteArray cmd("MRCP");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = 0x01;
+    payload[1] = (char)state;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::startRecordingMacro(quint8 macroIndex, const QByteArray &name, const QByteArray &description)
+{
+    QByteArray cmd("MSRc");
+    QByteArray payload(6, (char)0x0);
+
+    payload[1] = (char)macroIndex;
+    QAtem::U16_U8 val;
+    val.u16 = name.count();
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+    val.u16 = description.count();
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
+    payload += name;
+    payload += description;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::stopRecordingMacro()
+{
+    QByteArray cmd("MAct");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)0xff;
+    payload[1] = (char)0xff;
+    payload[2] = (char)0x02;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::addMacroUserWait()
+{
+    QByteArray cmd("MAct");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)0xff;
+    payload[1] = (char)0xff;
+    payload[2] = (char)0x03;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::addMacroPause(quint32 frames)
+{
+    QByteArray cmd("MSlp");
+    QByteArray payload(4, (char)0x0);
+
+    QAtem::U32_U8 val;
+    val.u32 = frames;
+    payload[0] = (char)val.u8[3];
+    payload[1] = (char)val.u8[2];
+    payload[2] = (char)val.u8[1];
+    payload[3] = (char)val.u8[0];
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setMacroName(quint8 macroIndex, const QByteArray &name)
+{
+    QByteArray cmd("CMPr");
+    QByteArray payload(6, (char)0x0);
+
+    payload[0] = (char)0x01;
+    payload[3] = (char)macroIndex;
+    QAtem::U16_U8 val;
+    val.u16 = name.count();
+    payload[4] = (char)val.u8[1];
+    payload[5] = (char)val.u8[0];
+    payload += name;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::setMacroDescription(quint8 macroIndex, const QByteArray &description)
+{
+    QByteArray cmd("CMPr");
+    QByteArray payload(6, (char)0x0);
+
+    payload[0] = (char)0x02;
+    payload[3] = (char)macroIndex;
+    QAtem::U16_U8 val;
+    val.u16 = description.count();
+    payload[6] = (char)val.u8[1];
+    payload[7] = (char)val.u8[0];
+    payload += description;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::removeMacro(quint8 macroIndex)
+{
+    QByteArray cmd("MAct");
+    QByteArray payload(4, (char)0x0);
+
+    payload[1] = (char)macroIndex;
+    payload[2] = (char)0x05;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::continueMacro()
+{
+    QByteArray cmd("MAct");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)0xff;
+    payload[1] = (char)0xff;
+    payload[2] = (char)0x04;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::stopMacro()
+{
+    QByteArray cmd("MAct");
+    QByteArray payload(4, (char)0x0);
+
+    payload[0] = (char)0xff;
+    payload[1] = (char)0xff;
+    payload[2] = (char)0x01;
+
+    sendCommand(cmd, payload);
 }

@@ -222,6 +222,13 @@ public:
 
     QAtemCameraControl *cameraControl() const { return m_cameraControl; }
 
+    QAtem::MacroInfo macroInfo(quint8 index) const { return m_macroInfos.at(index); }
+    bool macroRunning() const { return m_macroRunning; }
+    bool macroRepeating() const { return m_macroRepeating; }
+    quint8 runningMacro() const { return m_runningMacro; }
+    bool macroRecording() const { return m_macroRecording; }
+    quint8 recordingMacro() const { return m_recordingMacro; }
+
 public slots:
     void setDownstreamKeyOn(quint8 keyer, bool state);
     void setDownstreamKeyTie(quint8 keyer, bool state);
@@ -290,6 +297,18 @@ public slots:
     void resetAudioMasterOutputPeaks();
     void resetAudioInputPeaks(quint16 input);
 
+    void runMacro(quint8 macroIndex);
+    void setMacroRepeating(bool state);
+    void startRecordingMacro(quint8 macroIndex, const QByteArray &name, const QByteArray &description);
+    void stopRecordingMacro();
+    void addMacroUserWait();
+    void addMacroPause(quint32 frames);
+    void setMacroName(quint8 macroIndex, const QByteArray &name);
+    void setMacroDescription(quint8 macroIndex, const QByteArray &description);
+    void removeMacro(quint8 macroIndex);
+    void continueMacro();
+    void stopMacro();
+
 protected slots:
     void handleSocketData();
 
@@ -336,6 +355,10 @@ protected slots:
     void onMPAS(const QByteArray& payload);
     void onMPfM(const QByteArray& payload);
     void onAuxP(const QByteArray& payload);
+    void onMPrp(const QByteArray& payload);
+    void onMRPr(const QByteArray& payload);
+    void onMRcS(const QByteArray& payload);
+    void on_MAC(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -464,6 +487,13 @@ private:
 
     QAtemCameraControl *m_cameraControl;
 
+    QVector<QAtem::MacroInfo> m_macroInfos;
+    bool m_macroRunning;
+    bool m_macroRepeating;
+    quint8 m_runningMacro;
+    bool m_macroRecording;
+    quint8 m_recordingMacro;
+
 signals:
     void connected();
     void disconnected();
@@ -529,6 +559,10 @@ signals:
 
     void multiViewLayoutChanged(quint8 multiView, quint8 layout);
     void multiViewInputsChanged(quint8 multiView);
+
+    void macroInfoChanged(quint8 index, const QAtem::MacroInfo &info);
+    void macroRunningStateChanged(bool running, bool repeating, quint8 macroIndex);
+    void macroRecordingStateChanged(bool recording, quint8 macroIndex);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QAtemConnection::Commands)
