@@ -223,7 +223,7 @@ public:
     QAtemCameraControl *cameraControl() const { return m_cameraControl; }
 
     QAtem::MacroInfo macroInfo(quint8 index) const { return m_macroInfos.at(index); }
-    QVector<QAtem::MacroInfo> macrosInfos () const { return m_macroInfos; }
+    QVector<QAtem::MacroInfo> macroInfos () const { return m_macroInfos; }
 
     bool macroRunning() const { return m_macroRunning; }
     bool macroRepeating() const { return m_macroRepeating; }
