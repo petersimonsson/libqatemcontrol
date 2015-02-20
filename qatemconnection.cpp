@@ -805,8 +805,15 @@ void QAtemConnection::setAuxSource(quint8 aux, quint16 source)
         return;
     }
 
+    quint8 payloadsize = 4;
+
+    if(m_majorversion == 1 || (m_majorversion == 2 && m_minorversion < 16))
+    {
+        payloadsize = 8;
+    }
+
     QByteArray cmd("CAuS");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(payloadsize, (char)0x0);
     QAtem::U16_U8 val;
 
     payload[0] = 0x01;
