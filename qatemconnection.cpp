@@ -2056,11 +2056,11 @@ void QAtemConnection::onMPrp(const QByteArray& payload)
 
 void QAtemConnection::onMRPr(const QByteArray& payload)
 {
-    m_macroRunning = (bool)payload.at(6);
+    m_macroRunningState = (QAtem::MacroRunningState)payload.at(6);
     m_macroRepeating = (bool)payload.at(7);
     m_runningMacro = (quint8)payload.at(9);
 
-    emit macroRunningStateChanged(m_macroRunning, m_macroRepeating, m_runningMacro);
+    emit macroRunningStateChanged(m_macroRunningState, m_macroRepeating, m_runningMacro);
 }
 
 void QAtemConnection::onMRcS(const QByteArray& payload)

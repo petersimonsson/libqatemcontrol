@@ -225,7 +225,7 @@ public:
     QAtem::MacroInfo macroInfo(quint8 index) const { return m_macroInfos.at(index); }
     QVector<QAtem::MacroInfo> macroInfos () const { return m_macroInfos; }
 
-    bool macroRunning() const { return m_macroRunning; }
+    QAtem::MacroRunningState macroRunningState() const { return m_macroRunningState; }
     bool macroRepeating() const { return m_macroRepeating; }
     quint8 runningMacro() const { return m_runningMacro; }
     bool macroRecording() const { return m_macroRecording; }
@@ -490,7 +490,7 @@ private:
     QAtemCameraControl *m_cameraControl;
 
     QVector<QAtem::MacroInfo> m_macroInfos;
-    bool m_macroRunning;
+    QAtem::MacroRunningState m_macroRunningState;
     bool m_macroRepeating;
     quint8 m_runningMacro;
     bool m_macroRecording;
@@ -563,7 +563,7 @@ signals:
     void multiViewInputsChanged(quint8 multiView);
 
     void macroInfoChanged(quint8 index, const QAtem::MacroInfo &info);
-    void macroRunningStateChanged(bool running, bool repeating, quint8 macroIndex);
+    void macroRunningStateChanged(QAtem::MacroRunningState running, bool repeating, quint8 macroIndex);
     void macroRecordingStateChanged(bool recording, quint8 macroIndex);
 };
 

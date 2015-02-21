@@ -204,6 +204,13 @@ namespace QAtem
         QString name;
         QString description;
     };
+
+    enum MacroRunningState
+    {
+        MacroStoped,
+        MacroRunning,
+        MacroWaiting
+    };
 }
 
 #endif //QATEM_TOPOLOGY_H
