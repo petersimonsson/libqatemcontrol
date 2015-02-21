@@ -191,7 +191,7 @@ public:
 
     /**
      * @brief Send data to a store in the switcher.
-     * @param storeId 0 = Still store, 1 = Clip store, 2 = Sound store, 3 = Multiview labels
+     * @param storeId 0 = Still store, 1 = Clip store, 2 = Sound store, 3 = Multiview labels, 255 = Macros
      * @param index Index in the store
      * @param name Name shown to the user
      * @param data Actual pixel or sound data
@@ -201,6 +201,8 @@ public:
     bool transferActive() const { return m_transferActive; }
     quint16 transferId () const { return m_transferId; }
     int remainingTransferDataSize() const { return m_transferData.size(); }
+    quint16 getDataFromSwitcher(quint8 storeId, quint8 index);
+    QByteArray transferData() const { return m_transferData; }
 
     /**
      * Convert @p image to a QByteArray suitable for sending to the switcher.
@@ -361,6 +363,8 @@ protected slots:
     void onMRPr(const QByteArray& payload);
     void onMRcS(const QByteArray& payload);
     void on_MAC(const QByteArray& payload);
+    void onFTDa(const QByteArray& payload);
+    void onFTDE(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
@@ -378,6 +382,7 @@ protected:
 
     void sendData(quint16 id, const QByteArray &data);
     void sendFileDescription();
+    void acceptData();
 
     static float convertToDecibel(quint16 level);
     static quint16 convertFromDecibel(float level);

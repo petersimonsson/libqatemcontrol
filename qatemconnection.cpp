@@ -1325,6 +1325,8 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("MRPr", ObjectSlot(this, "onMRPr"));
     m_commandSlotHash.insert("MRcS", ObjectSlot(this, "onMRcS"));
     m_commandSlotHash.insert("_MAC", ObjectSlot(this, "on_MAC"));
+    m_commandSlotHash.insert("FTDa", ObjectSlot(this, "onFTDa"));
+    m_commandSlotHash.insert("FTDE", ObjectSlot(this, "onFTDE"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1650,7 +1652,7 @@ quint16 QAtemConnection::sendDataToSwitcher(quint8 storeId, quint8 index, const 
 {
     if (m_transferActive)
     {
-        return false;
+        return 0;
     }
 
     m_transferStoreId = storeId;
@@ -1663,7 +1665,7 @@ quint16 QAtemConnection::sendDataToSwitcher(quint8 storeId, quint8 index, const 
 
     initDownloadToSwitcher();
 
-    return true;
+    return m_transferId;
 }
 
 void QAtemConnection::initDownloadToSwitcher()
@@ -1762,6 +1764,74 @@ void QAtemConnection::onFTDC(const QByteArray& payload)
     id.u8[0] = (quint8)payload.at(7);
 
     emit dataTransferFinished(id.u16);
+}
+
+quint16 QAtemConnection::getDataFromSwitcher(quint8 storeId, quint8 index)
+{
+    if (m_transferActive)
+    {
+        return 0;
+    }
+
+    QByteArray cmd("FTSU");
+    QByteArray payload(12, (char)0x0);
+
+    m_transferStoreId = storeId;
+    m_transferIndex = index;
+    m_lastTransferId++;
+    m_transferId = m_lastTransferId;
+    m_transferActive = true;
+    m_transferData.clear();
+
+    QAtem::U16_U8 id;
+    id.u16 = m_transferId;
+    payload[0] = (char)id.u8[1];
+    payload[1] = (char)id.u8[0];
+    payload[2] = (char)m_transferStoreId;
+    payload[7] = (char)m_transferIndex;
+    payload[8] = (char)0x03;
+
+    sendCommand(cmd, payload);
+
+    return m_transferId;
+}
+
+void QAtemConnection::onFTDa(const QByteArray& payload)
+{
+    QAtem::U16_U8 val;
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
+
+    if(val.u16 != m_transferId)
+    {
+        qWarning() << "Unknown transfer ID:" << val.u16 << "(" << m_transferId << ")";
+        return;
+    }
+
+    val.u8[1] = (quint8)payload.at(8);
+    val.u8[0] = (quint8)payload.at(9);
+    m_transferData.append(payload.mid(10, val.u16));
+
+    acceptData();
+}
+
+void QAtemConnection::acceptData()
+{
+    QByteArray cmd("FTUA");
+    QByteArray payload(4, (char)0x0);
+
+    QAtem::U16_U8 val;
+    val.u16 = m_transferId;
+    payload[0] = (char)val.u8[1];
+    payload[1] = (char)val.u8[0];
+    payload[3] = (char)m_transferIndex;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::onFTDE(const QByteArray& payload)
+{
+    qWarning() << "Data transfer error:" << payload.toHex();
 }
 
 QByteArray QAtemConnection::prepImageForSwitcher(QImage &image, const int width, const int height)
