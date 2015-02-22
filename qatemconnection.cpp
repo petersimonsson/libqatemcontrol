@@ -1327,6 +1327,7 @@ void QAtemConnection::initCommandSlotHash()
     m_commandSlotHash.insert("_MAC", ObjectSlot(this, "on_MAC"));
     m_commandSlotHash.insert("FTDa", ObjectSlot(this, "onFTDa"));
     m_commandSlotHash.insert("FTDE", ObjectSlot(this, "onFTDE"));
+    m_commandSlotHash.insert("LKOB", ObjectSlot(this, "onLKOB"));
 }
 
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
@@ -1773,9 +1774,6 @@ quint16 QAtemConnection::getDataFromSwitcher(quint8 storeId, quint8 index)
         return 0;
     }
 
-    QByteArray cmd("FTSU");
-    QByteArray payload(12, (char)0x0);
-
     m_transferStoreId = storeId;
     m_transferIndex = index;
     m_lastTransferId++;
@@ -1783,17 +1781,45 @@ quint16 QAtemConnection::getDataFromSwitcher(quint8 storeId, quint8 index)
     m_transferActive = true;
     m_transferData.clear();
 
+    requestData();
+
+    return m_transferId;
+}
+
+void QAtemConnection::requestData()
+{
+    QByteArray cmd("FTSU");
+    QByteArray payload(12, (char)0x0);
+
     QAtem::U16_U8 id;
     id.u16 = m_transferId;
     payload[0] = (char)id.u8[1];
     payload[1] = (char)id.u8[0];
     payload[2] = (char)m_transferStoreId;
     payload[7] = (char)m_transferIndex;
-    payload[8] = (char)0x03;
+
+    if(m_transferStoreId == 0xff) // Macros
+    {
+        payload[8] = (char)0x03;
+    }
 
     sendCommand(cmd, payload);
+}
 
-    return m_transferId;
+void QAtemConnection::aquireLock(quint8 storeId)
+{
+    QByteArray cmd("LOCK");
+    QByteArray payload(4, (char)0x0);
+
+    payload[1] = (char)storeId;
+    payload[2] = (char)0x01;
+
+    sendCommand(cmd, payload);
+}
+
+void QAtemConnection::onLKOB(const QByteArray& payload)
+{
+    emit getLockStateChanged(payload.at(7), true);
 }
 
 void QAtemConnection::onFTDa(const QByteArray& payload)
@@ -1812,7 +1838,7 @@ void QAtemConnection::onFTDa(const QByteArray& payload)
     val.u8[0] = (quint8)payload.at(9);
     m_transferData.append(payload.mid(10, val.u16));
 
-    acceptData();
+    QTimer::singleShot(50, this, SLOT(acceptData()));
 }
 
 void QAtemConnection::acceptData()

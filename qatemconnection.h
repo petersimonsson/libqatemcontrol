@@ -189,6 +189,8 @@ public:
     /// @returns the state of the media pool lock with ID @p id.
     bool mediaLockState(quint8 id) const { return m_mediaLocks.value(id); }
 
+    void aquireLock(quint8 storeId);
+
     /**
      * @brief Send data to a store in the switcher.
      * @param storeId 0 = Still store, 1 = Clip store, 2 = Sound store, 3 = Multiview labels, 255 = Macros
@@ -365,9 +367,11 @@ protected slots:
     void on_MAC(const QByteArray& payload);
     void onFTDa(const QByteArray& payload);
     void onFTDE(const QByteArray& payload);
+    void onLKOB(const QByteArray& payload);
 
     void initDownloadToSwitcher();
     void flushTransferBuffer(quint8 count);
+    void acceptData();
 
 protected:
     QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId);
@@ -382,7 +386,7 @@ protected:
 
     void sendData(quint16 id, const QByteArray &data);
     void sendFileDescription();
-    void acceptData();
+    void requestData();
 
     static float convertToDecibel(quint16 level);
     static quint16 convertFromDecibel(float level);
@@ -557,6 +561,7 @@ signals:
     void audioLevelsChanged();
 
     void mediaLockStateChanged(quint8 id, bool state);
+    void getLockStateChanged(quint8 storeId, bool state);
 
     void dataTransferFinished(quint16 transferId);
 
