@@ -74,37 +74,12 @@ void QAtemUploader::handleMediaLockState(quint8 id, bool locked)
             return;
         }
 
-        int width;
-        int height;
-
-        switch(m_connection->videoFormat())
-        {
-        case 0:
-        case 2:
-            width = 720;
-            height = 525;
-            break;
-        case 1:
-        case 3:
-            width = 720;
-            height = 625;
-            break;
-        case 4:
-        case 5:
-            width = 1280;
-            height = 720;
-            break;
-        case 6:
-        case 7:
-            width = 1920;
-            height = 1080;
-            break;
-        }
+        QSize size = m_connection->availableVideoModes().value(m_connection->videoFormat()).size;
 
         QFileInfo info(m_filename);
 
         out << tr ("Uploading... ");
-        m_connection->sendDataToSwitcher(0, m_position, info.baseName().toUtf8(), QAtemConnection::prepImageForSwitcher(image, width, height));
+        m_connection->sendDataToSwitcher(0, m_position, info.baseName().toUtf8(), QAtemConnection::prepImageForSwitcher(image, size.width(), size.height()));
         m_state = Inprogress;
     }
     else if(id == 0 && !locked)

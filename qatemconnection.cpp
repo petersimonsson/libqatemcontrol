@@ -1210,29 +1210,6 @@ void QAtemConnection::onVidM(const QByteArray& payload)
 {
     m_videoFormat = (quint8)payload.at(6); // 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
 
-    switch(m_videoFormat)
-    {
-    case 0:
-    case 2:
-    case 7:
-        m_framesPerSecond = 30;
-        break;
-    case 5:
-        m_framesPerSecond = 60;
-        break;
-    case 1:
-    case 3:
-    case 6:
-        m_framesPerSecond = 25;
-        break;
-    case 4:
-        m_framesPerSecond = 50;
-        break;
-    default:
-        m_framesPerSecond = 0;
-        break;
-    }
-
     emit videoFormatChanged(m_videoFormat);
 }
 
@@ -1976,25 +1953,25 @@ void QAtemConnection::onVMC(const QByteArray& payload)
     val.u8[1] = (quint8)payload.at(8);
     val.u8[0] = (quint8)payload.at(9);
 
-    QVector<QString> modes(18);
-    modes[0] = "525i59.94 NTSC";
-    modes[1] = "625i50 PAL";
-    modes[2] = "525i59.94 NTSC 16:9";
-    modes[3] = "625i50 PAL 16:9";
-    modes[4] = "720p50";
-    modes[5] = "720p59.94";
-    modes[6] = "1080i50";
-    modes[7] = "1080i59.94";
-    modes[8] = "1080p23.98";
-    modes[9] = "1080p24";
-    modes[10] = "1080p25";
-    modes[11] = "1080p29.97";
-    modes[12] = "1080p50";
-    modes[13] = "1080p59.94";
-    modes[14] = "2160p23.98";
-    modes[15] = "2160p24";
-    modes[16] = "2160p25";
-    modes[17] = "2160p29.97";
+    QVector<QAtem::VideoMode> mode;
+    mode[0] = QAtem::VideoMode(0, "525i59.94 NTSC", QSize(720, 525), 29.97);
+    mode[1] = QAtem::VideoMode(1, "625i50 PAL", QSize(720, 625), 25);
+    mode[2] = QAtem::VideoMode(2, "525i59.94 NTSC 16:9", QSize(864, 525), 29.97);
+    mode[3] = QAtem::VideoMode(3, "625i50 PAL 16:9", QSize(1024, 625), 25);
+    mode[4] = QAtem::VideoMode(4, "720p50", QSize(1280, 720), 50);
+    mode[5] = QAtem::VideoMode(5, "720p59.94", QSize(1280, 720), 59.94);
+    mode[6] = QAtem::VideoMode(6, "1080i50", QSize(1920, 1080), 25);
+    mode[7] = QAtem::VideoMode(7, "1080i59.94", QSize(1920, 1080), 29.97);
+    mode[8] = QAtem::VideoMode(8, "1080p23.98", QSize(1920, 1080), 23.98);
+    mode[9] = QAtem::VideoMode(9, "1080p24", QSize(1920, 1080), 24);
+    mode[10] = QAtem::VideoMode(10, "1080p25", QSize(1920, 1080), 25);
+    mode[11] = QAtem::VideoMode(11, "1080p29.97", QSize(1920, 1080), 29.97);
+    mode[12] = QAtem::VideoMode(12, "1080p50", QSize(1920, 1080), 50);
+    mode[13] = QAtem::VideoMode(13, "1080p59.94", QSize(1920, 1080), 59.94);
+    mode[14] = QAtem::VideoMode(14, "2160p23.98", QSize(3840, 2160), 23.98);
+    mode[15] = QAtem::VideoMode(15, "2160p24", QSize(3840, 2160), 24);
+    mode[16] = QAtem::VideoMode(16, "2160p25", QSize(3840, 2160), 25);
+    mode[17] = QAtem::VideoMode(17, "2160p29.97", QSize(3840, 2160), 29.97);
 
     m_availableVideoModes.clear();
 
@@ -2002,7 +1979,7 @@ void QAtemConnection::onVMC(const QByteArray& payload)
     {
         if(val.u32 & (1 << i))
         {
-            m_availableVideoModes.append(QAtem::VideoMode(i, modes[i]));
+            m_availableVideoModes.insert(i, mode[i]);
         }
     }
 }

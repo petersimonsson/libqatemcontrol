@@ -140,10 +140,9 @@ public:
     quint8 multiViewCount() const { return m_multiViews.count(); }
     QAtem::MultiView *multiView(quint8 index) const;
 
-    QList<QAtem::VideoMode> availableVideoModes() const { return m_availableVideoModes; }
+    QMap<quint8, QAtem::VideoMode> availableVideoModes() const { return m_availableVideoModes; }
     /// @returns index of the video format in use. 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
     quint8 videoFormat() const { return m_videoFormat; }
-    quint8 framesPerSecond() const { return m_framesPerSecond; }
     /// @returns type of video down coversion, 0 = Center cut, 1 = Letterbox, 2 = Anamorphic
     quint8 videoDownConvertType() const { return m_videoDownConvertType; }
 
@@ -451,7 +450,6 @@ private:
     QVector<QAtem::MultiView*> m_multiViews;
 
     quint8 m_videoFormat;
-    quint8 m_framesPerSecond;
     quint8 m_videoDownConvertType;
 
     quint16 m_mediaPoolClip1Size;
@@ -494,7 +492,7 @@ private:
 
     quint8 m_powerStatus;
 
-    QList<QAtem::VideoMode> m_availableVideoModes;
+    QMap<quint8, QAtem::VideoMode> m_availableVideoModes;
 
     QAtemCameraControl *m_cameraControl;
 
