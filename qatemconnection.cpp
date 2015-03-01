@@ -1953,7 +1953,7 @@ void QAtemConnection::onVMC(const QByteArray& payload)
     val.u8[1] = (quint8)payload.at(8);
     val.u8[0] = (quint8)payload.at(9);
 
-    QVector<QAtem::VideoMode> mode;
+    QVector<QAtem::VideoMode> mode(18);
     mode[0] = QAtem::VideoMode(0, "525i59.94 NTSC", QSize(720, 525), 29.97);
     mode[1] = QAtem::VideoMode(1, "625i50 PAL", QSize(720, 625), 25);
     mode[2] = QAtem::VideoMode(2, "525i59.94 NTSC 16:9", QSize(864, 525), 29.97);
