@@ -121,7 +121,7 @@ void MainWindow::onAtemConnected()
 {
     quint8 count = 0;
 
-    foreach(const QAtemConnection::InputInfo &info, m_atemConnection->inputInfos())
+    foreach(const QAtem::InputInfo &info, m_atemConnection->inputInfos())
     {
         if(info.externalType != 0 /*Internal source*/)
         {
