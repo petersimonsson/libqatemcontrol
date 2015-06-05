@@ -1825,6 +1825,7 @@ void QAtemMixEffect::onKeOn(const QByteArray& payload)
     if(me == m_id)
     {
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         m_upstreamKeys[index]->m_onAir = (quint8)payload.at(8);
 
         emit upstreamKeyOnAirChanged(m_id, index, m_upstreamKeys[index]->m_onAir);
@@ -1839,6 +1840,7 @@ void QAtemMixEffect::onKeBP(const QByteArray& payload)
     {
         QAtem::U16_U8 val;
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         m_upstreamKeys[index]->m_type = (quint8)payload.at(8);
         m_upstreamKeys[index]->m_enableFly = (bool)payload.at(11);
         val.u8[1] = (quint8)payload[12];
@@ -1880,6 +1882,7 @@ void QAtemMixEffect::onKeLm(const QByteArray& payload)
     if(me == m_id)
     {
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         m_upstreamKeys[index]->m_lumaPreMultipliedKey = (quint8)payload.at(8);
         QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(10);
@@ -1904,6 +1907,7 @@ void QAtemMixEffect::onKeCk(const QByteArray& payload)
     if(me == m_id)
     {
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(8);
         val.u8[0] = (quint8)payload.at(9);
@@ -1934,6 +1938,7 @@ void QAtemMixEffect::onKePt(const QByteArray& payload)
     if(me == m_id)
     {
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         m_upstreamKeys[index]->m_patternPattern = (quint8)payload.at(8);
         QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(10);
@@ -1970,6 +1975,7 @@ void QAtemMixEffect::onKeDV(const QByteArray& payload)
     if(me == m_id)
     {
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         QAtem::U16_U8 val;
         val.u8[1] = (quint8)payload.at(12);
         val.u8[0] = (quint8)payload.at(13);
@@ -2066,6 +2072,7 @@ void QAtemMixEffect::onKeFS(const QByteArray& payload)
     if(me == m_id)
     {
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         m_upstreamKeys[index]->m_dveKeyFrameASet = (bool)payload.at(8);
         m_upstreamKeys[index]->m_dveKeyFrameBSet = (bool)payload.at(9);
 
@@ -2081,6 +2088,7 @@ void QAtemMixEffect::onKKFP(const QByteArray& payload)
     if(me == m_id)
     {
         quint8 index = (quint8)payload.at(7);
+        if (index >= m_upstreamKeys.count()) return;
         quint8 frameIndex = (quint8)payload.at(8);
         QAtem::DveKeyFrame keyFrame;
 
