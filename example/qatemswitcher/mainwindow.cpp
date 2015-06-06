@@ -136,108 +136,135 @@ void MainWindow::onAtemConnected()
 
     QAtemMixEffect *me = m_atemConnection->mixEffect(0);
 
-    m_ui->key2Btn->setEnabled(me->upstreamKeyCount() >= 2);
-    m_ui->key2OnAirBtn->setEnabled(me->upstreamKeyCount() >= 2);
-    m_ui->key3Btn->setEnabled(me->upstreamKeyCount() >= 3);
-    m_ui->key3OnAirBtn->setEnabled(me->upstreamKeyCount() >= 3);
-    m_ui->key4Btn->setEnabled(me->upstreamKeyCount() >= 4);
-    m_ui->key4OnAirBtn->setEnabled(me->upstreamKeyCount() >= 4);
-    m_ui->stingBtn->setEnabled(m_atemConnection->topology().DVEs != 0);
-    m_ui->dveBtn->setEnabled(m_atemConnection->topology().DVEs != 0);
-
-    connect(m_ui->autoButton, SIGNAL(clicked()),
-            me, SLOT(autoTransition()));
-    connect(m_ui->cutButton, SIGNAL(clicked()),
-            me, SLOT(cut()));
-
-    connect(me, SIGNAL(programInputChanged(quint8,quint16,quint16)),
-            this, SLOT(updateProgramInput(quint8,quint16,quint16)));
-    connect(me, SIGNAL(previewInputChanged(quint8,quint16,quint16)),
-            this, SLOT(updatePreviewInput(quint8,quint16,quint16)));
-
-    connect(me, SIGNAL(transitionFrameCountChanged(quint8,quint8)),
-            this, SLOT(setTransitionRate(quint8,quint8)));
-    connect(me, SIGNAL(nextTransitionStyleChanged(quint8,quint8)),
-            this, SLOT(setTransitionStyle(quint8,quint8)));
-    connect(me, SIGNAL(keyersOnNextTransitionChanged(quint8,quint8)),
-            this, SLOT(updateKeysOnNextTransition(quint8,quint8)));
-    connect(me, SIGNAL(transitionPreviewChanged(quint8,bool)),
-            this, SLOT(updateTransitionPreview(quint8,bool)));
-    connect(m_ui->prevTransBtn, SIGNAL(toggled(bool)),
-            me, SLOT(setTransitionPreview(bool)));
-    connect(me, SIGNAL(transitionPositionChanged(quint8,quint16)),
-            this, SLOT(setTransitionPosition(quint8,quint16)));
-    connect(m_ui->tBar, SIGNAL(valueChanged(int)),
-            this, SLOT(changeTransitionPosition(int)));
-
-    connect(me, SIGNAL(fadeToBlackFrameCountChanged(quint8,quint8)),
-            this, SLOT(setFadeToBlackRate(quint8,quint8)));
-    connect(me, SIGNAL(fadeToBlackChanged(quint8,bool,bool)),
-            this, SLOT(setFadeToBlack(quint8,bool,bool)));
-    connect(m_ui->ftbBtn, SIGNAL(clicked()),
-            me, SLOT(toggleFadeToBlack()));
-
-    connect(me, SIGNAL(upstreamKeyOnAirChanged(quint8,quint8,bool)),
-            this, SLOT(setUpstreamKeyOnAir(quint8,quint8,bool)));
-
-    if(me->programInput() > 0 && me->programInput() <= 8)
+    if(me)
     {
-        m_programGroup->button(me->programInput())->setChecked(true);
+        m_ui->key2Btn->setEnabled(me->upstreamKeyCount() >= 2);
+        m_ui->key2OnAirBtn->setEnabled(me->upstreamKeyCount() >= 2);
+        m_ui->key3Btn->setEnabled(me->upstreamKeyCount() >= 3);
+        m_ui->key3OnAirBtn->setEnabled(me->upstreamKeyCount() >= 3);
+        m_ui->key4Btn->setEnabled(me->upstreamKeyCount() >= 4);
+        m_ui->key4OnAirBtn->setEnabled(me->upstreamKeyCount() >= 4);
+        m_ui->stingBtn->setEnabled(m_atemConnection->topology().DVEs != 0);
+        m_ui->dveBtn->setEnabled(m_atemConnection->topology().DVEs != 0);
+
+        connect(m_ui->autoButton, SIGNAL(clicked()),
+                me, SLOT(autoTransition()));
+        connect(m_ui->cutButton, SIGNAL(clicked()),
+                me, SLOT(cut()));
+
+        connect(me, SIGNAL(programInputChanged(quint8,quint16,quint16)),
+                this, SLOT(updateProgramInput(quint8,quint16,quint16)));
+        connect(me, SIGNAL(previewInputChanged(quint8,quint16,quint16)),
+                this, SLOT(updatePreviewInput(quint8,quint16,quint16)));
+
+        connect(me, SIGNAL(transitionFrameCountChanged(quint8,quint8)),
+                this, SLOT(setTransitionRate(quint8,quint8)));
+        connect(me, SIGNAL(nextTransitionStyleChanged(quint8,quint8)),
+                this, SLOT(setTransitionStyle(quint8,quint8)));
+        connect(me, SIGNAL(keyersOnNextTransitionChanged(quint8,quint8)),
+                this, SLOT(updateKeysOnNextTransition(quint8,quint8)));
+        connect(me, SIGNAL(transitionPreviewChanged(quint8,bool)),
+                this, SLOT(updateTransitionPreview(quint8,bool)));
+        connect(m_ui->prevTransBtn, SIGNAL(toggled(bool)),
+                me, SLOT(setTransitionPreview(bool)));
+        connect(me, SIGNAL(transitionPositionChanged(quint8,quint16)),
+                this, SLOT(setTransitionPosition(quint8,quint16)));
+        connect(m_ui->tBar, SIGNAL(valueChanged(int)),
+                this, SLOT(changeTransitionPosition(int)));
+
+        connect(me, SIGNAL(fadeToBlackFrameCountChanged(quint8,quint8)),
+                this, SLOT(setFadeToBlackRate(quint8,quint8)));
+        connect(me, SIGNAL(fadeToBlackChanged(quint8,bool,bool)),
+                this, SLOT(setFadeToBlack(quint8,bool,bool)));
+        connect(m_ui->ftbBtn, SIGNAL(clicked()),
+                me, SLOT(toggleFadeToBlack()));
+
+        connect(me, SIGNAL(upstreamKeyOnAirChanged(quint8,quint8,bool)),
+                this, SLOT(setUpstreamKeyOnAir(quint8,quint8,bool)));
+
+        if(me->programInput() > 0 && me->programInput() <= 8)
+        {
+            m_programGroup->button(me->programInput())->setChecked(true);
+        }
+        if(me->previewInput() > 0 && me->previewInput() <= 8)
+        {
+            m_previewGroup->button(me->previewInput())->setChecked(true);
+        }
+
+        setTransitionRate(0, me->transitionFrameCount());
+        setTransitionStyle(0, me->nextTransitionStyle());
+        updateKeysOnNextTransition(0, me->keyersOnNextTransition());
+        m_ui->prevTransBtn->setChecked(me->transitionPreviewEnabled());
+
+        setFadeToBlackRate(0, me->fadeToBlackFrameCount());
+        setFadeToBlack(0, me->fadeToBlackFading(), me->fadeToBlackEnabled());
+
+        for(int i = 0; i < me->upstreamKeyCount(); ++i)
+        {
+            setUpstreamKeyOnAir(0, i, me->upstreamKeyOnAir(i));
+        }
     }
-    if(me->previewInput() > 0 && me->previewInput() <= 8)
+    else
     {
-        m_previewGroup->button(me->previewInput())->setChecked(true);
-    }
-
-    setTransitionRate(0, me->transitionFrameCount());
-    setTransitionStyle(0, me->nextTransitionStyle());
-    updateKeysOnNextTransition(0, me->keyersOnNextTransition());
-    m_ui->prevTransBtn->setChecked(me->transitionPreviewEnabled());
-
-    setFadeToBlackRate(0, me->fadeToBlackFrameCount());
-    setFadeToBlack(0, me->fadeToBlackFading(), me->fadeToBlackEnabled());
-
-    for(int i = 0; i < me->upstreamKeyCount(); ++i)
-    {
-        setUpstreamKeyOnAir(0, i, me->upstreamKeyOnAir(i));
+        qCritical() << "No M/E found!";
     }
 }
 
 void MainWindow::changeProgramInput(int input)
 {
-    m_atemConnection->mixEffect(0)->changeProgramInput(input);
+    QAtemMixEffect *me = m_atemConnection->mixEffect(0);
+
+    if(me)
+    {
+        me->changeProgramInput(input);
+    }
+    else
+    {
+        qCritical() << "No M/E found!";
+    }
 }
 
 void MainWindow::changePreviewInput(int input)
 {
-    m_atemConnection->mixEffect(0)->changePreviewInput(input);
+    QAtemMixEffect *me = m_atemConnection->mixEffect(0);
+
+    if(me)
+    {
+        me->changePreviewInput(input);
+    }
+    else
+    {
+        qCritical() << "No M/E found!";
+    }
 }
 
 void MainWindow::updateProgramInput(quint8 me, quint16 oldInput, quint16 newInput)
 {
-    Q_UNUSED(me)
-
-    if(newInput > 0 && newInput <= 8)
+    if(me == 0)
     {
-        m_programGroup->button(newInput)->setChecked(true);
-    }
-    else if(oldInput > 0 && oldInput <= 8)
-    {
-        m_programGroup->button(oldInput)->setChecked(false);
+        if(newInput > 0 && newInput <= 8)
+        {
+            m_programGroup->button(newInput)->setChecked(true);
+        }
+        else if(oldInput > 0 && oldInput <= 8)
+        {
+            m_programGroup->button(oldInput)->setChecked(false);
+        }
     }
 }
 
 void MainWindow::updatePreviewInput(quint8 me, quint16 oldInput, quint16 newInput)
 {
-    Q_UNUSED(me)
-
-    if(newInput > 0 && newInput <= 8)
+    if(me == 0)
     {
-        m_previewGroup->button(newInput)->setChecked(true);
-    }
-    else if(oldInput > 0 && oldInput <= 8)
-    {
-        m_previewGroup->button(oldInput)->setChecked(false);
+        if(newInput > 0 && newInput <= 8)
+        {
+            m_previewGroup->button(newInput)->setChecked(true);
+        }
+        else if(oldInput > 0 && oldInput <= 8)
+        {
+            m_previewGroup->button(oldInput)->setChecked(false);
+        }
     }
 }
 
