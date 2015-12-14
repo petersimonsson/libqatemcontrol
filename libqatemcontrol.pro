@@ -9,7 +9,7 @@ SOURCES += qatemconnection.cpp \
     qatemmixeffect.cpp \
     qatemcameracontrol.cpp
 
-HEADERS += qatemconnection.h\
+HEADERS += qatemconnection.h \
         libqatemcontrol_global.h \
     qdownstreamkeysettings.h \
     qupstreamkeysettings.h \
