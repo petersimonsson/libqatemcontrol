@@ -1413,7 +1413,7 @@ void QAtemConnection::onAMLv(const QByteArray& payload)
         idlist.append(val.u16);
     }
 
-    int offset = 43 + ((numInputs.u16 - 1) * 2) + 4;
+    int offset = 43 + ((numInputs.u16) * 2);
 
     for(int i = 0; i < numInputs.u16; ++i)
     {
