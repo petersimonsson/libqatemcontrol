@@ -7,15 +7,16 @@ DEFINES += LIBQATEMCONTROL_LIBRARY
 
 SOURCES += qatemconnection.cpp \
     qatemmixeffect.cpp \
-    qatemcameracontrol.cpp
+    qatemcameracontrol.cpp \
+    qatemdownstreamkey.cpp
 
 HEADERS += qatemconnection.h \
         libqatemcontrol_global.h \
-    qdownstreamkeysettings.h \
     qupstreamkeysettings.h \
     qatemmixeffect.h \
     qatemtypes.h \
-    qatemcameracontrol.h
+    qatemcameracontrol.h \
+    qatemdownstreamkey.h
 
 unix {
     target.path = /usr/lib

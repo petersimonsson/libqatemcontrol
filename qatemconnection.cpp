@@ -18,6 +18,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "qatemconnection.h"
 #include "qatemmixeffect.h"
 #include "qatemcameracontrol.h"
+#include "qatemdownstreamkey.h"
 
 #include <QDebug>
 #include <QTimer>
@@ -39,7 +40,7 @@ public:
 };
 
 QAtemConnection::QAtemConnection(QObject* parent)
-    : QObject(parent), m_socket(NULL)
+    : QObject(parent), m_socket(NULL), m_downstreamKeys(2)
 {
     m_connectionTimer = new QTimer(this);
     m_connectionTimer->setInterval(1000);
@@ -90,6 +91,9 @@ QAtemConnection::QAtemConnection(QObject* parent)
 
     m_cameraControl = new QAtemCameraControl(this);
 
+    m_downstreamKeys[0] = new QAtemDownstreamKey(0, this);
+    m_downstreamKeys[1] = new QAtemDownstreamKey(1, this);
+
     m_macroInfos.resize(100);
 }
 
@@ -97,6 +101,7 @@ QAtemConnection::~QAtemConnection()
 {
     qDeleteAll(m_multiViews);
     qDeleteAll(m_mixEffects);
+    qDeleteAll(m_downstreamKeys);
 
     delete m_cameraControl;
     m_cameraControl = NULL;
@@ -404,217 +409,6 @@ void QAtemConnection::handleConnectionTimeout()
     emit disconnected();
 }
 
-void QAtemConnection::setDownstreamKeyOn(quint8 keyer, bool state)
-{
-    if(state == m_downstreamKeys.value(keyer).m_onAir)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsL");
-    QByteArray payload(4, (char)0x0);
-
-    payload[0] = (char)keyer;
-    payload[1] = (char)state;
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyTie(quint8 keyer, bool state)
-{
-    if(state == m_downstreamKeys.value(keyer).m_tie)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsT");
-    QByteArray payload(4, (char)0x0);
-
-    payload[0] = (char)keyer;
-    payload[1] = (char)state;
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::doDownstreamKeyAuto(quint8 keyer)
-{
-    QByteArray cmd("DDsA");
-    QByteArray payload(4, (char)0x0);
-
-    payload[0] = (char)keyer;
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyFillSource(quint8 keyer, quint16 source)
-{
-    if(source == m_downstreamKeys.value(keyer).m_fillSource)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsF");
-    QByteArray payload(4, (char)0x0);
-    QAtem::U16_U8 val;
-
-    payload[0] = (char)keyer;
-    val.u16 = source;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyKeySource(quint8 keyer, quint16 source)
-{
-    if(source == m_downstreamKeys.value(keyer).m_keySource)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsC");
-    QByteArray payload(4, (char)0x0);
-    QAtem::U16_U8 val;
-
-    payload[0] = (char)keyer;
-    val.u16 = source;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyFrameRate(quint8 keyer, quint8 frames)
-{
-    if(frames == m_downstreamKeys.value(keyer).m_frames)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsR");
-    QByteArray payload(4, (char)0x0);
-
-    payload[0] = (char)keyer;
-    payload[1] = (char)frames;
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyInvertKey(quint8 keyer, bool invert)
-{
-    if(invert == m_downstreamKeys.value(keyer).m_invertKey)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
-
-    payload[0] = (char)0x08;
-    payload[1] = (char)keyer;
-    payload[8] = (char)invert;
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyPreMultiplied(quint8 keyer, bool preMultiplied)
-{
-    if(preMultiplied == m_downstreamKeys.value(keyer).m_preMultiplied)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
-
-    payload[0] = (char)0x01;
-    payload[1] = (char)keyer;
-    payload[2] = (char)preMultiplied;
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyClip(quint8 keyer, float clip)
-{
-    if(clip == m_downstreamKeys.value(keyer).m_clip)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
-    QAtem::U16_U8 val;
-    val.u16 = clip * 10;
-
-    payload[0] = (char)0x02;
-    payload[1] = (char)keyer;
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyGain(quint8 keyer, float gain)
-{
-    if(gain == m_downstreamKeys.value(keyer).m_gain)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
-    QAtem::U16_U8 val;
-    val.u16 = gain * 10;
-
-    payload[0] = (char)0x04;
-    payload[1] = (char)keyer;
-    payload[6] = (char)val.u8[1];
-    payload[7] = (char)val.u8[0];
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyEnableMask(quint8 keyer, bool enable)
-{
-    if(enable == m_downstreamKeys.value(keyer).m_enableMask)
-    {
-        return;
-    }
-
-    QByteArray cmd("CDsM");
-    QByteArray payload(12, (char)0x0);
-
-    payload[0] = (char)0x01;
-    payload[1] = (char)keyer;
-    payload[2] = (char)enable;
-
-    sendCommand(cmd, payload);
-}
-
-void QAtemConnection::setDownstreamKeyMask(quint8 keyer, float top, float bottom, float left, float right)
-{
-    QByteArray cmd("CDsM");
-    QByteArray payload(12, (char)0x0);
-
-    payload[0] = (char)0x1e;
-    payload[1] = (char)keyer;
-    QAtem::U16_U8 val;
-    val.u16 = top * 1000;
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
-    val.u16 = bottom * 1000;
-    payload[6] = (char)val.u8[1];
-    payload[7] = (char)val.u8[0];
-    val.u16 = left * 1000;
-    payload[8] = (char)val.u8[1];
-    payload[9] = (char)val.u8[0];
-    val.u16 = right * 1000;
-    payload[10] = (char)val.u8[1];
-    payload[11] = (char)val.u8[0];
-
-    sendCommand(cmd, payload);
-}
-
 void QAtemConnection::saveSettings()
 {
     QByteArray cmd("SRsv");
@@ -761,16 +555,6 @@ quint8 QAtemConnection::tallyByIndex(quint8 index) const
     }
 
     return 0;
-}
-
-bool QAtemConnection::downstreamKeyOn(quint8 keyer) const
-{
-    return m_downstreamKeys.value(keyer).m_onAir;
-}
-
-bool QAtemConnection::downstreamKeyTie(quint8 keyer) const
-{
-    return m_downstreamKeys.value(keyer).m_tie;
 }
 
 QColor QAtemConnection::colorGeneratorColor(quint8 generator) const
@@ -971,71 +755,6 @@ void QAtemConnection::onTlIn(const QByteArray& payload)
     {
         m_tallyByIndex[i] = (quint8)payload.at(8 + i);
     }
-}
-
-void QAtemConnection::onDskS(const QByteArray& payload)
-{
-    quint8 index = (quint8)payload.at(6);
-    m_downstreamKeys[index].m_onAir = (quint8)payload.at(7);
-    m_downstreamKeys[index].m_frameCount = (quint8)payload.at(10);
-
-    emit downstreamKeyOnChanged(index, m_downstreamKeys[index].m_onAir);
-    emit downstreamKeyFrameCountChanged(index, m_downstreamKeys[index].m_frameCount);
-}
-
-void QAtemConnection::onDskP(const QByteArray& payload)
-{
-    quint8 index = (quint8)payload.at(6);
-    m_downstreamKeys[index].m_tie = (quint8)payload.at(7);
-    m_downstreamKeys[index].m_frames = (quint8)payload.at(8);
-    m_downstreamKeys[index].m_preMultiplied = (quint8)payload.at(9);
-    QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(10);
-    val.u8[0] = (quint8)payload.at(11);
-    m_downstreamKeys[index].m_clip = val.u16 / 10.0;
-    val.u8[1] = (quint8)payload.at(12);
-    val.u8[0] = (quint8)payload.at(13);
-    m_downstreamKeys[index].m_gain = val.u16 / 10.0;
-    m_downstreamKeys[index].m_invertKey = (quint8)payload.at(14);
-    m_downstreamKeys[index].m_enableMask = (quint8)payload.at(15);
-    val.u8[1] = (quint8)payload.at(16);
-    val.u8[0] = (quint8)payload.at(17);
-    m_downstreamKeys[index].m_topMask = (qint16)val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(18);
-    val.u8[0] = (quint8)payload.at(19);
-    m_downstreamKeys[index].m_bottomMask = (qint16)val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(20);
-    val.u8[0] = (quint8)payload.at(21);
-    m_downstreamKeys[index].m_leftMask = (qint16)val.u16 / 1000.0;
-    val.u8[1] = (quint8)payload.at(22);
-    val.u8[0] = (quint8)payload.at(23);
-    m_downstreamKeys[index].m_rightMask = (qint16)val.u16 / 1000.0;
-
-    emit downstreamKeyTieChanged(index, m_downstreamKeys[index].m_tie);
-    emit downstreamKeyFramesChanged(index, m_downstreamKeys[index].m_frames);
-    emit downstreamKeyInvertKeyChanged(index, m_downstreamKeys[index].m_invertKey);
-    emit downstreamKeyPreMultipliedChanged(index, m_downstreamKeys[index].m_preMultiplied);
-    emit downstreamKeyClipChanged(index, m_downstreamKeys[index].m_clip);
-    emit downstreamKeyGainChanged(index, m_downstreamKeys[index].m_gain);
-    emit downstreamKeyEnableMaskChanged(index, m_downstreamKeys[index].m_enableMask);
-    emit downstreamKeyTopMaskChanged(index, m_downstreamKeys[index].m_topMask);
-    emit downstreamKeyBottomMaskChanged(index, m_downstreamKeys[index].m_bottomMask);
-    emit downstreamKeyLeftMaskChanged(index, m_downstreamKeys[index].m_leftMask);
-    emit downstreamKeyRightMaskChanged(index, m_downstreamKeys[index].m_rightMask);
-}
-
-void QAtemConnection::onDskB(const QByteArray& payload)
-{
-    QAtem::U16_U8 val;
-    quint8 index = (quint8)payload.at(6);
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
-    m_downstreamKeys[index].m_fillSource = val.u16;
-    val.u8[1] = (quint8)payload.at(10);
-    val.u8[0] = (quint8)payload.at(11);
-    m_downstreamKeys[index].m_keySource = val.u16;
-
-    emit downstreamKeySourcesChanged(index, m_downstreamKeys[index].m_fillSource, m_downstreamKeys[index].m_keySource);
 }
 
 void QAtemConnection::onColV(const QByteArray& payload)
@@ -1260,9 +979,6 @@ void QAtemConnection::onRCPS(const QByteArray& payload)
 void QAtemConnection::initCommandSlotHash()
 {
     m_commandSlotHash.insert("TlIn", ObjectSlot(this, "onTlIn"));
-    m_commandSlotHash.insert("DskS", ObjectSlot(this, "onDskS"));
-    m_commandSlotHash.insert("DskP", ObjectSlot(this, "onDskP"));
-    m_commandSlotHash.insert("DskB", ObjectSlot(this, "onDskB"));
     m_commandSlotHash.insert("ColV", ObjectSlot(this, "onColV"));
     m_commandSlotHash.insert("MPCE", ObjectSlot(this, "onMPCE"));
     m_commandSlotHash.insert("AuxS", ObjectSlot(this, "onAuxS"));
@@ -1919,6 +1635,14 @@ QAtemMixEffect *QAtemConnection::mixEffect(quint8 me) const
     {
         return NULL;
     }
+}
+
+QAtemDownstreamKey *QAtemConnection::downstreamKey(quint8 id) const
+{
+    if (id < m_downstreamKeys.count())
+        return m_downstreamKeys.value(id);
+    else
+        return NULL;
 }
 
 void QAtemConnection::registerCommand(const QByteArray &command, QObject *object, const QByteArray &slot)
