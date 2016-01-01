@@ -8,6 +8,19 @@ class QAtemConnection;
 class QAtemDownstreamKey : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(bool onAir READ onAir WRITE setOnAir NOTIFY onAirChanged)
+    Q_PROPERTY(bool tie READ tie WRITE setTie NOTIFY tieChanged)
+    Q_PROPERTY(quint8 frameRate READ frameRate WRITE setFrameRate NOTIFY frameRateChanged)
+    Q_PROPERTY(quint8 frameCount READ frameCount NOTIFY frameCountChanged)
+    Q_PROPERTY(quint16 fillSource READ fillSource WRITE setFillSource NOTIFY sourcesChanged)
+    Q_PROPERTY(quint16 keySource READ keySource WRITE setKeySource NOTIFY sourcesChanged)
+    Q_PROPERTY(bool invertKey READ invertKey WRITE setInvertKey NOTIFY invertKeyChanged)
+    Q_PROPERTY(bool preMultiplied READ preMultiplied WRITE setPreMultiplied NOTIFY preMultipliedChanged)
+    Q_PROPERTY(float clip READ clip WRITE setClip NOTIFY clipChanged)
+    Q_PROPERTY(float gain READ gain WRITE setGain NOTIFY gainChanged)
+    Q_PROPERTY(bool enableMask READ enableMask WRITE setEnableMask NOTIFY enableMaskChanged)
+
 public:
     explicit QAtemDownstreamKey(quint8 id, QAtemConnection *parent);
     ~QAtemDownstreamKey();
