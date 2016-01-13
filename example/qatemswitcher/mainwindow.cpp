@@ -3,6 +3,7 @@
 
 #include "qatemconnection.h"
 #include "qatemmixeffect.h"
+#include "qatemdownstreamkey.h"
 
 #include <QInputDialog>
 
@@ -94,10 +95,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->dsk2AutoButton, SIGNAL(clicked()),
             this, SLOT(doDsk2Auto()));
 
-    connect(m_atemConnection, SIGNAL(downstreamKeyTieChanged(quint8,bool)),
-            this, SLOT(updateDskTie(quint8,bool)));
-    connect(m_atemConnection, SIGNAL(downstreamKeyOnChanged(quint8,bool)),
-            this, SLOT(updateDskOn(quint8,bool)));
+    foreach(QAtemDownstreamKey *dsk, m_atemConnection->downstreamKeys())
+    {
+        connect(dsk, SIGNAL(tieChanged(quint8,bool)),
+                this, SLOT(updateDskTie(quint8,bool)));
+        connect(dsk, SIGNAL(onAirChanged(quint8,bool)),
+                this, SLOT(updateDskOn(quint8,bool)));
+    }
 
     connectToAtem();
 }
@@ -270,32 +274,32 @@ void MainWindow::updatePreviewInput(quint8 me, quint16 oldInput, quint16 newInpu
 
 void MainWindow::toogleDsk1Tie()
 {
-    m_atemConnection->setDownstreamKeyTie(0, !m_atemConnection->downstreamKeyTie(0));
+    m_atemConnection->downstreamKey(0)->setTie(!m_atemConnection->downstreamKey(0)->tie());
 }
 
 void MainWindow::toogleDsk1OnAir()
 {
-    m_atemConnection->setDownstreamKeyOn(0, !m_atemConnection->downstreamKeyOn(0));
+    m_atemConnection->downstreamKey(0)->setOnAir(!m_atemConnection->downstreamKey(0)->onAir());
 }
 
 void MainWindow::doDsk1Auto()
 {
-    m_atemConnection->doDownstreamKeyAuto(0);
+    m_atemConnection->downstreamKey(0)->doAuto();
 }
 
 void MainWindow::toogleDsk2Tie()
 {
-    m_atemConnection->setDownstreamKeyTie(1, !m_atemConnection->downstreamKeyTie(1));
+    m_atemConnection->downstreamKey(1)->setTie(!m_atemConnection->downstreamKey(1)->tie());
 }
 
 void MainWindow::toogleDsk2OnAir()
 {
-    m_atemConnection->setDownstreamKeyOn(1, !m_atemConnection->downstreamKeyOn(1));
+    m_atemConnection->downstreamKey(1)->setOnAir(!m_atemConnection->downstreamKey(1)->onAir());
 }
 
 void MainWindow::doDsk2Auto()
 {
-    m_atemConnection->doDownstreamKeyAuto(1);
+    m_atemConnection->downstreamKey(1)->doAuto();
 }
 
 void MainWindow::updateDskTie(quint8 key, bool tie)
