@@ -1389,7 +1389,7 @@ void QAtemConnection::onFTCD(const QByteArray& payload)
     QAtem::U16_U8 id;
     id.u8[1] = (quint8)payload.at(6);
     id.u8[0] = (quint8)payload.at(7);
-    quint8 count = (quint8)payload.at(14);
+    quint8 count = (quint8)payload.at(15);
 
     if(id.u16 == m_transferId)
     {
@@ -1422,7 +1422,7 @@ void QAtemConnection::flushTransferBuffer(quint8 count)
 void QAtemConnection::sendData(quint16 id, const QByteArray &data)
 {
     QByteArray cmd("FTDa");
-    QByteArray payload(data.size() + 8, (char)0x0);
+    QByteArray payload(data.size() + 4, (char)0x0);
 
     QAtem::U16_U8 val;
     val.u16 = id;
@@ -1431,7 +1431,7 @@ void QAtemConnection::sendData(quint16 id, const QByteArray &data)
     val.u16 = data.size();
     payload[2] = val.u8[1];
     payload[3] = val.u8[0];
-    payload.replace(4, val.u16, data);
+    payload.replace(4, data.size(), data);
 
     sendCommand(cmd, payload);
 }
@@ -1439,14 +1439,14 @@ void QAtemConnection::sendData(quint16 id, const QByteArray &data)
 void QAtemConnection::sendFileDescription()
 {
     QByteArray cmd("FTFD");
-    QByteArray payload(84, (char)0x0);
+    QByteArray payload(212, (char)0x0);
 
     QAtem::U16_U8 val;
     val.u16 = m_transferId;
     payload[0] = val.u8[1];
     payload[1] = val.u8[0];
-    payload.replace(2, qMin(64, m_transferName.size()), m_transferName);
-    payload.replace(66, 16, m_transferHash);
+    payload.replace(2, qMin(194, m_transferName.size()), m_transferName);
+    payload.replace(194, 16, m_transferHash);
 
     sendCommand(cmd, payload);
 }
