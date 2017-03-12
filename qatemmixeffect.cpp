@@ -815,7 +815,7 @@ void QAtemMixEffect::setUpstreamKeyType(quint8 keyer, quint8 type)
     }
 
     QByteArray cmd("CKTp");
-    QByteArray payload(10, (char)0x0);
+    QByteArray payload(8, (char)0x0);
 
     payload[0] = (char)0x01;
     payload[1] = (char)m_id;
