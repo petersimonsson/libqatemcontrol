@@ -1670,12 +1670,10 @@ void QAtemConnection::onPowr(const QByteArray& payload)
 
 void QAtemConnection::onVMC(const QByteArray& payload)
 {
-    QAtem::U32_U8 val;
+    QAtem::U16_U8 val;
 
-    val.u8[3] = (quint8)payload.at(6);
-    val.u8[2] = (quint8)payload.at(7);
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
+    val.u8[1] = (quint8)payload.at(6);
+    val.u8[0] = (quint8)payload.at(7);
 
     QVector<QAtem::VideoMode> mode(18);
     mode[0] = QAtem::VideoMode(0, "525i59.94 NTSC", QSize(720, 525), 29.97);
@@ -1699,12 +1697,9 @@ void QAtemConnection::onVMC(const QByteArray& payload)
 
     m_availableVideoModes.clear();
 
-    for(int i = 0; i < 18; ++i)
+    for(int i = 0; i < val.u16; ++i)
     {
-        if(val.u32 & (1 << i))
-        {
-            m_availableVideoModes.insert(i, mode[i]);
-        }
+        m_availableVideoModes.insert(i, mode[i]);
     }
 }
 
