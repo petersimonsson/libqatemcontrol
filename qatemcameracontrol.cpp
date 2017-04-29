@@ -45,7 +45,11 @@ void QAtemCameraControl::onCCdP(const QByteArray& payload)
 
     if(input >= m_cameras.count())
     {
-        m_cameras.append(new QAtem::Camera(input));
+        int index;
+        for (index = m_cameras.count(); index < input; index++)
+        {
+            m_cameras.append(new QAtem::Camera(index));
+        }
     }
 
     QAtem::Camera *camera = m_cameras[input - 1];
