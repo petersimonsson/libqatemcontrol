@@ -43,6 +43,8 @@ public:
     ~QAtemDownstreamKey();
 
     bool onAir() const { return m_onAir; }
+    bool inTransition() const { return m_inTransition; }
+    bool inAutoTransition() const { return m_inAutoTransition; }
     bool tie() const { return m_tie; }
     quint8 frameRate() const { return m_frameRate; }
     quint8 frameCount() const { return m_frameCount; }
@@ -82,6 +84,8 @@ private:
     quint8 m_id;
 
     bool m_onAir;
+    bool m_inTransition;
+    bool m_inAutoTransition;
     bool m_tie;
     quint8 m_frameRate;
     quint8 m_frameCount;
@@ -101,6 +105,8 @@ private:
 
 signals:
     void onAirChanged(quint8 keyer, bool state);
+    void inTransitionChanged(quint8 keyer, bool state);
+    void inAutoTransitionChanged(quint8 keyer, bool state);
     void tieChanged(quint8 keyer, bool state);
     void frameCountChanged(quint8 keyer, quint8 count);
     void frameRateChanged(quint8 keyer, quint8 frames);
