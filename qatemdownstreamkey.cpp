@@ -266,11 +266,32 @@ void QAtemDownstreamKey::onDskS(const QByteArray& payload)
 
     if(index == m_id)
     {
-        m_onAir = (quint8)payload.at(7);
+        bool temp_onAir = m_onAir;
+        bool temp_inTransition = m_inTransition;
+        bool temp_inAutoTransition = m_inAutoTransition;
+        quint8 temp_frameCount = m_frameCount;
+
+        m_onAir = (quint8)payload.at(7) == 1;
+        m_inTransition = (quint8)payload.at(8) == 1;
+        m_inAutoTransition = (quint8)payload.at(9) == 1;
         m_frameCount = (quint8)payload.at(10);
 
-        emit onAirChanged(m_id, m_onAir);
-        emit frameCountChanged(m_id, m_frameCount);
+        if (m_onAir != temp_onAir)
+        {
+            emit onAirChanged(m_id, m_onAir);
+        }
+        if (m_inTransition != temp_inTransition)
+        {
+            emit inTransitionChanged(m_id, m_inTransition);
+        }
+        if (m_inAutoTransition != temp_inAutoTransition)
+        {
+            emit inAutoTransitionChanged(m_id, m_inAutoTransition);
+        }
+        if (m_frameCount != temp_frameCount)
+        {
+            emit frameCountChanged(m_id, m_frameCount);
+        }
     }
 }
 
