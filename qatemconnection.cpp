@@ -109,7 +109,7 @@ QAtemConnection::~QAtemConnection()
 
 bool QAtemConnection::isConnected() const
 {
-    return m_socket && m_socket->isOpen() && m_isInitialized;
+    return m_socket && m_socket->isValid() && m_isInitialized;
 }
 
 void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connectionTimeout)
