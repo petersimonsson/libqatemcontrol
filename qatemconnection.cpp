@@ -187,7 +187,7 @@ void QAtemConnection::handleSocketData()
         }
         else if((m_isInitialized && (header.bitmask & Cmd_AckRequest)) || (!m_isInitialized && datagram.size() == SIZE_OF_HEADER && header.bitmask & Cmd_AckRequest))
         {
-            QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packageId);
+            QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packetId);
             sendDatagram(ackDatagram);
             m_socket->flush();
 
@@ -197,16 +197,16 @@ void QAtemConnection::handleSocketData()
             }
         }
 
-        if((header.packageId - m_lastPacketId) > 1)
+        if((header.packetId - m_lastPacketId) > 1)
         {
-            for(int i = 1; i <= (header.packageId - m_lastPacketId - 1); ++i)
+            for(int i = 1; i <= (header.packetId - m_lastPacketId - 1); ++i)
             {
                 QByteArray resendDatagram = createCommandHeader(Cmd_Resend, 0, m_currentUid, 0, m_lastPacketId + i);
                 sendDatagram(resendDatagram);
             }
         }
 
-        m_lastPacketId = header.packageId;
+        m_lastPacketId = header.packetId;
 
         if(datagram.size() > (SIZE_OF_HEADER + 2) && !(header.bitmask & (Cmd_HelloPacket | Cmd_Resend)))
         {
@@ -270,7 +270,7 @@ QAtemConnection::CommandHeader QAtemConnection::parseCommandHeader(const QByteAr
         header.uid = (quint8)datagram[3] + ((quint8)datagram[2] << 8);
         header.ackId = (quint8)datagram[5] | ((quint8)datagram[4] << 8);
         // We don't try to parse 6-9 as we have no idea what it means
-        header.packageId = (quint8)datagram[11] | ((quint8)datagram[10] << 8);
+        header.packetId = (quint8)datagram[11] | ((quint8)datagram[10] << 8);
     }
 
     return header;

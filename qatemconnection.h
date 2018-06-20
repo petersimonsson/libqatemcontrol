@@ -56,11 +56,11 @@ public:
         quint16 size;
         quint16 uid;
         quint16 ackId;
-        quint16 packageId;
+        quint16 packetId;
 
         CommandHeader()
         {
-            bitmask = size = uid = ackId = packageId = 0;
+            bitmask = size = uid = ackId = packetId = 0;
         }
     };
 
