@@ -1676,24 +1676,24 @@ void QAtemConnection::onVMC(const QByteArray& payload)
     val.u8[0] = (quint8)payload.at(7);
 
     QVector<QAtem::VideoMode> mode(18);
-    mode[0] = QAtem::VideoMode(0, "525i59.94 NTSC", QSize(720, 525), 29.97);
+    mode[0] = QAtem::VideoMode(0, "525i59.94 NTSC", QSize(720, 525), 29.97f);
     mode[1] = QAtem::VideoMode(1, "625i50 PAL", QSize(720, 625), 25);
-    mode[2] = QAtem::VideoMode(2, "525i59.94 NTSC 16:9", QSize(864, 525), 29.97);
+    mode[2] = QAtem::VideoMode(2, "525i59.94 NTSC 16:9", QSize(864, 525), 29.97f);
     mode[3] = QAtem::VideoMode(3, "625i50 PAL 16:9", QSize(1024, 625), 25);
     mode[4] = QAtem::VideoMode(4, "720p50", QSize(1280, 720), 50);
-    mode[5] = QAtem::VideoMode(5, "720p59.94", QSize(1280, 720), 59.94);
+    mode[5] = QAtem::VideoMode(5, "720p59.94", QSize(1280, 720), 59.94f);
     mode[6] = QAtem::VideoMode(6, "1080i50", QSize(1920, 1080), 25);
-    mode[7] = QAtem::VideoMode(7, "1080i59.94", QSize(1920, 1080), 29.97);
-    mode[8] = QAtem::VideoMode(8, "1080p23.98", QSize(1920, 1080), 23.98);
+    mode[7] = QAtem::VideoMode(7, "1080i59.94", QSize(1920, 1080), 29.97f);
+    mode[8] = QAtem::VideoMode(8, "1080p23.98", QSize(1920, 1080), 23.98f);
     mode[9] = QAtem::VideoMode(9, "1080p24", QSize(1920, 1080), 24);
     mode[10] = QAtem::VideoMode(10, "1080p25", QSize(1920, 1080), 25);
-    mode[11] = QAtem::VideoMode(11, "1080p29.97", QSize(1920, 1080), 29.97);
+    mode[11] = QAtem::VideoMode(11, "1080p29.97", QSize(1920, 1080), 29.97f);
     mode[12] = QAtem::VideoMode(12, "1080p50", QSize(1920, 1080), 50);
-    mode[13] = QAtem::VideoMode(13, "1080p59.94", QSize(1920, 1080), 59.94);
-    mode[14] = QAtem::VideoMode(14, "2160p23.98", QSize(3840, 2160), 23.98);
+    mode[13] = QAtem::VideoMode(13, "1080p59.94", QSize(1920, 1080), 59.94f);
+    mode[14] = QAtem::VideoMode(14, "2160p23.98", QSize(3840, 2160), 23.98f);
     mode[15] = QAtem::VideoMode(15, "2160p24", QSize(3840, 2160), 24);
     mode[16] = QAtem::VideoMode(16, "2160p25", QSize(3840, 2160), 25);
-    mode[17] = QAtem::VideoMode(17, "2160p29.97", QSize(3840, 2160), 29.97);
+    mode[17] = QAtem::VideoMode(17, "2160p29.97", QSize(3840, 2160), 29.97f);
 
     m_availableVideoModes.clear();
 
