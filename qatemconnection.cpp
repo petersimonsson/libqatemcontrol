@@ -190,11 +190,6 @@ void QAtemConnection::handleSocketData()
             QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packetId);
             sendDatagram(ackDatagram);
             m_socket->flush();
-
-            if(!m_isInitialized)
-            {
-                setInitialized(true);
-            }
         }
 
         if((header.packetId - m_lastPacketId) > 1)
