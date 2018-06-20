@@ -51,6 +51,7 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_packetCounter = 0;
     m_isInitialized = false;
     m_currentUid = 0;
+    m_lastPacketId = 0;
 
     m_debugEnabled = false;
 
@@ -140,6 +141,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connect
     m_packetCounter = 0;
     m_isInitialized = false;
     m_currentUid = 0x1337; // Just a random UID, we'll get a new one from the server eventually
+    m_lastPacketId = 0;
 
     //Hello
     QByteArray datagram = createCommandHeader(Cmd_HelloPacket, 8, m_currentUid, 0x0);
@@ -195,6 +197,17 @@ void QAtemConnection::handleSocketData()
             }
         }
 
+        if((header.packageId - m_lastPacketId) > 1)
+        {
+            for(int i = 1; i <= (header.packageId - m_lastPacketId - 1); ++i)
+            {
+                QByteArray resendDatagram = createCommandHeader(Cmd_Resend, 0, m_currentUid, 0, m_lastPacketId + i);
+                sendDatagram(resendDatagram);
+            }
+        }
+
+        m_lastPacketId = header.packageId;
+
         if(datagram.size() > (SIZE_OF_HEADER + 2) && !(header.bitmask & (Cmd_HelloPacket | Cmd_Resend)))
         {
             parsePayLoad(datagram);
@@ -204,7 +217,7 @@ void QAtemConnection::handleSocketData()
     }
 }
 
-QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId)
+QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 resendId)
 {
     QByteArray buffer(12, (char)0x0);
     quint16 packageId = 0;
@@ -230,6 +243,14 @@ QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloa
     val.u16 = ackId;
     buffer[4] = (char)val.u8[1];
     buffer[5] = (char)val.u8[0];
+
+    if(resendId != 0)
+    {
+        val.u16 = resendId;
+        buffer[6] = (char)val.u8[1];
+        buffer[7] = (char)val.u8[0];
+        buffer[8] = 0x01;
+    }
 
     val.u16 = packageId;
     buffer[10] = (char)val.u8[1];

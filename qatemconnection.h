@@ -331,7 +331,7 @@ protected slots:
     void acceptData();
 
 protected:
-    QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId);
+    QByteArray createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 resendId = 0);
 
     QAtemConnection::CommandHeader parseCommandHeader(const QByteArray& datagram) const;
     void parsePayLoad(const QByteArray& datagram);
@@ -373,6 +373,7 @@ private:
     quint16 m_packetCounter;
     bool m_isInitialized;
     quint16 m_currentUid;
+    quint16 m_lastPacketId;
 
     QMultiHash<QByteArray, ObjectSlot> m_commandSlotHash;
 
