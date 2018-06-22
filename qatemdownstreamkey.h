@@ -19,10 +19,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define DOWNSTREAMKEY_H
 
 #include <QObject>
+#include "libqatemcontrol_global.h"
 
 class QAtemConnection;
 
-class QAtemDownstreamKey : public QObject
+class LIBQATEMCONTROLSHARED_EXPORT QAtemDownstreamKey : public QObject
 {
     Q_OBJECT
 

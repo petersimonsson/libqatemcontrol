@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define QATEMCONNECTION_H
 
 #include "qatemtypes.h"
+#include "libqatemcontrol_global.h"
 
 #include <QObject>
 #include <QUdpSocket>
@@ -30,7 +31,7 @@ class QAtemMixEffect;
 class QAtemCameraControl;
 class QAtemDownstreamKey;
 
-class QAtemConnection : public QObject
+class LIBQATEMCONTROLSHARED_EXPORT QAtemConnection : public QObject
 {
     Q_OBJECT
 friend class QAtemMixEffect;
