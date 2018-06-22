@@ -96,6 +96,8 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_downstreamKeys[1] = new QAtemDownstreamKey(1, this);
 
     m_macroInfos.resize(100);
+
+    memset(&m_topology, 0, sizeof(m_topology));
 }
 
 QAtemConnection::~QAtemConnection()
@@ -142,6 +144,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connect
     m_isInitialized = false;
     m_currentUid = 0x1337; // Just a random UID, we'll get a new one from the server eventually
     m_lastPacketId = 0;
+    memset(&m_topology, 0, sizeof(m_topology));
 
     //Hello
     QByteArray datagram = createCommandHeader(Cmd_HelloPacket, 8, m_currentUid, 0x0);
