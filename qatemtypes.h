@@ -47,6 +47,7 @@ namespace QAtem
         quint8 colorGenerators;
         quint8 auxBusses;
         quint8 downstreamKeyers;
+        quint8 upstreamKeyers;
         quint8 stingers;
         quint8 DVEs;
         quint8 supersources;
