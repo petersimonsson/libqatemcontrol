@@ -830,11 +830,11 @@ void QAtemConnection::onInPr(const QByteArray& payload)
     info.index = index.u16;
     info.longText = payload.mid(8, 20);
     info.shortText = payload.mid(28, 4);
-    info.availableExternalTypes = (quint8)payload.at(33); // Bit 0: SDI, 1: HDMI, 2: Component, 3: Composite, 4: SVideo
-    info.externalType = (quint8)payload.at(35); // 1 = SDI, 2 = HDMI, 3 = Composite, 4 = Component, 5 = SVideo, 0 = Internal
-    info.internalType = (quint8)payload.at(36); // 0 = External, 1 = Black, 2 = Color Bars, 3 = Color Generator, 4 = Media Player Fill, 5 = Media Player Key, 6 = SuperSource, 128 = ME Output, 129 = Auxiliary, 130 = Mask
-    info.availability = (quint8)payload.at(38); // Bit 0: Auxiliary, 1: Multiviewer, 2: SuperSource Art, 3: SuperSource Box, 4: Key Sources
-    info.meAvailability = (quint8)payload.at(39); // Bit 0: ME1 + Fill Sources, 1: ME2 + Fill Sources
+    info.availableExternalTypes = (quint8)payload.at(35); // Bit 0: SDI, 1: HDMI, 2: Component, 3: Composite, 4: SVideo
+    info.externalType = (quint8)payload.at(37); // 1 = SDI, 2 = HDMI, 3 = Composite, 4 = Component, 5 = SVideo, 0 = Internal
+    info.internalType = (quint8)payload.at(38); // 0 = External, 1 = Black, 2 = Color Bars, 3 = Color Generator, 4 = Media Player Fill, 5 = Media Player Key, 6 = SuperSource, 128 = ME Output, 129 = Auxiliary, 130 = Mask
+    info.availability = (quint8)payload.at(40); // Bit 0: Auxiliary, 1: Multiviewer, 2: SuperSource Art, 3: SuperSource Box, 4: Key Sources
+    info.meAvailability = (quint8)payload.at(41); // Bit 0: ME1 + Fill Sources, 1: ME2 + Fill Sources
     m_inputInfos.insert(info.index, info);
 
     emit inputInfoChanged(info);
