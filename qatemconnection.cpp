@@ -1622,7 +1622,6 @@ void QAtemConnection::on_top(const QByteArray& payload)
     m_topology.DVEs = (quint8)payload.at(15);
     m_topology.supersources = (quint8)payload.at(16);
     m_topology.hasSD = (bool)payload.at(17);
-    qDebug() << payload.mid(6).toHex() << payload.count();
 
     emit topologyChanged(m_topology);
 }
