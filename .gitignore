@@ -16,3 +16,5 @@
 *.pro.user*
 Makefile
 moc_*
+
+build
