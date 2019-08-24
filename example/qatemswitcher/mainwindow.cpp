@@ -6,6 +6,7 @@
 #include "qatemdownstreamkey.h"
 
 #include <QInputDialog>
+#include <QButtonGroup>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -203,7 +204,7 @@ void MainWindow::onAtemConnected()
         setFadeToBlackRate(0, me->fadeToBlackFrameCount());
         setFadeToBlack(0, me->fadeToBlackFading(), me->fadeToBlackEnabled());
 
-        for(int i = 0; i < me->upstreamKeyCount(); ++i)
+        for(quint8 i = 0; i < me->upstreamKeyCount(); ++i)
         {
             setUpstreamKeyOnAir(0, i, me->upstreamKeyOnAir(i));
         }
@@ -214,7 +215,7 @@ void MainWindow::onAtemConnected()
     }
 }
 
-void MainWindow::changeProgramInput(int input)
+void MainWindow::changeProgramInput(quint16 input)
 {
     QAtemMixEffect *me = m_atemConnection->mixEffect(0);
 
@@ -228,7 +229,7 @@ void MainWindow::changeProgramInput(int input)
     }
 }
 
-void MainWindow::changePreviewInput(int input)
+void MainWindow::changePreviewInput(quint16 input)
 {
     QAtemMixEffect *me = m_atemConnection->mixEffect(0);
 
@@ -340,7 +341,7 @@ void MainWindow::setTransitionStyle(quint8 me, quint8 style)
     m_transitionStyleGroup->button(style)->setChecked(true);
 }
 
-void MainWindow::changeTransitionStyle(int style)
+void MainWindow::changeTransitionStyle(quint8 style)
 {
     m_atemConnection->mixEffect(0)->setTransitionType(style);
 }

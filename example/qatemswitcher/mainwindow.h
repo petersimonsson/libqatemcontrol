@@ -15,7 +15,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 protected slots:
@@ -23,8 +23,8 @@ protected slots:
 
     void onAtemConnected();
 
-    void changeProgramInput(int input);
-    void changePreviewInput(int input);
+    void changeProgramInput(quint16 input);
+    void changePreviewInput(quint16 input);
     void updateProgramInput(quint8 me, quint16 oldInput, quint16 newInput);
     void updatePreviewInput(quint8 me, quint16 oldInput, quint16 newInput);
 
@@ -39,7 +39,7 @@ protected slots:
 
     void setTransitionRate(quint8 me, quint8 rate);
     void setTransitionStyle(quint8 me, quint8 style);
-    void changeTransitionStyle(int style);
+    void changeTransitionStyle(quint8 style);
     void updateKeysOnNextTransition(quint8 me, quint8 keyers);
     void changeKeysTransition(int btn, bool state);
     void setTransitionPosition(quint8 me, quint16 pos);
