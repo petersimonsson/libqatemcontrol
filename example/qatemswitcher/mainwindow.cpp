@@ -83,18 +83,18 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::changeKeyOnAir);
 
     connect(m_ui->dsk1TieButton, &QPushButton::clicked,
-            this, &MainWindow::toogleDsk1Tie);
+            this, &MainWindow::toggleDsk1Tie);
     connect(m_ui->dsk1OnAirButton, &QPushButton::clicked,
-            this, &MainWindow::toogleDsk1OnAir);
+            this, &MainWindow::toggleDsk1OnAir);
     connect(m_ui->dsk1AutoButton, SIGNAL(clicked()),
             this, SLOT(doDsk1Auto()));
     connect(m_ui->dsk1AutoButton, &QPushButton::clicked,
             this, &MainWindow::doDsk1Auto);
 
     connect(m_ui->dsk2TieButton, &QPushButton::clicked,
-            this, &MainWindow::toogleDsk2Tie);
+            this, &MainWindow::toggleDsk2Tie);
     connect(m_ui->dsk2OnAirButton, &QPushButton::clicked,
-            this, &MainWindow::toogleDsk2OnAir);
+            this, &MainWindow::toggleDsk2OnAir);
     connect(m_ui->dsk2AutoButton, &QPushButton::clicked,
             this, &MainWindow::doDsk2Auto);
 
@@ -275,12 +275,12 @@ void MainWindow::updatePreviewInput(quint8 me, quint16 oldInput, quint16 newInpu
     }
 }
 
-void MainWindow::toogleDsk1Tie()
+void MainWindow::toggleDsk1Tie()
 {
     m_atemConnection->downstreamKey(0)->setTie(!m_atemConnection->downstreamKey(0)->tie());
 }
 
-void MainWindow::toogleDsk1OnAir()
+void MainWindow::toggleDsk1OnAir()
 {
     m_atemConnection->downstreamKey(0)->setOnAir(!m_atemConnection->downstreamKey(0)->onAir());
 }
@@ -290,12 +290,12 @@ void MainWindow::doDsk1Auto()
     m_atemConnection->downstreamKey(0)->doAuto();
 }
 
-void MainWindow::toogleDsk2Tie()
+void MainWindow::toggleDsk2Tie()
 {
     m_atemConnection->downstreamKey(1)->setTie(!m_atemConnection->downstreamKey(1)->tie());
 }
 
-void MainWindow::toogleDsk2OnAir()
+void MainWindow::toggleDsk2OnAir()
 {
     m_atemConnection->downstreamKey(1)->setOnAir(!m_atemConnection->downstreamKey(1)->onAir());
 }

@@ -28,11 +28,11 @@ protected slots:
     void updateProgramInput(quint8 me, quint16 oldInput, quint16 newInput);
     void updatePreviewInput(quint8 me, quint16 oldInput, quint16 newInput);
 
-    void toogleDsk1Tie();
-    void toogleDsk1OnAir();
+    void toggleDsk1Tie();
+    void toggleDsk1OnAir();
     void doDsk1Auto();
-    void toogleDsk2Tie();
-    void toogleDsk2OnAir();
+    void toggleDsk2Tie();
+    void toggleDsk2OnAir();
     void doDsk2Auto();
     void updateDskTie(quint8 key, bool tie);
     void updateDskOn(quint8 key, bool on);
