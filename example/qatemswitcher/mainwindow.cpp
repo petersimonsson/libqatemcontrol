@@ -345,7 +345,8 @@ void MainWindow::setTransitionStyle(quint8 me, quint8 style)
 
 void MainWindow::changeTransitionStyle(int style)
 {
-    m_atemConnection->mixEffect(0)->setTransitionType(static_cast<quint8>(style));
+    if (style != m_atemConnection->mixEffect(0)->nextTransitionStyle())
+        m_atemConnection->mixEffect(0)->setTransitionType(static_cast<quint8>(style));
 }
 
 void MainWindow::updateKeysOnNextTransition(quint8 me, quint8 keyers)
