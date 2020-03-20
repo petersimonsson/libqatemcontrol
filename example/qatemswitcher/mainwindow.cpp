@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_atemConnection = new QAtemConnection(this);
 
-    connect(m_atemConnection, SIGNAL(connected()),
-            this, SLOT(onAtemConnected()));
+    connect(m_atemConnection, &QAtemConnection::connected,
+            this, &MainWindow::onAtemConnected);
 
     m_programGroup = new QButtonGroup (this);
     m_programGroup->setExclusive(true);
@@ -33,8 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_programGroup->addButton(m_ui->program7Button, 7);
     m_programGroup->addButton(m_ui->program8Button, 8);
 
-    connect(m_programGroup, SIGNAL(buttonClicked(int)),
-            this, SLOT(changeProgramInput(int)));
+    connect(m_programGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
+            this, &MainWindow::changeProgramInput);
 
     m_previewGroup = new QButtonGroup (this);
     m_previewGroup->setExclusive(true);
@@ -47,8 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_previewGroup->addButton(m_ui->preview7Button, 7);
     m_previewGroup->addButton(m_ui->preview8Button, 8);
 
-    connect(m_previewGroup, SIGNAL(buttonClicked(int)),
-            this, SLOT(changePreviewInput(int)));
+    connect(m_previewGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
+            this, &MainWindow::changePreviewInput);
 
     m_transitionStyleGroup = new QButtonGroup (this);
     m_transitionStyleGroup->setExclusive(true);
@@ -58,8 +58,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_transitionStyleGroup->addButton(m_ui->dveBtn, 3);
     m_transitionStyleGroup->addButton(m_ui->stingBtn, 4);
 
-    connect(m_transitionStyleGroup, SIGNAL(buttonClicked(int)),
-            this, SLOT(changeTransitionStyle(int)));
+    connect(m_transitionStyleGroup, QOverload<int>::of(&QButtonGroup::buttonClicked),
+            this, &MainWindow::changeTransitionStyle);
 
     m_keysTransitionGroup = new QButtonGroup (this);
     m_keysTransitionGroup->setExclusive(false);
@@ -69,8 +69,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_keysTransitionGroup->addButton(m_ui->key3Btn, 3);
     m_keysTransitionGroup->addButton(m_ui->key4Btn, 4);
 
-    connect(m_keysTransitionGroup, SIGNAL(buttonToggled(int,bool)),
-            this, SLOT(changeKeysTransition(int,bool)));
+    connect(m_keysTransitionGroup, QOverload<int, bool>::of(&QButtonGroup::buttonToggled),
+            this, &MainWindow::changeKeysTransition);
 
     m_keyOnAirGroup = new QButtonGroup(this);
     m_keyOnAirGroup->setExclusive(false);
@@ -79,29 +79,31 @@ MainWindow::MainWindow(QWidget *parent) :
     m_keyOnAirGroup->addButton(m_ui->key3OnAirBtn, 2);
     m_keyOnAirGroup->addButton(m_ui->key4OnAirBtn, 3);
 
-    connect(m_keyOnAirGroup, SIGNAL(buttonToggled(int,bool)),
-            this, SLOT(changeKeyOnAir(int,bool)));
+    connect(m_keyOnAirGroup, QOverload<int, bool>::of(&QButtonGroup::buttonToggled),
+            this, &MainWindow::changeKeyOnAir);
 
-    connect(m_ui->dsk1TieButton, SIGNAL(clicked()),
-            this, SLOT(toogleDsk1Tie()));
-    connect(m_ui->dsk1OnAirButton, SIGNAL(clicked()),
-            this, SLOT(toogleDsk1OnAir()));
+    connect(m_ui->dsk1TieButton, &QPushButton::clicked,
+            this, &MainWindow::toogleDsk1Tie);
+    connect(m_ui->dsk1OnAirButton, &QPushButton::clicked,
+            this, &MainWindow::toogleDsk1OnAir);
     connect(m_ui->dsk1AutoButton, SIGNAL(clicked()),
             this, SLOT(doDsk1Auto()));
+    connect(m_ui->dsk1AutoButton, &QPushButton::clicked,
+            this, &MainWindow::doDsk1Auto);
 
-    connect(m_ui->dsk2TieButton, SIGNAL(clicked()),
-            this, SLOT(toogleDsk2Tie()));
-    connect(m_ui->dsk2OnAirButton, SIGNAL(clicked()),
-            this, SLOT(toogleDsk2OnAir()));
-    connect(m_ui->dsk2AutoButton, SIGNAL(clicked()),
-            this, SLOT(doDsk2Auto()));
+    connect(m_ui->dsk2TieButton, &QPushButton::clicked,
+            this, &MainWindow::toogleDsk2Tie);
+    connect(m_ui->dsk2OnAirButton, &QPushButton::clicked,
+            this, &MainWindow::toogleDsk2OnAir);
+    connect(m_ui->dsk2AutoButton, &QPushButton::clicked,
+            this, &MainWindow::doDsk2Auto);
 
     foreach(QAtemDownstreamKey *dsk, m_atemConnection->downstreamKeys())
     {
-        connect(dsk, SIGNAL(tieChanged(quint8,bool)),
-                this, SLOT(updateDskTie(quint8,bool)));
-        connect(dsk, SIGNAL(onAirChanged(quint8,bool)),
-                this, SLOT(updateDskOn(quint8,bool)));
+        connect(dsk, &QAtemDownstreamKey::tieChanged,
+                this, &MainWindow::updateDskTie);
+        connect(dsk, &QAtemDownstreamKey::onAirChanged,
+                this, &MainWindow::updateDskOn);
     }
 
     connectToAtem();
@@ -152,40 +154,40 @@ void MainWindow::onAtemConnected()
         m_ui->stingBtn->setEnabled(m_atemConnection->topology().DVEs != 0);
         m_ui->dveBtn->setEnabled(m_atemConnection->topology().DVEs != 0);
 
-        connect(m_ui->autoButton, SIGNAL(clicked()),
-                me, SLOT(autoTransition()));
-        connect(m_ui->cutButton, SIGNAL(clicked()),
-                me, SLOT(cut()));
+        connect(m_ui->autoButton, &QPushButton::clicked,
+                me, &QAtemMixEffect::autoTransition);
+        connect(m_ui->cutButton, &QPushButton::clicked,
+                me, &QAtemMixEffect::cut);
 
-        connect(me, SIGNAL(programInputChanged(quint8,quint16,quint16)),
-                this, SLOT(updateProgramInput(quint8,quint16,quint16)));
-        connect(me, SIGNAL(previewInputChanged(quint8,quint16,quint16)),
-                this, SLOT(updatePreviewInput(quint8,quint16,quint16)));
+        connect(me, &QAtemMixEffect::programInputChanged,
+                this, &MainWindow::updateProgramInput);
+        connect(me, &QAtemMixEffect::previewInputChanged,
+                this, &MainWindow::updatePreviewInput);
 
-        connect(me, SIGNAL(transitionFrameCountChanged(quint8,quint8)),
-                this, SLOT(setTransitionRate(quint8,quint8)));
-        connect(me, SIGNAL(nextTransitionStyleChanged(quint8,quint8)),
-                this, SLOT(setTransitionStyle(quint8,quint8)));
-        connect(me, SIGNAL(keyersOnNextTransitionChanged(quint8,quint8)),
-                this, SLOT(updateKeysOnNextTransition(quint8,quint8)));
-        connect(me, SIGNAL(transitionPreviewChanged(quint8,bool)),
-                this, SLOT(updateTransitionPreview(quint8,bool)));
-        connect(m_ui->prevTransBtn, SIGNAL(toggled(bool)),
-                me, SLOT(setTransitionPreview(bool)));
-        connect(me, SIGNAL(transitionPositionChanged(quint8,quint16)),
-                this, SLOT(setTransitionPosition(quint8,quint16)));
-        connect(m_ui->tBar, SIGNAL(valueChanged(int)),
-                this, SLOT(changeTransitionPosition(int)));
+        connect(me, &QAtemMixEffect::transitionFrameCountChanged,
+                this, &MainWindow::setTransitionRate);
+        connect(me, &QAtemMixEffect::nextTransitionStyleChanged,
+                this, &MainWindow::setTransitionStyle);
+        connect(me, &QAtemMixEffect::keyersOnNextTransitionChanged,
+                this, &MainWindow::updateKeysOnNextTransition);
+        connect(me, &QAtemMixEffect::transitionPreviewChanged,
+                this, &MainWindow::updateTransitionPreview);
+        connect(m_ui->prevTransBtn, &QPushButton::toggled,
+                me, &QAtemMixEffect::setTransitionPreview);
+        connect(me, &QAtemMixEffect::transitionPositionChanged,
+                this, &MainWindow::setTransitionPosition);
+        connect(m_ui->tBar, &QSlider::valueChanged,
+                this, &MainWindow::changeTransitionPosition);
 
-        connect(me, SIGNAL(fadeToBlackFrameCountChanged(quint8,quint8)),
-                this, SLOT(setFadeToBlackRate(quint8,quint8)));
-        connect(me, SIGNAL(fadeToBlackChanged(quint8,bool,bool)),
-                this, SLOT(setFadeToBlack(quint8,bool,bool)));
-        connect(m_ui->ftbBtn, SIGNAL(clicked()),
-                me, SLOT(toggleFadeToBlack()));
+        connect(me, &QAtemMixEffect::fadeToBlackFrameCountChanged,
+                this, &MainWindow::setFadeToBlackRate);
+        connect(me, &QAtemMixEffect::fadeToBlackChanged,
+                this, &MainWindow::setFadeToBlack);
+        connect(m_ui->ftbBtn, &QPushButton::clicked,
+                me, &QAtemMixEffect::toggleFadeToBlack);
 
-        connect(me, SIGNAL(upstreamKeyOnAirChanged(quint8,quint8,bool)),
-                this, SLOT(setUpstreamKeyOnAir(quint8,quint8,bool)));
+        connect(me, &QAtemMixEffect::upstreamKeyOnAirChanged,
+                this, &MainWindow::setUpstreamKeyOnAir);
 
         if(me->programInput() > 0 && me->programInput() <= 8)
         {
