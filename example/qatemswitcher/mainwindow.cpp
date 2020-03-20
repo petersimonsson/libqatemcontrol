@@ -370,7 +370,7 @@ void MainWindow::changeKeysTransition(int btn, bool state)
     }
     else
     {
-        m_atemConnection->mixEffect(0)->setUpstreamKeyOnNextTransition(btn - 1, state);
+        m_atemConnection->mixEffect(0)->setUpstreamKeyOnNextTransition(static_cast<quint8>(btn - 1), state);
     }
 }
 
