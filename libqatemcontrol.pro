@@ -18,11 +18,17 @@ HEADERS += qatemconnection.h \
     qatemcameracontrol.h \
     qatemdownstreamkey.h
 
-unix {
+macx {
+    target.path = /usr/local/lib
+    header_files.path = /usr/local/include
+}
+unix:!macx {
     target.path = /usr/lib
+    header_files.path = /usr/include
+}
+unix {
     INSTALLS += target
 
     header_files.files = $$HEADERS
-    header_files.path = /usr/include
     INSTALLS += header_files
 }
