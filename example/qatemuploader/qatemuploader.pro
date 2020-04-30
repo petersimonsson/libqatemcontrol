@@ -12,6 +12,12 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+macx {
+    INCLUDEPATH += /usr/local/include
+    DEPENDPATH += /usr/local/include
+    LIBS += -L/usr/local/lib
+}
+
 LIBS += -lqatemcontrol
 
 SOURCES += main.cpp \
