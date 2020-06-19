@@ -57,10 +57,10 @@ void QAtemDownstreamKey::setOnAir(bool state)
     }
 
     QByteArray cmd("CDsL");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)m_id;
-    payload[1] = (char)state;
+    payload[0] = static_cast<char>(m_id);
+    payload[1] = static_cast<char>(state);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -73,10 +73,10 @@ void QAtemDownstreamKey::setTie(bool state)
     }
 
     QByteArray cmd("CDsT");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)m_id;
-    payload[1] = (char)state;
+    payload[0] = static_cast<char>(m_id);
+    payload[1] = static_cast<char>(state);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -84,9 +84,9 @@ void QAtemDownstreamKey::setTie(bool state)
 void QAtemDownstreamKey::doAuto()
 {
     QByteArray cmd("DDsA");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)m_id;
+    payload[0] = static_cast<char>(m_id);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -99,13 +99,13 @@ void QAtemDownstreamKey::setFillSource(quint16 source)
     }
 
     QByteArray cmd("CDsF");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)m_id;
+    payload[0] = static_cast<char>(m_id);
     val.u16 = source;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -118,13 +118,13 @@ void QAtemDownstreamKey::setKeySource(quint16 source)
     }
 
     QByteArray cmd("CDsC");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)m_id;
+    payload[0] = static_cast<char>(m_id);
     val.u16 = source;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -137,10 +137,10 @@ void QAtemDownstreamKey::setFrameRate(quint8 frames)
     }
 
     QByteArray cmd("CDsR");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)m_id;
-    payload[1] = (char)frames;
+    payload[0] = static_cast<char>(m_id);
+    payload[1] = static_cast<char>(frames);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -153,11 +153,11 @@ void QAtemDownstreamKey::setInvertKey(bool invert)
     }
 
     QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x08;
-    payload[1] = (char)m_id;
-    payload[8] = (char)invert;
+    payload[0] = 0x08;
+    payload[1] = static_cast<char>(m_id);
+    payload[8] = static_cast<char>(invert);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -170,51 +170,51 @@ void QAtemDownstreamKey::setPreMultiplied(bool preMultiplied)
     }
 
     QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x01;
-    payload[1] = (char)m_id;
-    payload[2] = (char)preMultiplied;
+    payload[0] = 0x01;
+    payload[1] = static_cast<char>(m_id);
+    payload[2] = preMultiplied;
 
     m_atemConnection->sendCommand(cmd, payload);
 }
 
 void QAtemDownstreamKey::setClip(float clip)
 {
-    if(clip == m_clip)
+    if(qFuzzyCompare(clip, m_clip))
     {
         return;
     }
 
     QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
     QAtem::U16_U8 val;
-    val.u16 = clip * 10;
+    val.u16 = static_cast<quint16>(clip * 10);
 
-    payload[0] = (char)0x02;
-    payload[1] = (char)m_id;
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
+    payload[0] = 0x02;
+    payload[1] = static_cast<char>(m_id);
+    payload[4] = static_cast<char>(val.u8[1]);
+    payload[5] = static_cast<char>(val.u8[0]);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
 
 void QAtemDownstreamKey::setGain(float gain)
 {
-    if(gain == m_gain)
+    if(qFuzzyCompare(gain, m_gain))
     {
         return;
     }
 
     QByteArray cmd("CDsG");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
     QAtem::U16_U8 val;
-    val.u16 = gain * 10;
+    val.u16 = static_cast<quint16>(gain * 10);
 
-    payload[0] = (char)0x04;
-    payload[1] = (char)m_id;
-    payload[6] = (char)val.u8[1];
-    payload[7] = (char)val.u8[0];
+    payload[0] = 0x04;
+    payload[1] = static_cast<char>(m_id);
+    payload[6] = static_cast<char>(val.u8[1]);
+    payload[7] = static_cast<char>(val.u8[0]);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -227,11 +227,11 @@ void QAtemDownstreamKey::setEnableMask(bool enable)
     }
 
     QByteArray cmd("CDsM");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x01;
-    payload[1] = (char)m_id;
-    payload[2] = (char)enable;
+    payload[0] = 0x01;
+    payload[1] = static_cast<char>(m_id);
+    payload[2] = enable;
 
     m_atemConnection->sendCommand(cmd, payload);
 }
@@ -239,30 +239,30 @@ void QAtemDownstreamKey::setEnableMask(bool enable)
 void QAtemDownstreamKey::setMask(float top, float bottom, float left, float right)
 {
     QByteArray cmd("CDsM");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x1e;
-    payload[1] = (char)m_id;
+    payload[0] = static_cast<char>(0x1e);
+    payload[1] = static_cast<char>(m_id);
     QAtem::U16_U8 val;
-    val.u16 = top * 1000;
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
-    val.u16 = bottom * 1000;
-    payload[6] = (char)val.u8[1];
-    payload[7] = (char)val.u8[0];
-    val.u16 = left * 1000;
-    payload[8] = (char)val.u8[1];
-    payload[9] = (char)val.u8[0];
-    val.u16 = right * 1000;
-    payload[10] = (char)val.u8[1];
-    payload[11] = (char)val.u8[0];
+    val.u16 = static_cast<quint16>(top * 1000);
+    payload[4] = static_cast<char>(val.u8[1]);
+    payload[5] = static_cast<char>(val.u8[0]);
+    val.u16 = static_cast<quint16>(bottom * 1000);
+    payload[6] = static_cast<char>(val.u8[1]);
+    payload[7] = static_cast<char>(val.u8[0]);
+    val.u16 = static_cast<quint16>(left * 1000);
+    payload[8] = static_cast<char>(val.u8[1]);
+    payload[9] = static_cast<char>(val.u8[0]);
+    val.u16 = static_cast<quint16>(right * 1000);
+    payload[10] = static_cast<char>(val.u8[1]);
+    payload[11] = static_cast<char>(val.u8[0]);
 
     m_atemConnection->sendCommand(cmd, payload);
 }
 
 void QAtemDownstreamKey::onDskS(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
 
     if(index == m_id)
     {
@@ -271,10 +271,10 @@ void QAtemDownstreamKey::onDskS(const QByteArray& payload)
         bool temp_inAutoTransition = m_inAutoTransition;
         quint8 temp_frameCount = m_frameCount;
 
-        m_onAir = (quint8)payload.at(7) == 1;
-        m_inTransition = (quint8)payload.at(8) == 1;
-        m_inAutoTransition = (quint8)payload.at(9) == 1;
-        m_frameCount = (quint8)payload.at(10);
+        m_onAir = payload.at(7);
+        m_inTransition = payload.at(8);
+        m_inAutoTransition = payload.at(9);
+        m_frameCount = static_cast<quint8>(payload.at(10));
 
         if (m_onAir != temp_onAir)
         {
@@ -297,34 +297,34 @@ void QAtemDownstreamKey::onDskS(const QByteArray& payload)
 
 void QAtemDownstreamKey::onDskP(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
 
     if(index == m_id)
     {
-        m_tie = (quint8)payload.at(7);
-        m_frameRate = (quint8)payload.at(8);
-        m_preMultiplied = (quint8)payload.at(9);
+        m_tie = payload.at(7);
+        m_frameRate = static_cast<quint8>(payload.at(8));
+        m_preMultiplied = payload.at(9);
         QAtem::U16_U8 val;
-        val.u8[1] = (quint8)payload.at(10);
-        val.u8[0] = (quint8)payload.at(11);
-        m_clip = val.u16 / 10.0;
-        val.u8[1] = (quint8)payload.at(12);
-        val.u8[0] = (quint8)payload.at(13);
-        m_gain = val.u16 / 10.0;
-        m_invertKey = (quint8)payload.at(14);
-        m_enableMask = (quint8)payload.at(15);
-        val.u8[1] = (quint8)payload.at(16);
-        val.u8[0] = (quint8)payload.at(17);
-        m_topMask = (qint16)val.u16 / 1000.0;
-        val.u8[1] = (quint8)payload.at(18);
-        val.u8[0] = (quint8)payload.at(19);
-        m_bottomMask = (qint16)val.u16 / 1000.0;
-        val.u8[1] = (quint8)payload.at(20);
-        val.u8[0] = (quint8)payload.at(21);
-        m_leftMask = (qint16)val.u16 / 1000.0;
-        val.u8[1] = (quint8)payload.at(22);
-        val.u8[0] = (quint8)payload.at(23);
-        m_rightMask = (qint16)val.u16 / 1000.0;
+        val.u8[1] = static_cast<quint8>(payload.at(10));
+        val.u8[0] = static_cast<quint8>(payload.at(11));
+        m_clip = val.u16 / 10.0f;
+        val.u8[1] = static_cast<quint8>(payload.at(12));
+        val.u8[0] = static_cast<quint8>(payload.at(13));
+        m_gain = val.u16 / 10.0f;
+        m_invertKey = payload.at(14);
+        m_enableMask = payload.at(15);
+        val.u8[1] = static_cast<quint8>(payload.at(16));
+        val.u8[0] = static_cast<quint8>(payload.at(17));
+        m_topMask = static_cast<qint16>(val.u16) / 1000.0f;
+        val.u8[1] = static_cast<quint8>(payload.at(18));
+        val.u8[0] = static_cast<quint8>(payload.at(19));
+        m_bottomMask = static_cast<qint16>(val.u16) / 1000.0f;
+        val.u8[1] = static_cast<quint8>(payload.at(20));
+        val.u8[0] = static_cast<quint8>(payload.at(21));
+        m_leftMask = static_cast<qint16>(val.u16) / 1000.0f;
+        val.u8[1] = static_cast<quint8>(payload.at(22));
+        val.u8[0] = static_cast<quint8>(payload.at(23));
+        m_rightMask = static_cast<qint16>(val.u16) / 1000.0f;
 
         emit tieChanged(m_id, m_tie);
         emit frameRateChanged(m_id, m_frameRate);
@@ -340,15 +340,15 @@ void QAtemDownstreamKey::onDskP(const QByteArray& payload)
 void QAtemDownstreamKey::onDskB(const QByteArray& payload)
 {
     QAtem::U16_U8 val;
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
 
     if(index == m_id)
     {
-        val.u8[1] = (quint8)payload.at(8);
-        val.u8[0] = (quint8)payload.at(9);
+        val.u8[1] = static_cast<quint8>(payload.at(8));
+        val.u8[0] = static_cast<quint8>(payload.at(9));
         m_fillSource = val.u16;
-        val.u8[1] = (quint8)payload.at(10);
-        val.u8[0] = (quint8)payload.at(11);
+        val.u8[1] = static_cast<quint8>(payload.at(10));
+        val.u8[0] = static_cast<quint8>(payload.at(11));
         m_keySource = val.u16;
 
         emit sourcesChanged(m_id, m_fillSource, m_keySource);
