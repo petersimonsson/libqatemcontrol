@@ -29,7 +29,7 @@ class LIBQATEMCONTROLSHARED_EXPORT QAtemMixEffect : public QObject
 {
     Q_OBJECT
 public:
-    explicit QAtemMixEffect(quint8 id, QAtemConnection *parent = 0);
+    explicit QAtemMixEffect(quint8 id, QAtemConnection *parent = nullptr);
     ~QAtemMixEffect();
 
     void createUpstreamKeyers(quint8 count);
@@ -168,7 +168,7 @@ public:
     quint16 stingerMixRate() const { return m_stingerMixRate; }
 
     /// @returns number of upstream keys available on this M/E
-    quint8 upstreamKeyCount() const { return m_upstreamKeys.count(); }
+    quint8 upstreamKeyCount() const { return static_cast<quint8>(m_upstreamKeys.count()); }
     /// @returns true if upstream key @p keyer is on air
     bool upstreamKeyOnAir(quint8 keyer) const;
     /// @returns the key type for upstream key @p keyer, 0 = luma, 1 = chroma, 2 = pattern, 3 = DVE
@@ -254,7 +254,7 @@ public:
     /// @returns the bevel position of the border of the DVE for upstream key @p keyer
     float upstreamKeyDVEBorderBevelPosition(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveBorderBevelPosition; }
     /// @returns the bevel soften (%) of the border of the DVE for upstream key @p keyer
-    quint8 upstreamKeyDVEBorderBevelSoften(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveBorderBevelSoften; }
+    float upstreamKeyDVEBorderBevelSoften(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveBorderBevelSoften; }
     /// @returns the rate in frames the DVE for upstream key @p keyer runs at
     quint8 upstreamKeyDVERate(quint8 keyer) const { return m_upstreamKeys[keyer]->m_dveRate; }
     /// @returns true if key frame A has been set for the DVE for upstream key @p keyer
