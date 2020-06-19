@@ -29,11 +29,11 @@ int main(int argc, char *argv[])
         parser.showHelp(-1);
     }
 
-    qint8 mediaplayer = parser.value(copyToMediaPlayer).toInt() - 1;
+    qint8 mediaplayer = static_cast<qint8>(parser.value(copyToMediaPlayer).toInt() - 1);
 
     QAtemUploader uploader;
     uploader.setMediaPlayer(mediaplayer);
-    uploader.upload(arguments[2], arguments[0], arguments[1].toInt() - 1);
+    uploader.upload(arguments[2], arguments[0], static_cast<quint8> (arguments[1].toUInt() - 1));
 
     return a.exec();
 }

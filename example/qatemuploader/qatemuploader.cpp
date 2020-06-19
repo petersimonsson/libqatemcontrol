@@ -106,7 +106,7 @@ void QAtemUploader::handleDataTransferFinished(quint16 transferId)
 
         if(m_mediaplayer == 0 || m_mediaplayer == 1)
         {
-            m_connection->setMediaPlayerSource(m_mediaplayer, false, m_position);
+            m_connection->setMediaPlayerSource(static_cast<quint8>(m_mediaplayer), false, m_position);
         }
     }
 }
