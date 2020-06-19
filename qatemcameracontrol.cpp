@@ -18,6 +18,26 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "qatemcameracontrol.h"
 #include "qatemconnection.h"
 
+#define QATEM_LENS 0x00
+#define QATEM_CAMERA 0x01
+#define QATEM_CHIP 0x08
+
+#define QATEM_LENS_FOCUS 0x00
+#define QATEM_LENS_AUTOFOCUS 0x01
+#define QATEM_LENS_IRIS 0x03
+#define QATEM_LENS_ZOOM 0x09
+
+#define QATEM_CAMERA_GAIN 0x01
+#define QATEM_CAMERA_WHITE_BALANCE 0x02
+#define QATEM_CAMERA_SHUTTER 0x05
+
+#define QATEM_CHIP_LIFT 0x00
+#define QATEM_CHIP_GAMMA 0x01
+#define QATEM_CHIP_GAIN 0x02
+#define QATEM_CHIP_CONTRAST 0x04
+#define QATEM_CHIP_LUM_MIX 0x05
+#define QATEM_HUE_SATURATION 0x06
+
 QAtemCameraControl::QAtemCameraControl(QAtemConnection *parent) :
     QObject(parent), m_atemConnection(parent)
 {
@@ -187,7 +207,7 @@ void QAtemCameraControl::onCCdP(const QByteArray& payload)
     emit cameraChanged(input);
 }
 
-void QAtemCameraControl::setFocus(quint8 input, quint16 focus)
+void QAtemCameraControl::sendCCmd(quint8 input, quint8 hardware, quint8 command, bool append, quint8 valueType, QList<QAtem::U16_U8> values)
 {
     if(input < 1)
     {
@@ -198,317 +218,179 @@ void QAtemCameraControl::setFocus(quint8 input, quint16 focus)
     QByteArray payload(24, 0x0);
 
     payload[0] = static_cast<char>(input);
-    payload[1] = 0x00; //Lens
-    payload[2] = 0x00; //Focus
-    payload[3] = 0x00; //0: Set focus, 1: Add focus to previous value
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x01; //Unknown, but needs to be set
-    QAtem::U16_U8 val;
-    val.u16 = focus;
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
+    payload[1] = static_cast<char>(hardware);
+    payload[2] = static_cast<char>(command);
+    payload[3] = append;
+    payload[4] = static_cast<char>(valueType);
+
+
+    int index = 0;
+
+    switch (valueType)
+    {
+    case 0x01:
+        payload[7] = static_cast<char>(values.count());
+        foreach(const QAtem::U16_U8 &val, values)
+        {
+            payload[16 + 2 * index] = static_cast<char>(val.u8[1]);
+            payload[17 + 2 * index] = static_cast<char>(val.u8[0]);
+            index++;
+        }
+        break;
+    case 0x03:
+        payload[11] = static_cast<char>(values.count());
+        foreach(const QAtem::U16_U8 &val, values)
+        {
+            payload[18 + 2 * index] = static_cast<char>(val.u8[1]);
+            payload[19 + 2 * index] = static_cast<char>(val.u8[0]);
+            index++;
+        }
+        break;
+    case 0x02:
+        /* fallthrough */
+    case 0x80:
+        payload[9] = static_cast<char>(values.count());
+        foreach(const QAtem::U16_U8 &val, values)
+        {
+            payload[16 + 2 * index] = static_cast<char>(val.u8[1]);
+            payload[17 + 2 * index] = static_cast<char>(val.u8[0]);
+            index++;
+        }
+        break;
+    }
 
     m_atemConnection->sendCommand(cmd, payload);
+}
+
+void QAtemCameraControl::setFocus(quint8 input, quint16 focus)
+{
+    QAtem::U16_U8 val;
+    val.u16 = focus;
+
+    sendCCmd(input, QATEM_LENS, QATEM_LENS_FOCUS, false, 0x80, QList<QAtem::U16_U8>() << val);
 }
 
 void QAtemCameraControl::activeAutoFocus(quint8 input)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x00; //Lens
-    payload[2] = 0x01; //Auto focus
-
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_LENS, QATEM_LENS_AUTOFOCUS, false, 0x0, QList<QAtem::U16_U8>());
 }
 
 void QAtemCameraControl::setIris(quint8 input, quint16 iris)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x00; //Lens
-    payload[2] = 0x03; //Iris
-    payload[3] = 0x00; //0: Set iris, 1: Add iris to previous value
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x01; //Unknown, but needs to be set
     QAtem::U16_U8 val;
     val.u16 = iris;
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_LENS, QATEM_LENS_IRIS, false, 0x80, QList<QAtem::U16_U8>() << val);
 }
 
 void QAtemCameraControl::setZoomSpeed(quint8 input, qint16 zoom)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x00; //Lens
-    payload[2] = 0x09; //Zoom
-    payload[3] = 0x00; //0: Set focus, 1: Add zoom to previous value
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x01; //Unknown, but needs to be set
     QAtem::U16_U8 val;
     val.u16 = static_cast<quint16>(zoom);
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_LENS, QATEM_LENS_ZOOM, false, 0x80, QList<QAtem::U16_U8>() << val);
 }
 
 void QAtemCameraControl::setGain(quint8 input, quint16 gain)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x01; //Camera
-    payload[2] = 0x01; //Gain
-    payload[4] = 0x01; //Unknown, but needs to be set
-    payload[7] = 0x01; //Unknown, but needs to be set
     QAtem::U16_U8 val;
     val.u16 = gain;
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CAMERA, QATEM_CAMERA_GAIN, false, 0x01, QList<QAtem::U16_U8>() << val);
 }
 
 void QAtemCameraControl::setWhiteBalance(quint8 input, quint16 wb)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x01; //Camera
-    payload[2] = 0x02; //White balance
-    payload[4] = 0x02; //Unknown, but needs to be set
-    payload[9] = 0x01; //Unknown, but needs to be set
     QAtem::U16_U8 val;
     val.u16 = wb;
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CAMERA, QATEM_CAMERA_WHITE_BALANCE, false, 0x02, QList<QAtem::U16_U8>() << val);
 }
 
 void QAtemCameraControl::setShutter(quint8 input, quint16 shutter)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x01; //Camera
-    payload[2] = 0x05; //Shutter
-    payload[4] = 0x03; //Unknown, but needs to be set
-    payload[11] = 0x01; //Unknown, but needs to be set
     QAtem::U16_U8 val;
     val.u16 = shutter;
-    payload[18] = static_cast<char>(val.u8[1]);
-    payload[19] = static_cast<char>(val.u8[0]);
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CAMERA, QATEM_CAMERA_SHUTTER, false, 0x03, QList<QAtem::U16_U8>() << val);
 }
 
 void QAtemCameraControl::setLift(quint8 input, float r, float g, float b, float y)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x08; //Chip
-    payload[2] = 0x00; //Lift
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x04; //Unknown, but needs to be set
+    QList<QAtem::U16_U8> values;
     QAtem::U16_U8 val;
     val.u16 = static_cast<quint16>(qRound(r * 4096));
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(g * 4096));
-    payload[18] = static_cast<char>(val.u8[1]);
-    payload[19] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(b * 4096));
-    payload[20] = static_cast<char>(val.u8[1]);
-    payload[21] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(y * 4096));
-    payload[22] = static_cast<char>(val.u8[1]);
-    payload[23] = static_cast<char>(val.u8[0]);
+    values << val;
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CHIP, QATEM_CHIP_LIFT, false, 0x80, values);
 }
 
 void QAtemCameraControl::setGamma(quint8 input, float r, float g, float b, float y)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x08; //Chip
-    payload[2] = 0x01; //Gamma
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x04; //Unknown, but needs to be set
+    QList<QAtem::U16_U8> values;
     QAtem::U16_U8 val;
     val.u16 = static_cast<quint16>(qRound(r * 8192));
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(g * 8192));
-    payload[18] = static_cast<char>(val.u8[1]);
-    payload[19] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(b * 8192));
-    payload[20] = static_cast<char>(val.u8[1]);
-    payload[21] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(y * 8192));
-    payload[22] = static_cast<char>(val.u8[1]);
-    payload[23] = static_cast<char>(val.u8[0]);
+    values << val;
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CHIP, QATEM_CHIP_GAMMA, false, 0x80, values);
 }
 
 void QAtemCameraControl::setGain(quint8 input, float r, float g, float b, float y)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x08; //Chip
-    payload[2] = 0x02; //Gain
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x04; //Unknown, but needs to be set
+    QList<QAtem::U16_U8> values;
     QAtem::U16_U8 val;
     val.u16 = static_cast<quint16>(qRound(r * 2048));
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(g * 2048));
-    payload[18] = static_cast<char>(val.u8[1]);
-    payload[19] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(b * 2048));
-    payload[20] = static_cast<char>(val.u8[1]);
-    payload[21] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound(y * 2048));
-    payload[22] = static_cast<char>(val.u8[1]);
-    payload[23] = static_cast<char>(val.u8[0]);
+    values << val;
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CHIP, QATEM_CHIP_GAIN, false, 0x80, values);
 }
 
 void QAtemCameraControl::setContrast(quint8 input, quint8 contrast)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x08; //Chip
-    payload[2] = 0x04; //Contrast
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = static_cast<char>(0x02); //Unknown, but needs to be set
+    QList<QAtem::U16_U8> values;
     QAtem::U16_U8 val;
+    val.u16 = 0x00;
+    values << val;
     val.u16 = static_cast<quint16>(qRound((contrast / 100.0) * 4096.0));
-    payload[18] = static_cast<char>(val.u8[1]);
-    payload[19] = static_cast<char>(val.u8[0]);
+    values << val;
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CHIP, QATEM_CHIP_CONTRAST, false, 0x80, values);
 }
 
 void QAtemCameraControl::setLumMix(quint8 input, quint8 mix)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x08; //Chip
-    payload[2] = 0x05; //Lum
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x01; //Unknown, but needs to be set
     QAtem::U16_U8 val;
     val.u16 = static_cast<quint16>(qRound((mix / 100.0) * 2048.0));
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CHIP, QATEM_CHIP_LUM_MIX, false, 0x80, QList<QAtem::U16_U8>() << val);
 }
 
 void QAtemCameraControl::setHueSaturation(quint8 input, quint16 hue, quint8 saturation)
 {
-    if(input < 1)
-    {
-        return;
-    }
-
-    QByteArray cmd("CCmd");
-    QByteArray payload(24, 0x0);
-
-    payload[0] = static_cast<char>(input);
-    payload[1] = 0x08; //Chip
-    payload[2] = 0x06; //Hue & Saturation
-    payload[4] = static_cast<char>(0x80); //Unknown, but needs to be set
-    payload[9] = 0x02; //Unknown, but needs to be set
+    QList<QAtem::U16_U8> values;
     QAtem::U16_U8 val;
     val.u16 = static_cast<quint16>(qRound(((hue - 180) / 180.0) * 2048.0));
-    payload[16] = static_cast<char>(val.u8[1]);
-    payload[17] = static_cast<char>(val.u8[0]);
+    values << val;
     val.u16 = static_cast<quint16>(qRound((saturation / 100.0) * 4096.0));
-    payload[18] = static_cast<char>(val.u8[1]);
-    payload[19] = static_cast<char>(val.u8[0]);
+    values << val;
 
-    m_atemConnection->sendCommand(cmd, payload);
+    sendCCmd(input, QATEM_CHIP, QATEM_HUE_SATURATION, false, 0x80, values);
 }

@@ -55,6 +55,8 @@ protected slots:
     void onCCdP(const QByteArray& payload);
 
 private:
+    void sendCCmd(quint8 input, quint8 hardware, quint8 command, bool append, quint8 valueType, QList<QAtem::U16_U8> values);
+
     QAtemConnection *m_atemConnection;
 
     QList<QAtem::Camera*> m_cameras;
