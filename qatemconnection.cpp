@@ -40,7 +40,7 @@ public:
 };
 
 QAtemConnection::QAtemConnection(QObject* parent)
-    : QObject(parent), m_socket(NULL), m_downstreamKeys(2)
+    : QObject(parent), m_socket(nullptr), m_downstreamKeys(2)
 {
     m_connectionTimer = new QTimer(this);
     m_connectionTimer->setInterval(1000);
@@ -107,7 +107,7 @@ QAtemConnection::~QAtemConnection()
     qDeleteAll(m_downstreamKeys);
 
     delete m_cameraControl;
-    m_cameraControl = NULL;
+    m_cameraControl = nullptr;
 }
 
 bool QAtemConnection::isConnected() const
@@ -128,7 +128,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connect
     {
         m_connectionTimer->stop();
         delete m_socket;
-        m_socket = NULL;
+        m_socket = nullptr;
     }
 
     m_socket = new QUdpSocket(this);
@@ -158,7 +158,7 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connect
 void QAtemConnection::disconnectFromSwitcher()
 {
     delete m_socket;
-    m_socket = NULL;
+    m_socket = nullptr;
     m_connectionTimer->stop();
 }
 
@@ -173,7 +173,7 @@ void QAtemConnection::handleSocketData()
     {
         m_connectionTimer->start();
         QByteArray datagram;
-        datagram.resize(m_socket->pendingDatagramSize());
+        datagram.resize(static_cast<int>(m_socket->pendingDatagramSize()));
 
         m_socket->readDatagram(datagram.data(), datagram.size());
 
@@ -197,7 +197,7 @@ void QAtemConnection::handleSocketData()
 
         if((header.packetId - m_lastPacketId) > 1)
         {
-            for(int i = 1; i <= (header.packetId - m_lastPacketId - 1); ++i)
+            for(quint16 i = 1; i <= (header.packetId - m_lastPacketId - 1); ++i)
             {
                 QByteArray resendDatagram = createCommandHeader(Cmd_Resend, 0, m_currentUid, 0, m_lastPacketId + i);
                 sendDatagram(resendDatagram);
@@ -217,7 +217,7 @@ void QAtemConnection::handleSocketData()
 
 QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 resendId)
 {
-    QByteArray buffer(12, (char)0x0);
+    QByteArray buffer(12, 0x0);
     quint16 packageId = 0;
 
     if(!(bitmask & (Cmd_HelloPacket | Cmd_Ack)))
@@ -228,31 +228,31 @@ QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloa
 
     QAtem::U16_U8 val;
 
-    val.u16 = bitmask;
-    val.u16 = val.u16 << 11;
+    val.u16 = static_cast<quint16>(bitmask);
+    val.u16 = static_cast<quint16>(val.u16 << 11);
     val.u16 |= (payloadSize + SIZE_OF_HEADER);
-    buffer[0] = (char)val.u8[1];
-    buffer[1] = (char)val.u8[0];
+    buffer[0] = static_cast<char>(val.u8[1]);
+    buffer[1] = static_cast<char>(val.u8[0]);
 
     val.u16 = uid;
-    buffer[2] = (char)val.u8[1];
-    buffer[3] = (char)val.u8[0];
+    buffer[2] = static_cast<char>(val.u8[1]);
+    buffer[3] = static_cast<char>(val.u8[0]);
 
     val.u16 = ackId;
-    buffer[4] = (char)val.u8[1];
-    buffer[5] = (char)val.u8[0];
+    buffer[4] = static_cast<char>(val.u8[1]);
+    buffer[5] = static_cast<char>(val.u8[0]);
 
     if(resendId != 0)
     {
         val.u16 = resendId;
-        buffer[6] = (char)val.u8[1];
-        buffer[7] = (char)val.u8[0];
+        buffer[6] = static_cast<char>(val.u8[1]);
+        buffer[7] = static_cast<char>(val.u8[0]);
         buffer[8] = 0x01;
     }
 
     val.u16 = packageId;
-    buffer[10] = (char)val.u8[1];
-    buffer[11] = (char)val.u8[0];
+    buffer[10] = static_cast<char>(val.u8[1]);
+    buffer[11] = static_cast<char>(val.u8[0]);
 
     return buffer;
 }
@@ -263,12 +263,12 @@ QAtemConnection::CommandHeader QAtemConnection::parseCommandHeader(const QByteAr
 
     if(datagram.size() >= SIZE_OF_HEADER)
     {
-        header.bitmask = (quint8)datagram[0] >> 3;
-        header.size = (quint8)datagram[1] | ((quint8)(datagram[0] & 0x7) << 8);
-        header.uid = (quint8)datagram[3] + ((quint8)datagram[2] << 8);
-        header.ackId = (quint8)datagram[5] | ((quint8)datagram[4] << 8);
+        header.bitmask = static_cast<quint8>(datagram[0] >> 3);
+        header.size = static_cast<quint16>(datagram[1] | ((datagram[0] & 0x7) << 8));
+        header.uid = static_cast<quint16>(datagram[3] + (datagram[2] << 8));
+        header.ackId = static_cast<quint16>(datagram[5] | (datagram[4] << 8));
         // We don't try to parse 6-9 as we have no idea what it means
-        header.packetId = (quint8)datagram[11] | ((quint8)datagram[10] << 8);
+        header.packetId = static_cast<quint16>(datagram[11] | (datagram[10] << 8));
     }
 
     return header;
@@ -277,7 +277,7 @@ QAtemConnection::CommandHeader QAtemConnection::parseCommandHeader(const QByteAr
 void QAtemConnection::parsePayLoad(const QByteArray& datagram)
 {
     quint16 offset = SIZE_OF_HEADER;
-    quint16 size = (quint8)datagram.at(offset + 1) | ((quint8)datagram.at(offset) << 8);
+    quint16 size = static_cast<quint16>(datagram.at(offset + 1) | (datagram.at(offset) << 8));
 
     while((offset + size) <= datagram.size())
     {
@@ -292,17 +292,17 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
         }
         else if(cmd == "_MeC")
         {
-            quint8 me = (quint8)payload.at(6);
-            quint8 keyCount = (quint8)payload.at(7);
+            quint8 me = static_cast<quint8>(payload.at(6));
+            quint8 keyCount = static_cast<quint8>(payload.at(7));
             m_mixEffects[me]->createUpstreamKeyers(keyCount);
         }
         else if(cmd == "_MvC")
         {
-            quint8 count = (quint8)payload.at(6);
+            quint8 count = static_cast<quint8>(payload.at(6));
             qDeleteAll(m_multiViews);
             m_multiViews.resize(count);
 
-            for(int i = 0; i < count; ++i)
+            for(quint8 i = 0; i < count; ++i)
             {
                 m_multiViews[i] = new QAtem::MultiView(i);
             }
@@ -311,11 +311,11 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
         {
             if(cmd == "_top")
             {
-                quint8 meCount = (quint8)payload.at(6);
+                quint8 meCount = static_cast<quint8>(payload.at(6));
                 qDeleteAll(m_mixEffects);
                 m_mixEffects.resize(meCount);
 
-                for(int i = 0; i < meCount; ++i)
+                for(quint8 i = 0; i < meCount; ++i)
                 {
                     QAtemMixEffect *me = new QAtemMixEffect(i, this);
                     m_mixEffects[i] = me;
@@ -333,7 +333,7 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
 
             for(int i = 0; i < payload.size(); ++i)
             {
-                uchar ch = payload[i];
+                uchar ch = static_cast<uchar>(payload[i]);
                 if(ch > 31)
                 {
                     dbg.append(QChar(ch));
@@ -353,7 +353,7 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
 
         if((offset + 2) < datagram.size())
         {
-            size = (quint8)datagram.at(offset + 1) | ((quint8)datagram.at(offset) << 8);
+            size = static_cast<quint16>(datagram.at(offset + 1) | (datagram.at(offset) << 8));
         }
     }
 }
@@ -389,15 +389,15 @@ bool QAtemConnection::sendCommand(const QByteArray& cmd, const QByteArray& paylo
 {
     QAtem::U16_U8 size;
 
-    size.u16 = payload.size() + cmd.size() + 4;
+    size.u16 = static_cast<quint16>(payload.size() + cmd.size() + 4);
 
     QByteArray datagram = createCommandHeader(Cmd_AckRequest, size.u16, m_currentUid, 0x0);
 
-    datagram.append(size.u8[1]);
-    datagram.append(size.u8[0]);
+    datagram.append(static_cast<char>(size.u8[1]));
+    datagram.append(static_cast<char>(size.u8[0]));
 
-    datagram.append((char)0);
-    datagram.append((char)0);
+    datagram.append('\0');
+    datagram.append('\0');
 
     datagram.append(cmd);
     datagram.append(payload);
@@ -412,7 +412,7 @@ void QAtemConnection::handleError(QAbstractSocket::SocketError)
     emit socketError(m_socket->errorString());
 
     delete m_socket;
-    m_socket = NULL;
+    m_socket = nullptr;
     m_isInitialized = false;
 
     emit disconnected();
@@ -421,7 +421,7 @@ void QAtemConnection::handleError(QAbstractSocket::SocketError)
 void QAtemConnection::handleConnectionTimeout()
 {
     delete m_socket;
-    m_socket = NULL;
+    m_socket = nullptr;
     m_isInitialized = false;
     m_connectionTimer->stop();
     emit socketError(tr("The switcher connection timed out"));
@@ -431,7 +431,7 @@ void QAtemConnection::handleConnectionTimeout()
 void QAtemConnection::saveSettings()
 {
     QByteArray cmd("SRsv");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, '\0');
 
     sendCommand(cmd, payload);
 }
@@ -439,7 +439,7 @@ void QAtemConnection::saveSettings()
 void QAtemConnection::clearSettings()
 {
     QByteArray cmd("SRcl");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, '\0');
 
     sendCommand(cmd, payload);
 }
@@ -452,21 +452,21 @@ void QAtemConnection::setColorGeneratorColor(quint8 generator, const QColor& col
     }
 
     QByteArray cmd("CClV");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, '\0');
 
     QAtem::U16_U8 h, s, l;
-    h.u16 = (qMax((qreal)0.0, color.hslHueF()) * 360.0) * 10;
-    s.u16 = color.hslSaturationF() * 1000;
-    l.u16 = color.lightnessF() * 1000;
+    h.u16 = static_cast<quint16>((qMax(0.0, color.hslHueF()) * 360.0) * 10);
+    s.u16 = static_cast<quint16>(color.hslSaturationF() * 1000);
+    l.u16 = static_cast<quint16>(color.lightnessF() * 1000);
 
-    payload[0] = (char)0x07;
-    payload[1] = (char)generator;
-    payload[2] = (char)h.u8[1];
-    payload[3] = (char)h.u8[0];
-    payload[4] = (char)s.u8[1];
-    payload[5] = (char)s.u8[0];
-    payload[6] = (char)l.u8[1];
-    payload[7] = (char)l.u8[0];
+    payload[0] = 0x07;
+    payload[1] = static_cast<char>(generator);
+    payload[2] = static_cast<char>(h.u8[1]);
+    payload[3] = static_cast<char>(h.u8[0]);
+    payload[4] = static_cast<char>(s.u8[1]);
+    payload[5] = static_cast<char>(s.u8[0]);
+    payload[6] = static_cast<char>(l.u8[1]);
+    payload[7] = static_cast<char>(l.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -476,33 +476,33 @@ void QAtemConnection::setMediaPlayerSource(quint8 player, bool clip, quint8 sour
     QByteArray cmd("MPSS");
     QByteArray payload(8, 0);
 
-    payload[1] = (char)player;
+    payload[1] = static_cast<char>(player);
 
     if(clip) // Not available on TVS
     {
-        payload[0] = (char)0x04;
+        payload[0] = 0x04;
 
         if(source <= 1)
         {
-            payload[4] = (char)source;
+            payload[4] = static_cast<char>(source);
         }
     }
     else
     {
-        payload[0] = (char)0x02;
+        payload[0] = 0x02;
 
         if(source <= 31) // Only 20 sources on TVS
         {
-            payload[3] = (char)source;
+            payload[3] = static_cast<char>(source);
         }
     }
 
     sendCommand(cmd, payload);
 
-    payload[0] = (char)0x01;
-    payload[2] = (char)clip ? 2 : 1;
-    payload[3] = (char)0xbf;
-    payload[4] = (char)0x00;
+    payload[0] = 0x01;
+    payload[2] = clip ? 2 : 1;
+    payload[3] = static_cast<char>(0xbf);
+    payload[4] = 0x00;
 
     sendCommand(cmd, payload);
 }
@@ -510,11 +510,11 @@ void QAtemConnection::setMediaPlayerSource(quint8 player, bool clip, quint8 sour
 void QAtemConnection::setMediaPlayerLoop(quint8 player, bool loop)
 {
     QByteArray cmd("SCPS");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[0] = (char)0x02;
-    payload[1] = (char)player;
-    payload[3] = (char)loop;
+    payload[0] = 0x02;
+    payload[1] = static_cast<char>(player);
+    payload[3] = static_cast<char>(loop);
 
     sendCommand(cmd, payload);
 }
@@ -522,11 +522,11 @@ void QAtemConnection::setMediaPlayerLoop(quint8 player, bool loop)
 void QAtemConnection::setMediaPlayerPlay(quint8 player, bool play)
 {
     QByteArray cmd("SCPS");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[0] = (char)0x01;
-    payload[1] = (char)player;
-    payload[2] = (char)play;
+    payload[0] = 0x01;
+    payload[1] = static_cast<char>(player);
+    payload[2] = static_cast<char>(play);
 
     sendCommand(cmd, payload);
 }
@@ -534,11 +534,11 @@ void QAtemConnection::setMediaPlayerPlay(quint8 player, bool play)
 void QAtemConnection::mediaPlayerGoToBeginning(quint8 player)
 {
     QByteArray cmd("SCPS");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[0] = (char)0x04;
-    payload[1] = (char)player;
-    payload[4] = (char)0x01;
+    payload[0] = 0x04;
+    payload[1] = static_cast<char>(player);
+    payload[4] = 0x01;
 
     sendCommand(cmd, payload);
 }
@@ -546,10 +546,10 @@ void QAtemConnection::mediaPlayerGoToBeginning(quint8 player)
 void QAtemConnection::mediaPlayerGoFrameBackward(quint8 player)
 {
     QByteArray cmd("SCPS");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[0] = (char)0x08;
-    payload[1] = (char)player;
+    payload[0] = 0x08;
+    payload[1] = static_cast<char>(player);
 
     sendCommand(cmd, payload);
 }
@@ -557,11 +557,11 @@ void QAtemConnection::mediaPlayerGoFrameBackward(quint8 player)
 void QAtemConnection::mediaPlayerGoFrameForward(quint8 player)
 {
     QByteArray cmd("SCPS");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[0] = (char)0x08;
-    payload[1] = (char)player;
-    payload[7] = (char)0x01;
+    payload[0] = 0x08;
+    payload[1] = static_cast<char>(player);
+    payload[7] = 0x01;
 
     sendCommand(cmd, payload);
 }
@@ -616,14 +616,14 @@ void QAtemConnection::setAuxSource(quint8 aux, quint16 source)
     }
 
     QByteArray cmd("CAuS");
-    QByteArray payload(payloadsize, (char)0x0);
+    QByteArray payload(payloadsize, 0x0);
     QAtem::U16_U8 val;
 
     payload[0] = 0x01;
-    payload[1] = (char)aux;
+    payload[1] = static_cast<char>(aux);
     val.u16 = source;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -636,14 +636,14 @@ void QAtemConnection::setInputType(quint16 input, quint8 type)
     }
 
     QByteArray cmd("CInL");
-    QByteArray payload(32, (char)0x0);
+    QByteArray payload(32, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x04;
+    payload[0] = 0x04;
     val.u16 = input;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
-    payload[29] = (char)type;
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
+    payload[29] = static_cast<char>(type);
 
     sendCommand(cmd, payload);
 }
@@ -656,17 +656,17 @@ void QAtemConnection::setInputLongName(quint16 input, const QString &name)
     }
 
     QByteArray cmd("CInL");
-    QByteArray payload(32, (char)0x0);
+    QByteArray payload(32, 0x0);
     QByteArray namearray = name.toLatin1();
     namearray.resize(20);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x01;
+    payload[0] = 0x01;
     val.u16 = input;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
     payload.replace(4, 20, namearray);
-    payload[28] = (char)0xff;
+    payload[28] = static_cast<char>(0xff);
 
     sendCommand(cmd, payload);
 }
@@ -679,15 +679,15 @@ void QAtemConnection::setInputShortName(quint16 input, const QString &name)
     }
 
     QByteArray cmd("CInL");
-    QByteArray payload(32, (char)0x0);
+    QByteArray payload(32, 0x0);
     QByteArray namearray = name.toLatin1();
     namearray.resize(4);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x02;
+    payload[0] = 0x02;
     val.u16 = input;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
     payload.replace(24, 4, namearray);
 
     sendCommand(cmd, payload);
@@ -701,9 +701,9 @@ void QAtemConnection::setVideoFormat(quint8 format)
     }
 
     QByteArray cmd("CVdM");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)format;
+    payload[0] = static_cast<char>(format);
 
     sendCommand(cmd, payload);
 }
@@ -716,9 +716,9 @@ void QAtemConnection::setVideoDownConvertType(quint8 type)
     }
 
     QByteArray cmd("CDcO");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)type;
+    payload[0] = static_cast<char>(type);
 
     sendCommand(cmd, payload);
 }
@@ -726,12 +726,12 @@ void QAtemConnection::setVideoDownConvertType(quint8 type)
 void QAtemConnection::setMediaPoolClipSplit(quint16 size)
 {
     QByteArray cmd("CMPS");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
     QAtem::U16_U8 val;
     val.u16 = size;
-    payload[0] = (char)val.u8[1];
-    payload[1] = (char)val.u8[0];
+    payload[0] = static_cast<char>(val.u8[1]);
+    payload[1] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -739,11 +739,11 @@ void QAtemConnection::setMediaPoolClipSplit(quint16 size)
 void QAtemConnection::setMultiViewLayout(quint8 multiView, quint8 layout)
 {
     QByteArray cmd("CMvP");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)0x01;
-    payload[1] = (char)multiView;
-    payload[2] = (char)layout;
+    payload[0] = 0x01;
+    payload[1] = static_cast<char>(multiView);
+    payload[2] = static_cast<char>(layout);
 
     sendCommand(cmd, payload);
 }
@@ -751,14 +751,14 @@ void QAtemConnection::setMultiViewLayout(quint8 multiView, quint8 layout)
 void QAtemConnection::setMultiViewInput(quint8 multiView, quint8 windowIndex, quint16 source)
 {
     QByteArray cmd("CMvI");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)multiView;
-    payload[1] = (char)windowIndex;
+    payload[0] = static_cast<char>(multiView);
+    payload[1] = static_cast<char>(windowIndex);
     QAtem::U16_U8 val;
     val.u16 = source;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -766,31 +766,31 @@ void QAtemConnection::setMultiViewInput(quint8 multiView, quint8 windowIndex, qu
 void QAtemConnection::onTlIn(const QByteArray& payload)
 {
     QAtem::U16_U8 count;
-    count.u8[1] = (quint8)payload.at(6);
-    count.u8[0] = (quint8)payload.at(7);
+    count.u8[1] = static_cast<quint8>(payload.at(6));
+    count.u8[0] = static_cast<quint8>(payload.at(7));
     m_tallyByIndex.resize(count.u16);
 
     for(quint8 i = 0; i < count.u16; ++i)
     {
-        m_tallyByIndex[i] = (quint8)payload.at(8 + i);
+        m_tallyByIndex[i] = static_cast<quint8>(payload.at(8 + i));
     }
 }
 
 void QAtemConnection::onColV(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
 
     QAtem::U16_U8 h, s, l;
 
-    h.u8[1] = (quint8)payload.at(8);
-    h.u8[0] = (quint8)payload.at(9);
-    s.u8[1] = (quint8)payload.at(10);
-    s.u8[0] = (quint8)payload.at(11);
-    l.u8[1] = (quint8)payload.at(12);
-    l.u8[0] = (quint8)payload.at(13);
+    h.u8[1] = static_cast<quint8>(payload.at(8));
+    h.u8[0] = static_cast<quint8>(payload.at(9));
+    s.u8[1] = static_cast<quint8>(payload.at(10));
+    s.u8[0] = static_cast<quint8>(payload.at(11));
+    l.u8[1] = static_cast<quint8>(payload.at(12));
+    l.u8[0] = static_cast<quint8>(payload.at(13));
 
     QColor color;
-    float hf = ((h.u16 / 10) % 360) / 360.0;
+    qreal hf = ((h.u16 / 10) % 360) / 360.0;
     color.setHslF(hf, s.u16 / 1000.0, l.u16 / 1000.0);
     m_colorGeneratorColors[index] = color;
 
@@ -799,11 +799,11 @@ void QAtemConnection::onColV(const QByteArray& payload)
 
 void QAtemConnection::onMPCE(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
 
-    m_mediaPlayerType[index] = (quint8)payload.at(7);
-    m_mediaPlayerSelectedStill[index] = (quint8)payload.at(8);
-    m_mediaPlayerSelectedClip[index] = (quint8)payload.at(9);
+    m_mediaPlayerType[index] = static_cast<quint8>(payload.at(7));
+    m_mediaPlayerSelectedStill[index] = static_cast<quint8>(payload.at(8));
+    m_mediaPlayerSelectedClip[index] = static_cast<quint8>(payload.at(9));
 
     emit mediaPlayerChanged(index, m_mediaPlayerType[index], m_mediaPlayerSelectedStill[index], m_mediaPlayerSelectedClip[index]);
 }
@@ -811,10 +811,10 @@ void QAtemConnection::onMPCE(const QByteArray& payload)
 void QAtemConnection::onAuxS(const QByteArray& payload)
 {
     QAtem::U16_U8 val;
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
 
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
+    val.u8[1] = static_cast<quint8>(payload.at(8));
+    val.u8[0] = static_cast<quint8>(payload.at(9));
     m_auxSource[index] = val.u16;
 
     emit auxSourceChanged(index, m_auxSource[index]);
@@ -830,11 +830,11 @@ void QAtemConnection::on_pin(const QByteArray& payload)
 void QAtemConnection::on_ver(const QByteArray& payload)
 {
     QAtem::U16_U8 ver;
-    ver.u8[1] = payload.at(6);
-    ver.u8[0] = payload.at(7);
+    ver.u8[1] = static_cast<quint8>(payload.at(6));
+    ver.u8[0] = static_cast<quint8>(payload.at(7));
     m_majorversion = ver.u16;
-    ver.u8[1] = payload.at(8);
-    ver.u8[0] = payload.at(9);
+    ver.u8[1] = static_cast<quint8>(payload.at(8));
+    ver.u8[0] = static_cast<quint8>(payload.at(9));
     m_minorversion = ver.u16;
 
     emit versionChanged(m_majorversion, m_minorversion);
@@ -844,16 +844,16 @@ void QAtemConnection::onInPr(const QByteArray& payload)
 {
     QAtem::InputInfo info;
     QAtem::U16_U8 index;
-    index.u8[1] = (quint8)payload.at(6);
-    index.u8[0] = (quint8)payload.at(7);
+    index.u8[1] = static_cast<quint8>(payload.at(6));
+    index.u8[0] = static_cast<quint8>(payload.at(7));
     info.index = index.u16;
     info.longText = payload.mid(8, 20);
     info.shortText = payload.mid(28, 4);
-    info.availableExternalTypes = (quint8)payload.at(35); // Bit 0: SDI, 1: HDMI, 2: Component, 3: Composite, 4: SVideo
-    info.externalType = (quint8)payload.at(37); // 1 = SDI, 2 = HDMI, 3 = Composite, 4 = Component, 5 = SVideo, 0 = Internal
-    info.internalType = (quint8)payload.at(38); // 0 = External, 1 = Black, 2 = Color Bars, 3 = Color Generator, 4 = Media Player Fill, 5 = Media Player Key, 6 = SuperSource, 128 = ME Output, 129 = Auxiliary, 130 = Mask
-    info.availability = (quint8)payload.at(40); // Bit 0: Auxiliary, 1: Multiviewer, 2: SuperSource Art, 3: SuperSource Box, 4: Key Sources
-    info.meAvailability = (quint8)payload.at(41); // Bit 0: ME1 + Fill Sources, 1: ME2 + Fill Sources
+    info.availableExternalTypes = static_cast<quint8>(payload.at(35)); // Bit 0: SDI, 1: HDMI, 2: Component, 3: Composite, 4: SVideo
+    info.externalType = static_cast<quint8>(payload.at(37)); // 1 = SDI, 2 = HDMI, 3 = Composite, 4 = Component, 5 = SVideo, 0 = Internal
+    info.internalType = static_cast<quint8>(payload.at(38)); // 0 = External, 1 = Black, 2 = Color Bars, 3 = Color Generator, 4 = Media Player Fill, 5 = Media Player Key, 6 = SuperSource, 128 = ME Output, 129 = Auxiliary, 130 = Mask
+    info.availability = static_cast<quint8>(payload.at(40)); // Bit 0: Auxiliary, 1: Multiviewer, 2: SuperSource Art, 3: SuperSource Box, 4: Key Sources
+    info.meAvailability = static_cast<quint8>(payload.at(41)); // Bit 0: ME1 + Fill Sources, 1: ME2 + Fill Sources
     m_inputInfos.insert(info.index, info);
 
     emit inputInfoChanged(info);
@@ -862,8 +862,8 @@ void QAtemConnection::onInPr(const QByteArray& payload)
 void QAtemConnection::onMPSE(const QByteArray& payload)
 {
     QAtem::MediaInfo info;
-    info.index = (quint8)payload.at(6);
-    info.used = (quint8)payload.at(7);
+    info.index = static_cast<quint8>(payload.at(6));
+    info.used = static_cast<quint8>(payload.at(7));
 
     if(info.used)
     {
@@ -880,10 +880,10 @@ void QAtemConnection::onMPfe(const QByteArray& payload)
     QAtem::MediaInfo info;
     info.type = QAtem::StillMedia;
     info.frameCount = 1;
-    info.index = (quint8)payload.at(9);
-    info.used = (quint8)payload.at(10);
+    info.index = static_cast<quint8>(payload.at(9));
+    info.used = static_cast<quint8>(payload.at(10));
     info.hash = payload.mid(11, 16);
-    quint8 length = (quint8)payload.at(29);
+    quint8 length = static_cast<quint8>(payload.at(29));
 
     if(info.used)
     {
@@ -899,8 +899,8 @@ void QAtemConnection::onMPCS(const QByteArray& payload)
 {
     QAtem::MediaInfo info;
     info.type = QAtem::ClipMedia;
-    info.index = (quint8)payload.at(6);
-    info.used = (quint8)payload.at(7);
+    info.index = static_cast<quint8>(payload.at(6));
+    info.used = static_cast<quint8>(payload.at(7));
 
     if(info.used)
     {
@@ -908,8 +908,8 @@ void QAtemConnection::onMPCS(const QByteArray& payload)
     }
 
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(72);
-    val.u8[0] = (quint8)payload.at(73);
+    val.u8[1] = static_cast<quint8>(payload.at(72));
+    val.u8[0] = static_cast<quint8>(payload.at(73));
     info.frameCount = val.u16;
 
     m_clipMediaInfos.insert(info.index, info);
@@ -919,11 +919,11 @@ void QAtemConnection::onMPCS(const QByteArray& payload)
 
 void QAtemConnection::onMvIn(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
-    quint8 mvindex = (quint8)payload.at(7);    // Index of multiview output
+    quint8 index = static_cast<quint8>(payload.at(6));
+    quint8 mvindex = static_cast<quint8>(payload.at(7));    // Index of multiview output
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(8); // Index of input, these are mapped in the InPr command
-    val.u8[0] = (quint8)payload.at(9);
+    val.u8[1] = static_cast<quint8>(payload.at(8)); // Index of input, these are mapped in the InPr command
+    val.u8[0] = static_cast<quint8>(payload.at(9));
 
     if(index < m_multiViews.count() && mvindex < 10)
     {
@@ -934,11 +934,11 @@ void QAtemConnection::onMvIn(const QByteArray& payload)
 
 void QAtemConnection::onMvPr(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
 
     if(index < m_multiViews.count())
     {
-        m_multiViews[index]->layout = (quint8)payload.at(7);
+        m_multiViews[index]->layout = static_cast<quint8>(payload.at(7));
 
         emit multiViewLayoutChanged(index, m_multiViews[index]->layout);
     }
@@ -946,7 +946,7 @@ void QAtemConnection::onMvPr(const QByteArray& payload)
 
 void QAtemConnection::onVidM(const QByteArray& payload)
 {
-    m_videoFormat = (quint8)payload.at(6); // 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
+    m_videoFormat = static_cast<quint8>(payload.at(6)); // 0 = 525i5994, 1 = 625i50, 2 = 525i5994 16:9, 3 = 625i50 16:9, 4 = 720p50, 5 = 720p5994, 6 = 1080i50, 7 = 1080i5994
 
     emit videoFormatChanged(m_videoFormat);
 }
@@ -954,17 +954,17 @@ void QAtemConnection::onVidM(const QByteArray& payload)
 void QAtemConnection::onTime(const QByteArray& payload)
 {
     QAtem::U32_U8 val;
-    val.u8[3] = (quint8)payload.at(6);
-    val.u8[2] = (quint8)payload.at(7);
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
+    val.u8[3] = static_cast<quint8>(payload.at(6));
+    val.u8[2] = static_cast<quint8>(payload.at(7));
+    val.u8[1] = static_cast<quint8>(payload.at(8));
+    val.u8[0] = static_cast<quint8>(payload.at(9));
 
     emit timeChanged(val.u32);
 }
 
 void QAtemConnection::onDcOt(const QByteArray& payload)
 {
-    m_videoDownConvertType = (quint8)payload.at(6);
+    m_videoDownConvertType = static_cast<quint8>(payload.at(6));
 
     emit videoDownConvertTypeChanged(m_videoDownConvertType);
 }
@@ -972,11 +972,11 @@ void QAtemConnection::onDcOt(const QByteArray& payload)
 void QAtemConnection::onMPSp(const QByteArray& payload)
 {
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(6);
-    val.u8[0] = (quint8)payload.at(7);
+    val.u8[1] = static_cast<quint8>(payload.at(6));
+    val.u8[0] = static_cast<quint8>(payload.at(7));
     m_mediaPoolClip1Size = val.u16;
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
+    val.u8[1] = static_cast<quint8>(payload.at(8));
+    val.u8[0] = static_cast<quint8>(payload.at(9));
     m_mediaPoolClip2Size = val.u16;
 
     emit mediaPoolClip1SizeChanged(m_mediaPoolClip1Size);
@@ -985,12 +985,12 @@ void QAtemConnection::onMPSp(const QByteArray& payload)
 
 void QAtemConnection::onRCPS(const QByteArray& payload)
 {
-    quint8 index = (quint8)payload.at(6);
+    quint8 index = static_cast<quint8>(payload.at(6));
     m_mediaPlayerStates[index].index = index;
-    m_mediaPlayerStates[index].playing = (bool)payload.at(7);
-    m_mediaPlayerStates[index].loop = (bool)payload.at(8);
-    m_mediaPlayerStates[index].atBegining = (bool)payload.at(9);
-    m_mediaPlayerStates[index].currentFrame = (quint8)payload.at(11);
+    m_mediaPlayerStates[index].playing = static_cast<bool>(payload.at(7));
+    m_mediaPlayerStates[index].loop = static_cast<bool>(payload.at(8));
+    m_mediaPlayerStates[index].atBegining = static_cast<bool>(payload.at(9));
+    m_mediaPlayerStates[index].currentFrame = static_cast<quint8>(payload.at(11));
 
     emit mediaPlayerStateChanged(index, m_mediaPlayerStates.value(index));
 }
@@ -1045,9 +1045,9 @@ void QAtemConnection::initCommandSlotHash()
 void QAtemConnection::setAudioLevelsEnabled(bool enabled)
 {
     QByteArray cmd("SALN");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)enabled;
+    payload[0] = static_cast<char>(enabled);
 
     sendCommand(cmd, payload);
 }
@@ -1055,14 +1055,14 @@ void QAtemConnection::setAudioLevelsEnabled(bool enabled)
 void QAtemConnection::setAudioInputState(quint16 index, quint8 state)
 {
     QByteArray cmd("CAMI");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x01;
+    payload[0] = 0x01;
     val.u16 = index;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
-    payload[4] = (char)state;
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
+    payload[4] = static_cast<char>(state);
 
     sendCommand(cmd, payload);
 }
@@ -1070,16 +1070,16 @@ void QAtemConnection::setAudioInputState(quint16 index, quint8 state)
 void QAtemConnection::setAudioInputBalance(quint16 index, float balance)
 {
     QByteArray cmd("CAMI");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x04;
+    payload[0] = 0x04;
     val.u16 = index;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
-    val.u16 = balance * 10000;
-    payload[8] = (char)val.u8[1];
-    payload[9] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
+    val.u16 = static_cast<quint16>(balance * 10000);
+    payload[8] = static_cast<char>(val.u8[1]);
+    payload[9] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -1087,16 +1087,16 @@ void QAtemConnection::setAudioInputBalance(quint16 index, float balance)
 void QAtemConnection::setAudioInputGain(quint16 index, float gain)
 {
     QByteArray cmd("CAMI");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x06;
+    payload[0] = 0x06;
     val.u16 = index;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
     val.u16 = convertFromDecibel(gain);
-    payload[6] = (char)val.u8[1];
-    payload[7] = (char)val.u8[0];
+    payload[6] = static_cast<char>(val.u8[1]);
+    payload[7] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -1104,13 +1104,13 @@ void QAtemConnection::setAudioInputGain(quint16 index, float gain)
 void QAtemConnection::setAudioMasterOutputGain(float gain)
 {
     QByteArray cmd("CAMM");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x01;
+    payload[0] = 0x01;
     val.u16 = convertFromDecibel(gain);
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -1119,32 +1119,32 @@ void QAtemConnection::onAMLv(const QByteArray& payload)
 {
     // Audio mixer levels
     QAtem::U16_U8 numInputs;
-    numInputs.u8[1] = (quint8)payload.at(6);
-    numInputs.u8[0] = (quint8)payload.at(7);
+    numInputs.u8[1] = static_cast<quint8>(payload.at(6));
+    numInputs.u8[0] = static_cast<quint8>(payload.at(7));
 
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(11);
-    val.u8[0] = (quint8)payload.at(12);
+    val.u8[1] = static_cast<quint8>(payload.at(11));
+    val.u8[0] = static_cast<quint8>(payload.at(12));
     m_audioMasterOutputLevelLeft = convertToDecibel(val.u16);
-    val.u8[1] = (quint8)payload.at(15);
-    val.u8[0] = (quint8)payload.at(16);
+    val.u8[1] = static_cast<quint8>(payload.at(15));
+    val.u8[0] = static_cast<quint8>(payload.at(16));
     m_audioMasterOutputLevelRight = convertToDecibel(val.u16);
-    val.u8[1] = (quint8)payload.at(19);
-    val.u8[0] = (quint8)payload.at(20);
+    val.u8[1] = static_cast<quint8>(payload.at(19));
+    val.u8[0] = static_cast<quint8>(payload.at(20));
     m_audioMasterOutputPeakLeft = convertToDecibel(val.u16);
-    val.u8[1] = (quint8)payload.at(23);
-    val.u8[0] = (quint8)payload.at(24);
+    val.u8[1] = static_cast<quint8>(payload.at(23));
+    val.u8[0] = static_cast<quint8>(payload.at(24));
     m_audioMasterOutputPeakRight = convertToDecibel(val.u16);
-    val.u8[1] = (quint8)payload.at(27);
-    val.u8[0] = (quint8)payload.at(28);
+    val.u8[1] = static_cast<quint8>(payload.at(27));
+    val.u8[0] = static_cast<quint8>(payload.at(28));
     m_audioMonitorLevel = convertToDecibel(val.u16);
 
     QList<quint16> idlist;
 
     for(int i = 0; i < numInputs.u16; ++i)
     {
-        val.u8[1] = (quint8)payload.at(42 + (i * 2));
-        val.u8[0] = (quint8)payload.at(43 + (i * 2));
+        val.u8[1] = static_cast<quint8>(payload.at(42 + (i * 2)));
+        val.u8[0] = static_cast<quint8>(payload.at(43 + (i * 2)));
         idlist.append(val.u16);
     }
 
@@ -1154,17 +1154,17 @@ void QAtemConnection::onAMLv(const QByteArray& payload)
     {
         quint16 index = idlist[i];
         m_audioLevels[index].index = index;
-        val.u8[1] = (quint8)payload.at(offset + (i * 16));
-        val.u8[0] = (quint8)payload.at(offset + 1 + (i * 16));
+        val.u8[1] = static_cast<quint8>(payload.at(offset + (i * 16)));
+        val.u8[0] = static_cast<quint8>(payload.at(offset + 1 + (i * 16)));
         m_audioLevels[index].left = convertToDecibel(val.u16);
-        val.u8[1] = (quint8)payload.at(offset + 4 + (i * 16));
-        val.u8[0] = (quint8)payload.at(offset + 5 + (i * 16));
+        val.u8[1] = static_cast<quint8>(payload.at(offset + 4 + (i * 16)));
+        val.u8[0] = static_cast<quint8>(payload.at(offset + 5 + (i * 16)));
         m_audioLevels[index].right = convertToDecibel(val.u16);
-        val.u8[1] = (quint8)payload.at(offset + 8 + (i * 16));
-        val.u8[0] = (quint8)payload.at(offset + 9 + (i * 16));
+        val.u8[1] = static_cast<quint8>(payload.at(offset + 8 + (i * 16)));
+        val.u8[0] = static_cast<quint8>(payload.at(offset + 9 + (i * 16)));
         m_audioLevels[index].peakLeft = convertToDecibel(val.u16);
-        val.u8[1] = (quint8)payload.at(offset + 12 + (i * 16));
-        val.u8[0] = (quint8)payload.at(offset + 13 + (i * 16));
+        val.u8[1] = static_cast<quint8>(payload.at(offset + 12 + (i * 16)));
+        val.u8[0] = static_cast<quint8>(payload.at(offset + 13 + (i * 16)));
         m_audioLevels[index].peakRight = convertToDecibel(val.u16);
     }
 
@@ -1173,28 +1173,28 @@ void QAtemConnection::onAMLv(const QByteArray& payload)
 
 float QAtemConnection::convertToDecibel(quint16 level)
 {
-    return log10((float)level / 32768.0) * 20.0;
+    return log10(static_cast<float>(level) / 32768.0f) * 20.0f;
 }
 
 
 quint16 QAtemConnection::convertFromDecibel(float level)
 {
-    return pow(10,level / 20) * 32768;
+    return static_cast<quint16>(pow(10, level / 20) * 32768);
 }
 
 void QAtemConnection::onAMTl(const QByteArray& payload)
 {
     // Audio mixer tally
     QAtem::U16_U8 count;
-    count.u8[1] = (quint8)payload.at(6);
-    count.u8[0] = (quint8)payload.at(7);
+    count.u8[1] = static_cast<quint8>(payload.at(6));
+    count.u8[0] = static_cast<quint8>(payload.at(7));
     QAtem::U16_U8 val;
 
     for(int i = 0; i < count.u16; ++i)
     {
-        val.u8[1] = (quint8)payload.at(8 + (i * 3));
-        val.u8[0] = (quint8)payload.at(9 + (i * 3));
-        m_audioTally[val.u16] = (bool)payload.at(10 + (i * 3));
+        val.u8[1] = static_cast<quint8>(payload.at(8 + (i * 3)));
+        val.u8[0] = static_cast<quint8>(payload.at(9 + (i * 3)));
+        m_audioTally[val.u16] = static_cast<quint8>(payload.at(10 + (i * 3)));
     }
 }
 
@@ -1202,43 +1202,43 @@ void QAtemConnection::onAMIP(const QByteArray& payload)
 {
     // Audio mixer interface preferences
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(6);
-    val.u8[0] = (quint8)payload.at(7);
+    val.u8[1] = static_cast<quint8>(payload.at(6));
+    val.u8[0] = static_cast<quint8>(payload.at(7));
     quint16 index = val.u16;
     m_audioInputs[index].index = index;
-    m_audioInputs[index].type = (quint8)payload.at(8);
-    m_audioInputs[index].plugType = (quint8)payload.at(13);
-    m_audioInputs[index].state = (quint8)payload.at(14);
-    val.u8[1] = (quint8)payload.at(16);
-    val.u8[0] = (quint8)payload.at(17);
+    m_audioInputs[index].type = static_cast<quint8>(payload.at(8));
+    m_audioInputs[index].plugType = static_cast<quint8>(payload.at(13));
+    m_audioInputs[index].state = static_cast<quint8>(payload.at(14));
+    val.u8[1] = static_cast<quint8>(payload.at(16));
+    val.u8[0] = static_cast<quint8>(payload.at(17));
     m_audioInputs[index].gain = convertToDecibel(val.u16);
-    val.u8[1] = (quint8)payload.at(18);
-    val.u8[0] = (quint8)payload.at(19);
-    m_audioInputs[index].balance = (qint16)val.u16 / 10000.0;
+    val.u8[1] = static_cast<quint8>(payload.at(18));
+    val.u8[0] = static_cast<quint8>(payload.at(19));
+    m_audioInputs[index].balance = static_cast<qint16>(val.u16) / 10000.0f;
 
-    emit audioInputChanged(index, m_audioInputs[index]);
+    emit audioInputChanged(static_cast<quint8>(index), m_audioInputs[index]);
 }
 
 void QAtemConnection::onAMmO(const QByteArray& payload)
 {
-    m_audioMonitorEnabled = (bool)payload.at(6);
+    m_audioMonitorEnabled = static_cast<bool>(payload.at(6));
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
+    val.u8[1] = static_cast<quint8>(payload.at(8));
+    val.u8[0] = static_cast<quint8>(payload.at(9));
     m_audioMonitorGain = convertToDecibel(val.u16);
-    m_audioMonitorMuted = (bool)payload.at(12);
-    bool solo = (bool)payload.at(13);
+    m_audioMonitorMuted = static_cast<bool>(payload.at(12));
+    bool solo = static_cast<bool>(payload.at(13));
 
     if(solo)
     {
-        m_audioMonitorSolo = (qint8)payload.at(14);
+        m_audioMonitorSolo = static_cast<qint8>(payload.at(14));
     }
     else
     {
         m_audioMonitorSolo = -1;
     }
 
-    m_audioMonitorDimmed = (bool)payload.at(15);
+    m_audioMonitorDimmed = static_cast<bool>(payload.at(15));
 
     emit audioMonitorEnabledChanged(m_audioMonitorEnabled);
     emit audioMonitorGainChanged(m_audioMonitorGain);
@@ -1255,10 +1255,10 @@ void QAtemConnection::setAudioMonitorEnabled(bool enabled)
     }
 
     QByteArray cmd("CAMm");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x01;
-    payload[1] = (char)enabled;
+    payload[0] = 0x01;
+    payload[1] = static_cast<char>(enabled);
 
     sendCommand(cmd, payload);
 }
@@ -1266,13 +1266,13 @@ void QAtemConnection::setAudioMonitorEnabled(bool enabled)
 void QAtemConnection::setAudioMonitorGain(float gain)
 {
     QByteArray cmd("CAMm");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
     QAtem::U16_U8 val;
 
-    payload[0] = (char)0x06;
-    val.u16 = pow(10, gain / 20.0) * 32768;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[0] = 0x06;
+    val.u16 = static_cast<quint16>(pow(10, gain / 20.0f) * 32768);
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -1280,10 +1280,10 @@ void QAtemConnection::setAudioMonitorGain(float gain)
 void QAtemConnection::setAudioMonitorMuted(bool muted)
 {
     QByteArray cmd("CAMm");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x08;
-    payload[6] = (char)muted;
+    payload[0] = 0x08;
+    payload[6] = muted;
 
     sendCommand(cmd, payload);
 }
@@ -1291,10 +1291,10 @@ void QAtemConnection::setAudioMonitorMuted(bool muted)
 void QAtemConnection::setAudioMonitorDimmed(bool dimmed)
 {
     QByteArray cmd("CAMm");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x40;
-    payload[9] = (char)dimmed;
+    payload[0] = static_cast<char>(0x40);
+    payload[9] = dimmed;
 
     sendCommand(cmd, payload);
 }
@@ -1302,14 +1302,14 @@ void QAtemConnection::setAudioMonitorDimmed(bool dimmed)
 void QAtemConnection::setAudioMonitorSolo(qint8 solo)
 {
     QByteArray cmd("CAMm");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
-    payload[0] = (char)0x30;
+    payload[0] = static_cast<char>(0x30);
 
     if(solo > -1)
     {
-        payload[7] = (char)0x01; // Enable
-        payload[8] = (char)solo;
+        payload[7] = 0x01; // Enable
+        payload[8] = solo;
     }
 
     sendCommand(cmd, payload);
@@ -1318,8 +1318,8 @@ void QAtemConnection::setAudioMonitorSolo(qint8 solo)
 void QAtemConnection::onAMMO(const QByteArray& payload)
 {
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(6);
-    val.u8[0] = (quint8)payload.at(7);
+    val.u8[1] = static_cast<quint8>(payload.at(6));
+    val.u8[0] = static_cast<quint8>(payload.at(7));
     m_audioMasterOutputGain = convertToDecibel(val.u16);
 
     emit audioMasterOutputGainChanged(m_audioMasterOutputGain);
@@ -1333,11 +1333,11 @@ bool QAtemConnection::aquireMediaLock(quint8 id, quint8 index)
     }
 
     QByteArray cmd("PLCK");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[1] = (char)id;
-    payload[3] = (char)index;
-    payload[5] = (char)0x01;
+    payload[1] = static_cast<char>(id);
+    payload[3] = static_cast<char>(index);
+    payload[5] = 0x01;
 
     sendCommand(cmd, payload);
     return true;
@@ -1345,8 +1345,8 @@ bool QAtemConnection::aquireMediaLock(quint8 id, quint8 index)
 
 void QAtemConnection::onLKST(const QByteArray& payload)
 {
-    quint8 id = payload.at(7);
-    m_mediaLocks[id] = payload.at(8);
+    quint8 id = static_cast<quint8>(payload.at(7));
+    m_mediaLocks[id] = static_cast<quint8>(payload.at(8));
 
     emit mediaLockStateChanged(id, m_mediaLocks.value(id));
 }
@@ -1354,9 +1354,9 @@ void QAtemConnection::onLKST(const QByteArray& payload)
 void QAtemConnection::unlockMediaLock(quint8 id)
 {
     QByteArray cmd("LOCK");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[1] = (char)id;
+    payload[1] = static_cast<char>(id);
 
     sendCommand(cmd, payload);
 }
@@ -1384,21 +1384,21 @@ quint16 QAtemConnection::sendDataToSwitcher(quint8 storeId, quint8 index, const 
 void QAtemConnection::initDownloadToSwitcher()
 {
     QByteArray cmd("FTSD");
-    QByteArray payload(16, (char)0x0);
+    QByteArray payload(16, 0x0);
 
     QAtem::U16_U8 id;
     id.u16 = m_transferId;
-    payload[0] = (char)id.u8[1];
-    payload[1] = (char)id.u8[0];
-    payload[2] = (char)m_transferStoreId;
-    payload[7] = (char)m_transferIndex;
+    payload[0] = static_cast<char>(id.u8[1]);
+    payload[1] = static_cast<char>(id.u8[0]);
+    payload[2] = static_cast<char>(m_transferStoreId);
+    payload[7] = static_cast<char>(m_transferIndex);
     QAtem::U32_U8 val;
-    val.u32 = m_transferData.size();
-    payload[8] = val.u8[3];
-    payload[9] = val.u8[2];
-    payload[10] = val.u8[1];
-    payload[11] = val.u8[0];
-    payload[13] = (char)0x01; // 0x01 == write, 0x02 == Clear
+    val.u32 = static_cast<quint32>(m_transferData.size());
+    payload[8] = static_cast<char>(val.u8[3]);
+    payload[9] = static_cast<char>(val.u8[2]);
+    payload[10] = static_cast<char>(val.u8[1]);
+    payload[11] = static_cast<char>(val.u8[0]);
+    payload[13] = 0x01; // 0x01 == write, 0x02 == Clear
 
     sendCommand(cmd, payload);
 }
@@ -1406,9 +1406,9 @@ void QAtemConnection::initDownloadToSwitcher()
 void QAtemConnection::onFTCD(const QByteArray& payload)
 {
     QAtem::U16_U8 id;
-    id.u8[1] = (quint8)payload.at(6);
-    id.u8[0] = (quint8)payload.at(7);
-    quint8 count = (quint8)payload.at(15);
+    id.u8[1] = static_cast<quint8>(payload.at(6));
+    id.u8[0] = static_cast<quint8>(payload.at(7));
+    quint8 count = static_cast<quint8>(payload.at(15));
 
     if(id.u16 == m_transferId)
     {
@@ -1441,15 +1441,15 @@ void QAtemConnection::flushTransferBuffer(quint8 count)
 void QAtemConnection::sendData(quint16 id, const QByteArray &data)
 {
     QByteArray cmd("FTDa");
-    QByteArray payload(data.size() + 4, (char)0x0);
+    QByteArray payload(data.size() + 4, 0x0);
 
     QAtem::U16_U8 val;
     val.u16 = id;
-    payload[0] = val.u8[1];
-    payload[1] = val.u8[0];
-    val.u16 = data.size();
-    payload[2] = val.u8[1];
-    payload[3] = val.u8[0];
+    payload[0] = static_cast<char>(val.u8[1]);
+    payload[1] = static_cast<char>(val.u8[0]);
+    val.u16 = static_cast<quint16>(data.size());
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
     payload.replace(4, data.size(), data);
 
     sendCommand(cmd, payload);
@@ -1458,12 +1458,12 @@ void QAtemConnection::sendData(quint16 id, const QByteArray &data)
 void QAtemConnection::sendFileDescription()
 {
     QByteArray cmd("FTFD");
-    QByteArray payload(212, (char)0x0);
+    QByteArray payload(212, 0x0);
 
     QAtem::U16_U8 val;
     val.u16 = m_transferId;
-    payload[0] = val.u8[1];
-    payload[1] = val.u8[0];
+    payload[0] = static_cast<char>(val.u8[1]);
+    payload[1] = static_cast<char>(val.u8[0]);
     payload.replace(2, qMin(194, m_transferName.size()), m_transferName);
     payload.replace(194, 16, m_transferHash);
 
@@ -1473,8 +1473,8 @@ void QAtemConnection::sendFileDescription()
 void QAtemConnection::onFTDC(const QByteArray& payload)
 {
     QAtem::U16_U8 id;
-    id.u8[1] = (quint8)payload.at(6);
-    id.u8[0] = (quint8)payload.at(7);
+    id.u8[1] = static_cast<quint8>(payload.at(6));
+    id.u8[0] = static_cast<quint8>(payload.at(7));
 
     emit dataTransferFinished(id.u16);
 }
@@ -1501,18 +1501,18 @@ quint16 QAtemConnection::getDataFromSwitcher(quint8 storeId, quint8 index)
 void QAtemConnection::requestData()
 {
     QByteArray cmd("FTSU");
-    QByteArray payload(12, (char)0x0);
+    QByteArray payload(12, 0x0);
 
     QAtem::U16_U8 id;
     id.u16 = m_transferId;
-    payload[0] = (char)id.u8[1];
-    payload[1] = (char)id.u8[0];
-    payload[2] = (char)m_transferStoreId;
-    payload[7] = (char)m_transferIndex;
+    payload[0] = static_cast<char>(id.u8[1]);
+    payload[1] = static_cast<char>(id.u8[0]);
+    payload[2] = static_cast<char>(m_transferStoreId);
+    payload[7] = static_cast<char>(m_transferIndex);
 
     if(m_transferStoreId == 0xff) // Macros
     {
-        payload[8] = (char)0x03;
+        payload[8] = 0x03;
     }
 
     sendCommand(cmd, payload);
@@ -1521,24 +1521,24 @@ void QAtemConnection::requestData()
 void QAtemConnection::aquireLock(quint8 storeId)
 {
     QByteArray cmd("LOCK");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[1] = (char)storeId;
-    payload[2] = (char)0x01;
+    payload[1] = static_cast<char>(storeId);
+    payload[2] = 0x01;
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::onLKOB(const QByteArray& payload)
 {
-    emit getLockStateChanged(payload.at(7), true);
+    emit getLockStateChanged(static_cast<quint8>(payload.at(7)), true);
 }
 
 void QAtemConnection::onFTDa(const QByteArray& payload)
 {
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(6);
-    val.u8[0] = (quint8)payload.at(7);
+    val.u8[1] = static_cast<quint8>(payload.at(6));
+    val.u8[0] = static_cast<quint8>(payload.at(7));
 
     if(val.u16 != m_transferId)
     {
@@ -1546,8 +1546,8 @@ void QAtemConnection::onFTDa(const QByteArray& payload)
         return;
     }
 
-    val.u8[1] = (quint8)payload.at(8);
-    val.u8[0] = (quint8)payload.at(9);
+    val.u8[1] = static_cast<quint8>(payload.at(8));
+    val.u8[0] = static_cast<quint8>(payload.at(9));
     m_transferData.append(payload.mid(10, val.u16));
 
     QTimer::singleShot(50, this, SLOT(acceptData()));
@@ -1556,13 +1556,13 @@ void QAtemConnection::onFTDa(const QByteArray& payload)
 void QAtemConnection::acceptData()
 {
     QByteArray cmd("FTUA");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
     QAtem::U16_U8 val;
     val.u16 = m_transferId;
-    payload[0] = (char)val.u8[1];
-    payload[1] = (char)val.u8[0];
-    payload[3] = (char)m_transferIndex;
+    payload[0] = static_cast<char>(val.u8[1]);
+    payload[1] = static_cast<char>(val.u8[0]);
+    payload[3] = static_cast<char>(m_transferIndex);
 
     sendCommand(cmd, payload);
 }
@@ -1597,33 +1597,33 @@ QByteArray QAtemConnection::prepImageForSwitcher(QImage &image, const int width,
     const QRgb *pixel = reinterpret_cast<const QRgb*>(image.constBits());
     for(int i = 0; i < width * height; i+=2) {
 
-        unsigned char r1 =   qRed(pixel[i+0]);
-        unsigned char g1 = qGreen(pixel[i+0]);
-        unsigned char b1 =  qBlue(pixel[i+0]);
+        unsigned char r1 = static_cast<quint8>(qRed(pixel[i+0]));
+        unsigned char g1 = static_cast<quint8>(qGreen(pixel[i+0]));
+        unsigned char b1 = static_cast<quint8>(qBlue(pixel[i+0]));
 
-        unsigned char r2 =   qRed(pixel[i+1]);
-        unsigned char g2 = qGreen(pixel[i+1]);
-        unsigned char b2 =  qBlue(pixel[i+1]);
+        unsigned char r2 = static_cast<quint8>(qRed(pixel[i+1]));
+        unsigned char g2 = static_cast<quint8>(qGreen(pixel[i+1]));
+        unsigned char b2 = static_cast<quint8>(qBlue(pixel[i+1]));
 
-        quint16 a1 = qAlpha(pixel[i+0]) * 3.7;
-        quint16 a2 = qAlpha(pixel[i+1]) * 3.7;
+        quint16 a1 = static_cast<quint16>(qAlpha(pixel[i+0]) * 3.7);
+        quint16 a2 = static_cast<quint16>(qAlpha(pixel[i+1]) * 3.7);
 
-        quint16 y1 = (((66  * r1 + 129 * g1 +  25 * b1 + 128) >> 8) + 16 ) * 4 - 1;
-        quint16 u1 = (((-38 * r1 -  74 * g1 + 112 * b1 + 128) >> 8) + 128) * 4 - 1;
-        quint16 y2 = (((66  * r2 + 129 * g2 +  25 * b2 + 128) >> 8) + 16 ) * 4 - 1;
-        quint16 v2 = (((112 * r2 -  94 * g2 -  18 * b2 + 128) >> 8) + 128) * 4 - 1;
+        quint16 y1 = static_cast<quint16>((((66  * r1 + 129 * g1 +  25 * b1 + 128) >> 8) + 16 ) * 4 - 1);
+        quint16 u1 = static_cast<quint16>((((-38 * r1 -  74 * g1 + 112 * b1 + 128) >> 8) + 128) * 4 - 1);
+        quint16 y2 = static_cast<quint16>((((66  * r2 + 129 * g2 +  25 * b2 + 128) >> 8) + 16 ) * 4 - 1);
+        quint16 v2 = static_cast<quint16>((((112 * r2 -  94 * g2 -  18 * b2 + 128) >> 8) + 128) * 4 - 1);
 
         int j = i * 4;
 
-        data[j+0] = a1 >> 4;
-        data[j+1] = ((a1 & 0x0f) << 4) | (u1 >> 6);
-        data[j+2] = ((u1 & 0x3f) << 2) | (y1 >> 8);
-        data[j+3] = y1 & 0xff;
+        data[j+0] = static_cast<char>(a1 >> 4);
+        data[j+1] = static_cast<char>(((a1 & 0x0f) << 4) | (u1 >> 6));
+        data[j+2] = static_cast<char>(((u1 & 0x3f) << 2) | (y1 >> 8));
+        data[j+3] = static_cast<char>(y1 & 0xff);
 
-        data[j+4] = a2 >> 4;
-        data[j+5] = ((a2 & 0x0f) << 4) | (v2 >> 6);
-        data[j+6] = ((v2 & 0x3f) << 2) | (y2 >> 8);
-        data[j+7] = y2 & 0xff;
+        data[j+4] = static_cast<char>(a2 >> 4);
+        data[j+5] = static_cast<char>(((a2 & 0x0f) << 4) | (v2 >> 6));
+        data[j+6] = static_cast<char>(((v2 & 0x3f) << 2) | (y2 >> 8));
+        data[j+7] = static_cast<char>(y2 & 0xff);
     }
 
     return data;
@@ -1631,16 +1631,16 @@ QByteArray QAtemConnection::prepImageForSwitcher(QImage &image, const int width,
 
 void QAtemConnection::on_top(const QByteArray& payload)
 {
-    m_topology.MEs = (quint8)payload.at(6);
-    m_topology.sources = (quint8)payload.at(7);
-    m_topology.colorGenerators = (quint8)payload.at(8);
-    m_topology.auxBusses = (quint8)payload.at(9);
-    m_topology.downstreamKeyers = (quint8)payload.at(11);
-    m_topology.upstreamKeyers = (quint8)payload.at(13);
-    m_topology.stingers = (quint8)payload.at(14);
-    m_topology.DVEs = (quint8)payload.at(15);
-    m_topology.supersources = (quint8)payload.at(16);
-    m_topology.hasSD = (bool)payload.at(17);
+    m_topology.MEs = static_cast<quint8>(payload.at(6));
+    m_topology.sources = static_cast<quint8>(payload.at(7));
+    m_topology.colorGenerators = static_cast<quint8>(payload.at(8));
+    m_topology.auxBusses = static_cast<quint8>(payload.at(9));
+    m_topology.downstreamKeyers = static_cast<quint8>(payload.at(11));
+    m_topology.upstreamKeyers = static_cast<quint8>(payload.at(13));
+    m_topology.stingers = static_cast<quint8>(payload.at(14));
+    m_topology.DVEs = static_cast<quint8>(payload.at(15));
+    m_topology.supersources = static_cast<quint8>(payload.at(16));
+    m_topology.hasSD = static_cast<bool>(payload.at(17));
 
     emit topologyChanged(m_topology);
 }
@@ -1653,7 +1653,7 @@ QAtemMixEffect *QAtemConnection::mixEffect(quint8 me) const
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -1662,7 +1662,7 @@ QAtemDownstreamKey *QAtemConnection::downstreamKey(quint8 id) const
     if (id < m_downstreamKeys.count())
         return m_downstreamKeys.value(id);
     else
-        return NULL;
+        return nullptr;
 }
 
 void QAtemConnection::registerCommand(const QByteArray &command, QObject *object, const QByteArray &slot)
@@ -1683,7 +1683,7 @@ void QAtemConnection::unregisterCommand(const QByteArray &command, QObject *obje
 
 void QAtemConnection::onPowr(const QByteArray& payload)
 {
-    m_powerStatus = (quint8)payload.at(6); // Bit 0: Main power on/off 1: Backup power on/off
+    m_powerStatus = static_cast<quint8>(payload.at(6)); // Bit 0: Main power on/off 1: Backup power on/off
 
     emit powerStatusChanged(m_powerStatus);
 }
@@ -1692,8 +1692,8 @@ void QAtemConnection::onVMC(const QByteArray& payload)
 {
     QAtem::U16_U8 val;
 
-    val.u8[1] = (quint8)payload.at(6);
-    val.u8[0] = (quint8)payload.at(7);
+    val.u8[1] = static_cast<quint8>(payload.at(6));
+    val.u8[0] = static_cast<quint8>(payload.at(7));
 
     QVector<QAtem::VideoMode> mode(18);
     mode[0] = QAtem::VideoMode(0, "525i59.94 NTSC", QSize(720, 525), 29.97f);
@@ -1717,7 +1717,7 @@ void QAtemConnection::onVMC(const QByteArray& payload)
 
     m_availableVideoModes.clear();
 
-    for(int i = 0; i < val.u16; ++i)
+    for(quint8 i = 0; i < val.u16; ++i)
     {
         m_availableVideoModes.insert(i, mode[i]);
     }
@@ -1731,7 +1731,7 @@ QAtem::MultiView *QAtemConnection::multiView(quint8 index) const
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -1744,34 +1744,34 @@ void QAtemConnection::onWarn(const QByteArray& payload)
 
 void QAtemConnection::on_mpl(const QByteArray& payload)
 {
-    m_mediaPoolStillBankCount = (quint8)payload.at(6);
-    m_mediaPoolClipBankCount = (quint8)payload.at(7);
+    m_mediaPoolStillBankCount = static_cast<quint8>(payload.at(6));
+    m_mediaPoolClipBankCount = static_cast<quint8>(payload.at(7));
 }
 
 void QAtemConnection::on_TlC(const QByteArray& payload)
 {
     QAtem::U16_U8 val;
-    val.u8[1] = (quint8)payload.at(6);
-    val.u8[0] = (quint8)payload.at(7);
+    val.u8[1] = static_cast<quint8>(payload.at(6));
+    val.u8[0] = static_cast<quint8>(payload.at(7));
     m_tallyChannelCount = val.u16;
 }
 
 void QAtemConnection::onTlSr(const QByteArray& payload)
 {
     QAtem::U16_U8 count;
-    count.u8[1] = (quint8)payload.at(6);
-    count.u8[0] = (quint8)payload.at(7);
+    count.u8[1] = static_cast<quint8>(payload.at(6));
+    count.u8[0] = static_cast<quint8>(payload.at(7));
 
     QAtem::U16_U8 index;
 
     for(int i = 0; i < count.u16; ++i)
     {
-        index.u8[1] = (quint8)payload.at(8 + (i * 3));
-        index.u8[0] = (quint8)payload.at(9 + (i * 3));
+        index.u8[1] = static_cast<quint8>(payload.at(8 + (i * 3)));
+        index.u8[0] = static_cast<quint8>(payload.at(9 + (i * 3)));
 
         if(m_inputInfos.contains(index.u16))
         {
-            m_inputInfos[index.u16].tally = (quint8)payload.at(10 + (i * 3));
+            m_inputInfos[index.u16].tally = static_cast<quint8>(payload.at(10 + (i * 3)));
         }
     }
 
@@ -1781,31 +1781,31 @@ void QAtemConnection::onTlSr(const QByteArray& payload)
 void QAtemConnection::resetAudioMasterOutputPeaks()
 {
     QByteArray cmd("RAMP");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[0] = (char)0x04;
-    payload[4] = (char)0x01;
+    payload[0] = 0x04;
+    payload[4] = 0x01;
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::resetAudioInputPeaks(quint16 input)
 {
     QByteArray cmd("RAMP");
-    QByteArray payload(8, (char)0x0);
+    QByteArray payload(8, 0x0);
 
-    payload[0] = (char)0x02;
+    payload[0] = 0x02;
     QAtem::U16_U8 val;
     val.u16 = input;
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
 
 void QAtemConnection::on_AMC(const QByteArray& payload)
 {
-    m_audioChannelCount = (quint8)payload.at(6);
-    m_hasAudioMonitor = (quint8)payload.at(7);
+    m_audioChannelCount = static_cast<quint8>(payload.at(6));
+    m_hasAudioMonitor = static_cast<quint8>(payload.at(7));
 }
 
 void QAtemConnection::onMPAS(const QByteArray& payload)
@@ -1813,8 +1813,8 @@ void QAtemConnection::onMPAS(const QByteArray& payload)
     QAtem::MediaInfo info;
     info.type = QAtem::SoundMedia;
     info.frameCount = 1;
-    info.index = (quint8)payload.at(6);
-    info.used = (quint8)payload.at(7);
+    info.index = static_cast<quint8>(payload.at(6));
+    info.used = static_cast<quint8>(payload.at(7));
 
     if(info.used)
     {
@@ -1836,7 +1836,7 @@ void QAtemConnection::onAuxP(const QByteArray& payload)
 {
     if(debugEnabled())
     {
-        quint8 index = (quint8)payload.at(6);
+        quint8 index = static_cast<quint8>(payload.at(6));
         qDebug() << "AuxP for aux" << index <<":" << payload.mid(7).toHex();
     }
 }
@@ -1846,12 +1846,12 @@ void QAtemConnection::onMPrp(const QByteArray& payload)
     QAtem::MacroInfo info;
     QAtem::U16_U8 lenName, lenDesc;
 
-    info.index = (quint8)payload.at(7);
-    info.used = (bool)payload.at(8);
-    lenName.u8[1] = (quint8)payload.at(10);
-    lenName.u8[0] = (quint8)payload.at(11);
-    lenDesc.u8[1] = (quint8)payload.at(12);
-    lenDesc.u8[0] = (quint8)payload.at(13);
+    info.index = static_cast<quint8>(payload.at(7));
+    info.used = payload.at(8);
+    lenName.u8[1] = static_cast<quint8>(payload.at(10));
+    lenName.u8[0] = static_cast<quint8>(payload.at(11));
+    lenDesc.u8[1] = static_cast<quint8>(payload.at(12));
+    lenDesc.u8[0] = static_cast<quint8>(payload.at(13));
 
     if(lenName.u16 > 0)
     {
@@ -1868,32 +1868,32 @@ void QAtemConnection::onMPrp(const QByteArray& payload)
 
 void QAtemConnection::onMRPr(const QByteArray& payload)
 {
-    m_macroRunningState = (QAtem::MacroRunningState)payload.at(6);
-    m_macroRepeating = (bool)payload.at(7);
-    m_runningMacro = (quint8)payload.at(9);
+    m_macroRunningState = static_cast<QAtem::MacroRunningState>(payload.at(6));
+    m_macroRepeating = payload.at(7);
+    m_runningMacro = static_cast<quint8>(payload.at(9));
 
     emit macroRunningStateChanged(m_macroRunningState, m_macroRepeating, m_runningMacro);
 }
 
 void QAtemConnection::onMRcS(const QByteArray& payload)
 {
-    m_macroRecording = (bool)payload.at(6);
-    m_recordingMacro = (quint8)payload.at(9);
+    m_macroRecording = payload.at(6);
+    m_recordingMacro = static_cast<quint8>(payload.at(9));
 
     emit macroRecordingStateChanged(m_macroRecording, m_recordingMacro);
 }
 
 void QAtemConnection::on_MAC(const QByteArray& payload)
 {
-    m_macroInfos.resize((quint8)payload.at(6));
+    m_macroInfos.resize(payload.at(6));
 }
 
 void QAtemConnection::runMacro(quint8 macroIndex)
 {
     QByteArray cmd("MAct");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[1] = (char)macroIndex;
+    payload[1] = static_cast<char>(macroIndex);
 
     sendCommand(cmd, payload);
 }
@@ -1901,10 +1901,10 @@ void QAtemConnection::runMacro(quint8 macroIndex)
 void QAtemConnection::setMacroRepeating(bool state)
 {
     QByteArray cmd("MRCP");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
     payload[0] = 0x01;
-    payload[1] = (char)state;
+    payload[1] = static_cast<char>(state);
 
     sendCommand(cmd, payload);
 }
@@ -1912,16 +1912,16 @@ void QAtemConnection::setMacroRepeating(bool state)
 void QAtemConnection::startRecordingMacro(quint8 macroIndex, const QByteArray &name, const QByteArray &description)
 {
     QByteArray cmd("MSRc");
-    QByteArray payload(6, (char)0x0);
+    QByteArray payload(6, 0x0);
 
-    payload[1] = (char)macroIndex;
+    payload[1] = static_cast<char>(macroIndex);
     QAtem::U16_U8 val;
-    val.u16 = name.count();
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
-    val.u16 = description.count();
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
+    val.u16 = static_cast<quint16>(name.count());
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
+    val.u16 = static_cast<quint16>(description.count());
+    payload[4] = static_cast<char>(val.u8[1]);
+    payload[5] = static_cast<char>(val.u8[0]);
     payload += name;
     payload += description;
 
@@ -1931,11 +1931,11 @@ void QAtemConnection::startRecordingMacro(quint8 macroIndex, const QByteArray &n
 void QAtemConnection::stopRecordingMacro()
 {
     QByteArray cmd("MAct");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)0xff;
-    payload[1] = (char)0xff;
-    payload[2] = (char)0x02;
+    payload[0] = static_cast<char>(0xff);
+    payload[1] = static_cast<char>(0xff);
+    payload[2] = 0x02;
 
     sendCommand(cmd, payload);
 }
@@ -1943,11 +1943,11 @@ void QAtemConnection::stopRecordingMacro()
 void QAtemConnection::addMacroUserWait()
 {
     QByteArray cmd("MAct");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)0xff;
-    payload[1] = (char)0xff;
-    payload[2] = (char)0x03;
+    payload[0] = static_cast<char>(0xff);
+    payload[1] = static_cast<char>(0xff);
+    payload[2] = 0x03;
 
     sendCommand(cmd, payload);
 }
@@ -1955,14 +1955,14 @@ void QAtemConnection::addMacroUserWait()
 void QAtemConnection::addMacroPause(quint32 frames)
 {
     QByteArray cmd("MSlp");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
     QAtem::U32_U8 val;
     val.u32 = frames;
-    payload[0] = (char)val.u8[3];
-    payload[1] = (char)val.u8[2];
-    payload[2] = (char)val.u8[1];
-    payload[3] = (char)val.u8[0];
+    payload[0] = static_cast<char>(val.u8[3]);
+    payload[1] = static_cast<char>(val.u8[2]);
+    payload[2] = static_cast<char>(val.u8[1]);
+    payload[3] = static_cast<char>(val.u8[0]);
 
     sendCommand(cmd, payload);
 }
@@ -1970,14 +1970,14 @@ void QAtemConnection::addMacroPause(quint32 frames)
 void QAtemConnection::setMacroName(quint8 macroIndex, const QByteArray &name)
 {
     QByteArray cmd("CMPr");
-    QByteArray payload(6, (char)0x0);
+    QByteArray payload(6, 0x0);
 
-    payload[0] = (char)0x01;
-    payload[3] = (char)macroIndex;
+    payload[0] = 0x01;
+    payload[3] = static_cast<char>(macroIndex);
     QAtem::U16_U8 val;
-    val.u16 = name.count();
-    payload[4] = (char)val.u8[1];
-    payload[5] = (char)val.u8[0];
+    val.u16 = static_cast<quint16>(name.count());
+    payload[4] = static_cast<char>(val.u8[1]);
+    payload[5] = static_cast<char>(val.u8[0]);
     payload += name;
 
     sendCommand(cmd, payload);
@@ -1986,14 +1986,14 @@ void QAtemConnection::setMacroName(quint8 macroIndex, const QByteArray &name)
 void QAtemConnection::setMacroDescription(quint8 macroIndex, const QByteArray &description)
 {
     QByteArray cmd("CMPr");
-    QByteArray payload(6, (char)0x0);
+    QByteArray payload(6, 0x0);
 
-    payload[0] = (char)0x02;
-    payload[3] = (char)macroIndex;
+    payload[0] = 0x02;
+    payload[3] = static_cast<char>(macroIndex);
     QAtem::U16_U8 val;
-    val.u16 = description.count();
-    payload[6] = (char)val.u8[1];
-    payload[7] = (char)val.u8[0];
+    val.u16 = static_cast<quint16>(description.count());
+    payload[6] = static_cast<char>(val.u8[1]);
+    payload[7] = static_cast<char>(val.u8[0]);
     payload += description;
 
     sendCommand(cmd, payload);
@@ -2002,10 +2002,10 @@ void QAtemConnection::setMacroDescription(quint8 macroIndex, const QByteArray &d
 void QAtemConnection::removeMacro(quint8 macroIndex)
 {
     QByteArray cmd("MAct");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[1] = (char)macroIndex;
-    payload[2] = (char)0x05;
+    payload[1] = static_cast<char>(macroIndex);
+    payload[2] = 0x05;
 
     sendCommand(cmd, payload);
 }
@@ -2013,11 +2013,11 @@ void QAtemConnection::removeMacro(quint8 macroIndex)
 void QAtemConnection::continueMacro()
 {
     QByteArray cmd("MAct");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)0xff;
-    payload[1] = (char)0xff;
-    payload[2] = (char)0x04;
+    payload[0] = static_cast<char>(0xff);
+    payload[1] = static_cast<char>(0xff);
+    payload[2] = 0x04;
 
     sendCommand(cmd, payload);
 }
@@ -2025,11 +2025,11 @@ void QAtemConnection::continueMacro()
 void QAtemConnection::stopMacro()
 {
     QByteArray cmd("MAct");
-    QByteArray payload(4, (char)0x0);
+    QByteArray payload(4, 0x0);
 
-    payload[0] = (char)0xff;
-    payload[1] = (char)0xff;
-    payload[2] = (char)0x01;
+    payload[0] = static_cast<char>(0xff);
+    payload[1] = static_cast<char>(0xff);
+    payload[2] = 0x01;
 
     sendCommand(cmd, payload);
 }

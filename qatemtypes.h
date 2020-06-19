@@ -111,7 +111,7 @@ namespace QAtem
     {
         quint8 index;
         bool used;
-        quint8 frameCount;
+        quint16 frameCount;
         QString name;
         MediaType type;
         QByteArray hash;
@@ -138,7 +138,7 @@ namespace QAtem
 
     struct LIBQATEMCONTROLSHARED_EXPORT AudioLevel
     {
-        quint8 index;
+        quint16 index;
         float left;
         float right;
         float peakLeft;

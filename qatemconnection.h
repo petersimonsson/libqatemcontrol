@@ -64,7 +64,7 @@ public:
         }
     };
 
-    explicit QAtemConnection(QObject* parent = NULL);
+    explicit QAtemConnection(QObject* parent = nullptr);
     virtual ~QAtemConnection();
 
     QHostAddress address() const { return m_address; }
@@ -111,7 +111,7 @@ public:
     QAtem::MediaInfo clipMediaInfo(quint8 index) const { return m_clipMediaInfos.value(index); }
     QAtem::MediaInfo soundMediaInfo(quint8 index) const { return m_soundMediaInfos.value(index); }
 
-    quint8 multiViewCount() const { return m_multiViews.count(); }
+    quint8 multiViewCount() const { return static_cast<quint8>(m_multiViews.count()); }
     QAtem::MultiView *multiView(quint8 index) const;
 
     QMap<quint8, QAtem::VideoMode> availableVideoModes() const { return m_availableVideoModes; }
@@ -121,9 +121,9 @@ public:
     quint8 videoDownConvertType() const { return m_videoDownConvertType; }
 
     /// @returns size of clip 1 in the media pool
-    quint8 mediaPoolClip1Size() const { return m_mediaPoolClip1Size; }
+    quint16 mediaPoolClip1Size() const { return m_mediaPoolClip1Size; }
     /// @returns size of clip 2 in the media pool
-    quint8 mediaPoolClip2Size() const { return m_mediaPoolClip2Size; }
+    quint16 mediaPoolClip2Size() const { return m_mediaPoolClip2Size; }
 
     /// @returns number of still banks in the media pool
     quint8 mediaPoolStillBankCount() const { return m_mediaPoolStillBankCount; }
