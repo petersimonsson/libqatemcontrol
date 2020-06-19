@@ -29,7 +29,7 @@ class LIBQATEMCONTROLSHARED_EXPORT QAtemCameraControl : public QObject
 {
     Q_OBJECT
 public:
-    explicit QAtemCameraControl(QAtemConnection *parent = 0);
+    explicit QAtemCameraControl(QAtemConnection *parent = nullptr);
     ~QAtemCameraControl();
 
     QAtem::Camera *camera(quint8 input) const { return m_cameras[input - 1]; }
