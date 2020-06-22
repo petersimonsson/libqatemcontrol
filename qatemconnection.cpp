@@ -249,10 +249,17 @@ QAtemConnection::CommandHeader QAtemConnection::parseCommandHeader(const QByteAr
     {
         header.bitmask = static_cast<quint8>(datagram[0] >> 3);
         header.size = static_cast<quint16>(datagram[1] | ((datagram[0] & 0x7) << 8));
-        header.uid = static_cast<quint16>(datagram[3] + (datagram[2] << 8));
-        header.ackId = static_cast<quint16>(datagram[5] | (datagram[4] << 8));
+        QAtem::U16_U8 val;
+        val.u8[0] = static_cast<quint8>(datagram[3]);
+        val.u8[1] = static_cast<quint8>(datagram[2]);
+        header.uid = val.u16;
+        val.u8[0] = static_cast<quint8>(datagram[5]);
+        val.u8[1] = static_cast<quint8>(datagram[4]);
+        header.ackId = val.u16;
         // We don't try to parse 6-9 as we have no idea what it means
-        header.packetId = static_cast<quint16>(datagram[11] | (datagram[10] << 8));
+        val.u8[0] = static_cast<quint8>(datagram[11]);
+        val.u8[1] = static_cast<quint8>(datagram[10]);
+        header.packetId = val.u16;
     }
 
     return header;
