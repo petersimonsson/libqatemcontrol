@@ -277,11 +277,14 @@ QAtemConnection::CommandHeader QAtemConnection::parseCommandHeader(const QByteAr
 void QAtemConnection::parsePayLoad(const QByteArray& datagram)
 {
     quint16 offset = SIZE_OF_HEADER;
-    quint16 size = static_cast<quint16>(datagram.at(offset + 1) | (datagram.at(offset) << 8));
+    QAtem::U16_U8 size;
+    size.u8[0] = static_cast<quint8>(datagram.at(offset + 1));
+    size.u8[1] = static_cast<quint8>(datagram.at(offset));
 
-    while((offset + size) <= datagram.size())
+    while((offset + size.u16) <= datagram.size())
     {
-        QByteArray payload = datagram.mid(offset + 2, size - 2);
+        QByteArray payload = datagram.mid(offset + 2, size.u16 - 2);
+
 //        qDebug() << payload.toHex();
 
         QByteArray cmd = payload.mid(2, 4); // Skip first two bytes, not sure what they do
@@ -349,11 +352,12 @@ void QAtemConnection::parsePayLoad(const QByteArray& datagram)
             qDebug() << dbg;
         }
 
-        offset += size;
+        offset += size.u16;
 
         if((offset + 2) < datagram.size())
         {
-            size = static_cast<quint16>(datagram.at(offset + 1) | (datagram.at(offset) << 8));
+            size.u8[0] = static_cast<quint8>(datagram.at(offset + 1));
+            size.u8[1] = static_cast<quint8>(datagram.at(offset));
         }
     }
 }
