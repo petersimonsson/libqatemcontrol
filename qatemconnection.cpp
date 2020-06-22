@@ -51,7 +51,6 @@ QAtemConnection::QAtemConnection(QObject* parent)
     m_packetCounter = 0;
     m_isInitialized = false;
     m_currentUid = 0;
-    m_lastPacketId = 0;
 
     m_debugEnabled = false;
 
@@ -143,7 +142,6 @@ void QAtemConnection::connectToSwitcher(const QHostAddress &address, int connect
     m_packetCounter = 0;
     m_isInitialized = false;
     m_currentUid = 0x1337; // Just a random UID, we'll get a new one from the server eventually
-    m_lastPacketId = 0;
     memset(&m_topology, 0, sizeof(m_topology));
 
     //Hello
@@ -193,18 +191,12 @@ void QAtemConnection::handleSocketData()
             QByteArray ackDatagram = createCommandHeader(Cmd_Ack, 0, header.uid, header.packetId);
             sendDatagram(ackDatagram);
             m_socket->flush();
-        }
 
-        if((header.packetId - m_lastPacketId) > 1)
-        {
-            for(quint16 i = 1; i <= (header.packetId - m_lastPacketId - 1); ++i)
+            if(!m_isInitialized)
             {
-                QByteArray resendDatagram = createCommandHeader(Cmd_Resend, 0, m_currentUid, 0, m_lastPacketId + i);
-                sendDatagram(resendDatagram);
+                setInitialized(true);
             }
         }
-
-        m_lastPacketId = header.packetId;
 
         if(datagram.size() > (SIZE_OF_HEADER + 2) && !(header.bitmask & (Cmd_HelloPacket | Cmd_Resend)))
         {
@@ -215,7 +207,7 @@ void QAtemConnection::handleSocketData()
     }
 }
 
-QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId, quint16 resendId)
+QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloadSize, quint16 uid, quint16 ackId)
 {
     QByteArray buffer(12, 0x0);
     quint16 packageId = 0;
@@ -241,14 +233,6 @@ QByteArray QAtemConnection::createCommandHeader(Commands bitmask, quint16 payloa
     val.u16 = ackId;
     buffer[4] = static_cast<char>(val.u8[1]);
     buffer[5] = static_cast<char>(val.u8[0]);
-
-    if(resendId != 0)
-    {
-        val.u16 = resendId;
-        buffer[6] = static_cast<char>(val.u8[1]);
-        buffer[7] = static_cast<char>(val.u8[0]);
-        buffer[8] = 0x01;
-    }
 
     val.u16 = packageId;
     buffer[10] = static_cast<char>(val.u8[1]);
